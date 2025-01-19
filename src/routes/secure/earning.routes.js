@@ -1,0 +1,16 @@
+const router = require("express").Router();
+const {
+  getLevelIncome,
+  getRoiIncome,
+  getRankIncome,
+  getBonusIncome,
+  getDailyIncome,
+} = require("../../controller/secure/earning.controller");
+
+router.get("/get_level_income", getLevelIncome);
+router.get("/get_roi_income", getRoiIncome);
+router.get("/get_rank_income", getRankIncome);
+router.get("/get_bonus_income", getBonusIncome);
+router.get("/get_daily_income", getDailyIncome);
+
+module.exports = router;

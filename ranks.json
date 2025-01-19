@@ -1,0 +1,592 @@
+[
+  {
+    "userId": "884305",
+    "ranks": [
+      {
+        "rankName": "silver",
+        "amount": 40,
+        "date": "Wed Nov 22 2023"
+      },
+      {
+        "rankName": "gold",
+        "amount": 90,
+        "date": "Tue Nov 28 2023"
+      },
+      {
+        "rankName": "ruby",
+        "amount": 150,
+        "date": "Thu Dec 14 2023"
+      },
+      {
+        "rankName": "diamond",
+        "amount": 300,
+        "date": "Thu Jan 11 2024"
+      },
+      {
+        "rankName": "diamond",
+        "amount": 300,
+        "date": "Mon Mar 11 2024"
+      },
+      {
+        "rankName": "double-diamond",
+        "amount": 500,
+        "date": "Fri Mar 22 2024"
+      },
+      {
+        "rankName": "double-diamond",
+        "amount": 500,
+        "date": "Thu May 23 2024"
+      },
+      {
+        "rankName": "platinum-diamond",
+        "amount": 1000,
+        "date": "Wed May 29 2024"
+      }
+    ]
+  },
+  {
+    "userId": "793479",
+    "ranks": [
+      {
+        "rankName": "silver",
+        "amount": 40,
+        "date": "Tue Nov 28 2023"
+      },
+      {
+        "rankName": "gold",
+        "amount": 50,
+        "date": "Wed Jan 10 2024"
+      },
+      {
+        "rankName": "ruby",
+        "amount": 100,
+        "date": "Thu Jan 11 2024"
+      },
+      {
+        "rankName": "diamond",
+        "amount": 300,
+        "date": "Fri Jan 12 2024"
+      },
+      {
+        "rankName": "double-diamond",
+        "amount": 500,
+        "date": "Tue Feb 27 2024"
+      },
+      {
+        "rankName": "double-diamond",
+        "amount": 500,
+        "date": "Mon Apr 29 2024"
+      },
+      {
+        "rankName": "platinum-diamond",
+        "amount": 1000,
+        "date": "Wed Jun 05 2024"
+      }
+    ]
+  },
+  {
+    "userId": "246727",
+    "ranks": [
+      {
+        "rankName": "silver",
+        "amount": 40,
+        "date": "Thu Nov 30 2023"
+      },
+      {
+        "rankName": "gold",
+        "amount": 50,
+        "date": "Wed Mar 06 2024"
+      },
+      {
+        "rankName": "gold",
+        "amount": 50,
+        "date": "Fri Mar 29 2024"
+      }
+    ]
+  },
+  {
+    "userId": "423386",
+    "ranks": [
+      {
+        "rankName": "silver",
+        "amount": 40,
+        "date": "Thu Nov 30 2023"
+      },
+      {
+        "rankName": "gold",
+        "amount": 50,
+        "date": "Thu Jan 04 2024"
+      },
+      {
+        "rankName": "ruby",
+        "amount": 100,
+        "date": "Wed Feb 14 2024"
+      },
+      {
+        "rankName": "diamond",
+        "amount": 300,
+        "date": "Fri Feb 16 2024"
+      },
+      {
+        "rankName": "double-diamond",
+        "amount": 500,
+        "date": "Mon May 20 2024"
+      }
+    ]
+  },
+  {
+    "userId": "833921",
+    "ranks": [
+      {
+        "rankName": "silver",
+        "amount": 40,
+        "date": "Fri Dec 01 2023"
+      },
+      {
+        "rankName": "silver",
+        "amount": 50,
+        "date": "Tue Jan 02 2024"
+      }
+    ]
+  },
+  {
+    "userId": "885224",
+    "ranks": [
+      {
+        "rankName": "silver",
+        "amount": 50,
+        "date": "Mon Dec 25 2023"
+      },
+      {
+        "rankName": "gold",
+        "amount": 50,
+        "date": "Wed Jan 10 2024"
+      },
+      {
+        "rankName": "ruby",
+        "amount": 100,
+        "date": "Wed Jan 24 2024"
+      },
+      {
+        "rankName": "ruby",
+        "amount": 100,
+        "date": "Thu Feb 22 2024"
+      },
+      {
+        "rankName": "diamond",
+        "amount": 300,
+        "date": "Thu Apr 11 2024"
+      },
+      {
+        "rankName": "diamond",
+        "amount": 300,
+        "date": "Mon May 13 2024"
+      },
+      {
+        "rankName": "double-diamond",
+        "amount": 500,
+        "date": "Mon Jun 10 2024"
+      }
+    ]
+  },
+  {
+    "userId": "927252",
+    "ranks": [
+      {
+        "rankName": "silver",
+        "amount": 50,
+        "date": "Wed Jan 10 2024"
+      },
+      {
+        "rankName": "gold",
+        "amount": 50,
+        "date": "Fri Feb 02 2024"
+      },
+      {
+        "rankName": "ruby",
+        "amount": 100,
+        "date": "Mon Feb 19 2024"
+      },
+      {
+        "rankName": "diamond",
+        "amount": 300,
+        "date": "Thu May 23 2024"
+      }
+    ]
+  },
+  {
+    "userId": "424452",
+    "ranks": [
+      {
+        "rankName": "silver",
+        "amount": 50,
+        "date": "Tue Jan 23 2024"
+      },
+      {
+        "rankName": "gold",
+        "amount": 50,
+        "date": "Fri Mar 15 2024"
+      },
+      {
+        "rankName": "ruby",
+        "amount": 100,
+        "date": "Fri May 10 2024"
+      }
+    ]
+  },
+  {
+    "userId": "269311",
+    "ranks": [
+      {
+        "rankName": "silver",
+        "amount": 50,
+        "date": "Thu Jan 25 2024"
+      },
+      {
+        "rankName": "gold",
+        "amount": 50,
+        "date": "Tue Apr 30 2024"
+      },
+      {
+        "rankName": "ruby",
+        "amount": 100,
+        "date": "Tue May 14 2024"
+      }
+    ]
+  },
+  {
+    "userId": "765545",
+    "ranks": [
+      {
+        "rankName": "silver",
+        "amount": 50,
+        "date": "Tue Feb 06 2024"
+      },
+      {
+        "rankName": "gold",
+        "amount": 50,
+        "date": "Thu Jun 13 2024"
+      }
+    ]
+  },
+  {
+    "userId": "319488",
+    "ranks": [
+      {
+        "rankName": "silver",
+        "amount": 50,
+        "date": "Wed Feb 07 2024"
+      }
+    ]
+  },
+  {
+    "userId": "946028",
+    "ranks": [
+      {
+        "rankName": "silver",
+        "amount": 50,
+        "date": "Thu Feb 08 2024"
+      },
+      {
+        "rankName": "gold",
+        "amount": 50,
+        "date": "Wed Feb 21 2024"
+      }
+    ]
+  },
+  {
+    "userId": "669116",
+    "ranks": [
+      {
+        "rankName": "silver",
+        "amount": 50,
+        "date": "Tue Feb 27 2024"
+      },
+      {
+        "rankName": "gold",
+        "amount": 50,
+        "date": "Thu Feb 29 2024"
+      },
+      {
+        "rankName": "gold",
+        "amount": 50,
+        "date": "Fri Mar 08 2024"
+      },
+      {
+        "rankName": "ruby",
+        "amount": 100,
+        "date": "Mon Mar 11 2024"
+      }
+    ]
+  },
+  {
+    "userId": "076320",
+    "ranks": [
+      {
+        "rankName": "silver",
+        "amount": 50,
+        "date": "Tue Mar 05 2024"
+      }
+    ]
+  },
+  {
+    "userId": "431500",
+    "ranks": [
+      {
+        "rankName": "silver",
+        "amount": 50,
+        "date": "Thu Mar 14 2024"
+      }
+    ]
+  },
+  {
+    "userId": "050276",
+    "ranks": [
+      {
+        "rankName": "silver",
+        "amount": 50,
+        "date": "Thu Mar 21 2024"
+      },
+      {
+        "rankName": "silver",
+        "amount": 50,
+        "date": "Thu May 23 2024"
+      },
+      {
+        "rankName": "gold",
+        "amount": 50,
+        "date": "Thu Jun 13 2024"
+      }
+    ]
+  },
+  {
+    "userId": "558105",
+    "ranks": [
+      {
+        "rankName": "silver",
+        "amount": 50,
+        "date": "Fri Mar 29 2024"
+      },
+      {
+        "rankName": "gold",
+        "amount": 50,
+        "date": "Thu Apr 18 2024"
+      },
+      {
+        "rankName": "ruby",
+        "amount": 100,
+        "date": "Mon Apr 29 2024"
+      },
+      {
+        "rankName": "diamond",
+        "amount": 300,
+        "date": "Fri May 10 2024"
+      }
+    ]
+  },
+  {
+    "userId": "340787",
+    "ranks": [
+      {
+        "rankName": "silver",
+        "amount": 50,
+        "date": "Mon Apr 08 2024"
+      }
+    ]
+  },
+  {
+    "userId": "010379",
+    "ranks": [
+      {
+        "rankName": "silver",
+        "amount": 50,
+        "date": "Thu Apr 11 2024"
+      }
+    ]
+  },
+  {
+    "userId": "703957",
+    "ranks": [
+      {
+        "rankName": "silver",
+        "amount": 50,
+        "date": "Wed Apr 17 2024"
+      },
+      {
+        "rankName": "silver",
+        "amount": 50,
+        "date": "Mon May 20 2024"
+      }
+    ]
+  },
+  {
+    "userId": "094425",
+    "ranks": [
+      {
+        "rankName": "silver",
+        "amount": 50,
+        "date": "Tue Apr 23 2024"
+      }
+    ]
+  },
+  {
+    "userId": "336804",
+    "ranks": [
+      {
+        "rankName": "silver",
+        "amount": 50,
+        "date": "Thu Apr 25 2024"
+      }
+    ]
+  },
+  {
+    "userId": "642273",
+    "ranks": [
+      {
+        "rankName": "silver",
+        "amount": 50,
+        "date": "Fri Apr 26 2024"
+      }
+    ]
+  },
+  {
+    "userId": "107378",
+    "ranks": [
+      {
+        "rankName": "silver",
+        "amount": 50,
+        "date": "Fri Apr 26 2024"
+      },
+      {
+        "rankName": "gold",
+        "amount": 50,
+        "date": "Fri Jun 14 2024"
+      }
+    ]
+  },
+  {
+    "userId": "407217",
+    "ranks": [
+      {
+        "rankName": "silver",
+        "amount": 50,
+        "date": "Tue Apr 30 2024"
+      },
+      {
+        "rankName": "silver",
+        "amount": 50,
+        "date": "Fri May 31 2024"
+      }
+    ]
+  },
+  {
+    "userId": "807887",
+    "ranks": [
+      {
+        "rankName": "silver",
+        "amount": 50,
+        "date": "Wed May 01 2024"
+      },
+      {
+        "rankName": "silver",
+        "amount": 50,
+        "date": "Mon Jun 03 2024"
+      },
+      {
+        "rankName": "gold",
+        "amount": 50,
+        "date": "Tue Jun 11 2024"
+      }
+    ]
+  },
+  {
+    "userId": "853656",
+    "ranks": [
+      {
+        "rankName": "silver",
+        "amount": 50,
+        "date": "Tue May 07 2024"
+      }
+    ]
+  },
+  {
+    "userId": "952996",
+    "ranks": [
+      {
+        "rankName": "silver",
+        "amount": 50,
+        "date": "Wed May 15 2024"
+      }
+    ]
+  },
+  {
+    "userId": "620797",
+    "ranks": [
+      {
+        "rankName": "silver",
+        "amount": 50,
+        "date": "Thu May 16 2024"
+      }
+    ]
+  },
+  {
+    "userId": "105757",
+    "ranks": [
+      {
+        "rankName": "silver",
+        "amount": 50,
+        "date": "Thu May 23 2024"
+      }
+    ]
+  },
+  {
+    "userId": "358036",
+    "ranks": [
+      {
+        "rankName": "silver",
+        "amount": 50,
+        "date": "Fri May 24 2024"
+      }
+    ]
+  },
+  {
+    "userId": "679467",
+    "ranks": [
+      {
+        "rankName": "silver",
+        "amount": 50,
+        "date": "Tue May 28 2024"
+      }
+    ]
+  },
+  {
+    "userId": "072803",
+    "ranks": [
+      {
+        "rankName": "silver",
+        "amount": 50,
+        "date": "Tue Jun 04 2024"
+      }
+    ]
+  },
+  {
+    "userId": "221496",
+    "ranks": [
+      {
+        "rankName": "silver",
+        "amount": 50,
+        "date": "Mon Jun 10 2024"
+      }
+    ]
+  },
+  {
+    "userId": "317423",
+    "ranks": [
+      {
+        "rankName": "silver",
+        "amount": 50,
+        "date": "Wed Jun 12 2024"
+      }
+    ]
+  }
+]
