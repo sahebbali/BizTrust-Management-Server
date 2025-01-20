@@ -43,7 +43,7 @@ const getIstTimeWithInternet = async () => {
   const internetTime = await getInternetTime();
 
   if (internetTime) {
-    const istTime = internetTime.clone().utcOffset("+05:30");
+    const istTime = internetTime.clone().utcOffset("+05:00");
     return {
       time: istTime.format("hh:mm:ss A"),
       date: istTime.format("YYYY-MM-DD"),

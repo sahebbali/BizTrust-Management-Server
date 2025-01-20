@@ -8,13 +8,42 @@ const packageBuyInfoSchema = new mongoose.Schema(
     userFullName: String,
     sponsorId: String,
     sponsorName: String,
-    usedIds: Array,
-    packageInfo: {
-      amount: Number,
-      date: String,
-      time: String,
+    packageId: { type: String, required: true },
+    packageAmount: {
+      type: Number,
+      require: true,
+    },
+    isActive: { type: Boolean, default: true },
+    isComplect: { type: Boolean, default: false },
+    isMondayCheck: Boolean,
+    incomeDay: {
+      type: Number,
+      default: 0,
+      required: true,
+    },
+    totalReturnedAmount: {
+      type: Number,
+      required: true,
+    },
+    startDate: {
+      type: String,
+      required: true,
+    },
+    startDateInt: {
+      type: Number,
+      required: true,
+    },
+    endDate: {
+      type: String,
+      required: true,
+    },
+    endDateInt: {
+      type: Number,
+      required: true,
     },
     packageType: String,
+    date: String,
+    time: String,
     upgradedAmount: Number,
   },
   { timestamps: true }

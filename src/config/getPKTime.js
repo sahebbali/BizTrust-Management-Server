@@ -1,4 +1,4 @@
-const getIstTime = () => {
+const getPKTime = () => {
   d = new Date();
   utc = d.getTime() + d.getTimezoneOffset() * 60000;
   nd = new Date(utc + 3600000 * +5);
@@ -8,4 +8,4 @@ const getIstTime = () => {
   return { time, date: new Date(date).toDateString() };
 };
 
-module.exports = getIstTime;
+module.exports = getPKTime;

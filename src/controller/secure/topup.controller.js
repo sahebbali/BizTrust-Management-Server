@@ -16,14 +16,14 @@ const createTopupController = async (req, res) => {
     const isSatOrSun =
       dateStringToCheck.includes("Sat") || dateStringToCheck.includes("Sun");
 
-    if (isSatOrSun) {
-      return res
-        .status(400)
-        .json({ message: "Top up isn't available on Saturday and Sunday" });
-    }
+    // if (isSatOrSun) {
+    //   return res
+    //     .status(400)
+    //     .json({ message: "Top up isn't available on Saturday and Sunday" });
+    // }
 
-    let { packageAmount } = req.body;
-    const type = req.query.type;
+    let { packageAmount, type } = req.body;
+
     // Find existing Package Buying Info
     const extPackageBuyInfo = await PackageBuyInfo.findOne({
       userId: req.auth.id,
@@ -38,35 +38,18 @@ const createTopupController = async (req, res) => {
       amount = packageAmount;
     }
     console.log("Amount", Math.abs(amount));
-    await ThisMonthTeamBusiness(req.auth.id, Math.abs(amount));
     // Find existing Package ROI
     const extPackageRoi = await PackageRoi.findOne({ userId: req.auth.id });
     // Get current user
     const currentUser = await User.findOne({ userId: req.auth.id });
+    console.log("body", req.body);
     if (!type) {
       return res.status(400).json({ message: "Invalid Request" });
     }
     if (!packageAmount) {
       return res.status(400).json({ message: "Package is required" });
     }
-    // find package amount
-    const dynamicTopUpPackageAmount = [];
-    const maxAmount =
-      packageAmount >= 10000 ? packageAmount - 1000 : packageAmount;
-    const increment = 1000;
-    if (maxAmount >= 10000) {
-      // Generate dynamic values starting from $11,000
-      let nextAmount = maxAmount + increment;
-      while (nextAmount <= maxAmount + increment * 10) {
-        dynamicTopUpPackageAmount.push(nextAmount);
-        nextAmount += increment;
-      }
-    } else {
-      dynamicTopUpPackageAmount.push(...topUpPackageAmount);
-    }
-    if (!dynamicTopUpPackageAmount.includes(packageAmount)) {
-      return res.status(400).json({ message: "Invalid Package Amount 333" });
-    }
+  
     const startDate = new Date(
       new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" })
     );
@@ -99,12 +82,12 @@ const createTopupController = async (req, res) => {
         currentUser?.isActive === false &&
         extPackageRoi?.isActive === false
       ) {
-        if (extPackageRoi?.currentPackage > packageAmount) {
-          return res.status(400).json({
-            message:
-              "You need to activate with the same or greater than the current package.",
-          });
-        }
+        // if (extPackageRoi?.currentPackage > packageAmount) {
+        //   return res.status(400).json({
+        //     message:
+        //       "You need to activate with the same or greater than the current package.",
+        //   });
+        // }
         await processPackageAction(
           req.auth.id,
           packageAmount,

@@ -8,18 +8,29 @@ const topupPackageBuyInfoCreate = async (
   currentUser,
   type,
   packageAmount,
-  prevPackDeductPackAmount
+  prevPackDeductPackAmount,
+  startDate
 ) => {
+  // Calculate the start and end dates
+  const startDateObj = new Date(startDate);
+  const endDateObj = new Date(startDateObj);
+  endDateObj.setFullYear(endDateObj.getFullYear() + 2); // Add 2 years to the start date
+
   await PackageBuyInfo.create({
     userId: currentUser.userId,
     userFullName: currentUser.fullName,
     sponsorId: currentUser.sponsorId,
     sponsorName: currentUser.sponsorName,
-    packageInfo: {
-      amount: packageAmount,
-      date: new Date(getIstTime().date).toDateString(),
-      time: getIstTime().time,
-    },
+    packageId:
+      Date.now().toString(36) + Math.random().toString(36).substring(2),
+    packageAmount: packageAmount,
+    date: new Date(getIstTime().date).toDateString(),
+    time: getIstTime().time,
+    totalReturnedAmount: packageAmount * 2,
+    startDate: startDateObj.toDateString(), // Use the formatted start date
+    startDateInt: startDateObj.getTime(), // Use timestamp for startDateInt
+    endDate: endDateObj.toDateString(), // Use the formatted end date
+    endDateInt: endDateObj.getTime(), // Use timestamp for endDateInt
     packageType: type,
     upgradedAmount: prevPackDeductPackAmount,
   });
@@ -123,44 +134,45 @@ const processPackageAction = async (
     updatedUser,
     actionType === "Buy" ? "Buy" : "Upgrade",
     packageAmount,
-    prevPackDeductPackAmount
+    prevPackDeductPackAmount,
+    startDate
   );
 
-  actionType === "Upgrade" || type === "Again Buy"
-    ? await PackageRoi.findOneAndUpdate(
-        { userId: userId },
-        {
-          $set: {
-            currentPackage: packageAmount,
-            isActive: true,
-            isMondayCheck: satAndSun ? false : true,
-          },
-          $push: {
-            previousPackage: {
-              amount: extPackageBuyInfo?.packageInfo?.amount,
-              startDate: extPackageBuyInfo?.packageInfo?.date,
-              endDate: new Date(
-                ISTTime?.date ? ISTTime?.date : getIstTime().date
-              ).toDateString(),
-            },
-          },
-        }
-      )
-    : await PackageRoi.create({
-        email: updatedUser.email,
-        userId: updatedUser.userId,
-        fullName: updatedUser.fullName,
-        packageId:
-          Date.now().toString(36) + Math.random().toString(36).substring(2),
-        currentPackage: packageAmount,
-        sponsorId: updatedUser.sponsorId,
-        isActive: true,
-        isMondayCheck: satAndSun ? false : true,
-        incomeDay: 0,
-        totalReturnedAmount: 0,
-        startDate: startDate.toDateString(),
-        history: [],
-      });
+  // actionType === "Upgrade" || type === "Again Buy"
+  //   ? await PackageRoi.findOneAndUpdate(
+  //       { userId: userId },
+  //       {
+  //         $set: {
+  //           currentPackage: packageAmount,
+  //           isActive: true,
+  //           isMondayCheck: satAndSun ? false : true,
+  //         },
+  //         $push: {
+  //           previousPackage: {
+  //             amount: extPackageBuyInfo?.packageInfo?.amount,
+  //             startDate: extPackageBuyInfo?.packageInfo?.date,
+  //             endDate: new Date(
+  //               ISTTime?.date ? ISTTime?.date : getIstTime().date
+  //             ).toDateString(),
+  //           },
+  //         },
+  //       }
+  //     )
+  //   : await PackageRoi.create({
+  //       email: updatedUser.email,
+  //       userId: updatedUser.userId,
+  //       fullName: updatedUser.fullName,
+  //       packageId:
+  //         Date.now().toString(36) + Math.random().toString(36).substring(2),
+  //       currentPackage: packageAmount,
+  //       sponsorId: updatedUser.sponsorId,
+  //       isActive: true,
+  //       isMondayCheck: satAndSun ? false : true,
+  //       incomeDay: 0,
+  //       totalReturnedAmount: 0,
+  //       startDate: startDate.toDateString(),
+  //       history: [],
+  //     });
   // await levelIncome(updatedUser, packageAmount);
 };
 module.exports = {
