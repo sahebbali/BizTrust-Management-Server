@@ -38,24 +38,25 @@ const getAdminDashboardStatsController = async (_req, res) => {
 };
 const runROIStaticController = async (req, res) => {
   try {
-    function getISTDate() {
-      // Get current date and time in UTC
-      const currentDate = new Date();
+    await handleROI(),
+      function getISTDate() {
+        // Get current date and time in UTC
+        const currentDate = new Date();
 
-      // Create an Intl.DateTimeFormat object for Indian Standard Time (IST)
-      const istOptions = {
-        timeZone: "Asia/Kolkata",
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
+        // Create an Intl.DateTimeFormat object for Indian Standard Time (IST)
+        const istOptions = {
+          timeZone: "Asia/Kolkata",
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+        };
+        const istFormatter = new Intl.DateTimeFormat("en-IN", istOptions);
+
+        // Format the date in IST
+        const istDateStr = istFormatter.format(currentDate);
+
+        return istDateStr;
       };
-      const istFormatter = new Intl.DateTimeFormat("en-IN", istOptions);
-
-      // Format the date in IST
-      const istDateStr = istFormatter.format(currentDate);
-
-      return istDateStr;
-    }
     // Example usage
     const istDate = getISTDate();
     const lastUpdatedDate = await LastRoiData.findOne({});
@@ -64,7 +65,7 @@ const runROIStaticController = async (req, res) => {
     if (lastUpdatedDate?.date !== istDate) {
       await Promise.all([
         handleROI(), // ROI Income
-        levelIncome(), // Level Income
+        // levelIncome(), // Level Income
       ]);
 
       res.status(200).json({

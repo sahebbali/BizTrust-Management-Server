@@ -6,9 +6,7 @@ const Wallet = require("../models/wallet.model");
 
 const topupPackageBuyInfoCreate = async (
   currentUser,
-  type,
   packageAmount,
-  prevPackDeductPackAmount,
   startDate
 ) => {
   // Calculate the start and end dates
@@ -24,15 +22,14 @@ const topupPackageBuyInfoCreate = async (
     packageId:
       Date.now().toString(36) + Math.random().toString(36).substring(2),
     packageAmount: packageAmount,
+    packageLimit: packageAmount * 2,
     date: new Date(getIstTime().date).toDateString(),
     time: getIstTime().time,
-    totalReturnedAmount: packageAmount * 2,
     startDate: startDateObj.toDateString(), // Use the formatted start date
     startDateInt: startDateObj.getTime(), // Use timestamp for startDateInt
     endDate: endDateObj.toDateString(), // Use the formatted end date
     endDateInt: endDateObj.getTime(), // Use timestamp for endDateInt
-    packageType: type,
-    upgradedAmount: prevPackDeductPackAmount,
+    packageType: "Buy",
   });
 };
 
@@ -94,25 +91,15 @@ const topupWalletUpdate = async (
 const processPackageAction = async (
   userId,
   packageAmount,
-  prevPackDeductPackAmount,
-  extPackageBuyInfo,
   depositBalance,
   activeIncome,
-  startDate,
-  actionType,
-  type
+  startDate
 ) => {
   const ISTTime = await getIstTimeWithInternet();
   const today = new Date(ISTTime?.date ? ISTTime?.date : getIstTime().date)
     .toDateString()
     .split(" ")[0];
-  const satAndSun = today === "Sat" || today === "Sun";
-  await topupWalletUpdate(
-    depositBalance,
-    activeIncome,
-    prevPackDeductPackAmount,
-    userId
-  );
+  await topupWalletUpdate(depositBalance, activeIncome, packageAmount, userId);
   // Get Current user
   const updatedUser = await User.findOneAndUpdate(
     { userId: userId },
@@ -130,13 +117,7 @@ const processPackageAction = async (
     { new: true }
   );
 
-  await topupPackageBuyInfoCreate(
-    updatedUser,
-    actionType === "Buy" ? "Buy" : "Upgrade",
-    packageAmount,
-    prevPackDeductPackAmount,
-    startDate
-  );
+  await topupPackageBuyInfoCreate(updatedUser, packageAmount, startDate);
 
   // actionType === "Upgrade" || type === "Again Buy"
   //   ? await PackageRoi.findOneAndUpdate(

@@ -394,10 +394,8 @@ const loginController = async (req, res) => {
     console.log("req", req.body);
 
     const user = await User.findOne({ userId: userId });
+
     if (!user) {
-      return res.status(400).json({ message: "User does not found" });
-    }
-    if (user.userId.toLowerCase() === "admin" || user.role === "admin") {
       return res.status(400).json({ message: "User does not found" });
     }
 

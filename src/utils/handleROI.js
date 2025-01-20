@@ -10,129 +10,139 @@ const LastRoiData = require("../models/lastRoiData");
 
 const handleROI = async () => {
   try {
+    console.log("hello Run");
     {
       const today = new Date(getIstTime().date).toDateString().split(" ")[0];
-      if (
-        forbiddenDates.includes(
-          new Date(getIstTime().date)
-            .toDateString()
-            .split(" ")
-            .slice(1, 3)
-            .join(" ")
-        )
-      ) {
-        console.log("ROI isn't distributed on Dec 24 to Jan 03");
-        return res
-          .status(400)
-          .json({ message: "ROI isn't distributed on Dec 24 to Jan 03" });
-      }
-      if (today === "Sat" || today === "Sun") {
-        console.log("ROI isn't distributed on Saturday and Sunday");
-        return res
-          .status(400)
-          .json({ message: "ROI isn't distributed on Saturday and Sunday" });
-      }
-      const extRoi = await PackageRoi.find({ isActive: true }).select(
+      const dateInt = new Date(getIstTime().date).getTime();
+      console.log({ dateInt });
+      const commissionPercentage = 2;
+      // if (today === "Sat" || today === "Sun") {
+      //   console.log("ROI isn't distributed on Saturday and Sunday");
+      //   return res
+      //     .status(400)
+      //     .json({ message: "ROI isn't distributed on Saturday and Sunday" });
+      // }
+      const existPackage = await PackageBuyInfo.find({ isActive: true }).select(
         "-history"
       );
-      const userIds = extRoi.map((ext) => ext.userId);
 
-      const upgradeDates = await PackageBuyInfo.find({
-        userId: { $in: userIds },
-        packageType: "Upgrade",
-      })
-        .sort({ createdAt: -1 })
-        .then((upgradeDates) => {
-          const upgradeDateMap = new Map();
-          upgradeDates.forEach((date) => upgradeDateMap.set(date.userId, date));
-          return upgradeDateMap;
-        });
-
-      const newTopupDates = await PackageBuyInfo.find({
-        userId: { $in: userIds },
-        packageType: "Buy",
-      })
-        .sort({ createdAt: -1 })
-        .then((newTopupDates) => {
-          const newTopupDateMap = new Map();
-          newTopupDates.forEach((date) =>
-            newTopupDateMap.set(date.userId, date)
-          );
-          return newTopupDateMap;
-        });
-
-      await Promise.all(
-        extRoi.map(async (ext) => {
-          const userId = ext.userId;
-          const upgradeDateCheck = upgradeDates.get(userId);
-          const newTopupDateCheck = newTopupDates.get(userId);
-
-          console.log({ userId });
-
-          let packAmount = 0;
-          if (ext.isMondayCheck === false) {
-            if (
-              (upgradeDateCheck?.packageInfo?.date.split(" ")[0] === "Sat" ||
-                upgradeDateCheck?.packageInfo?.date.split(" ")[0] === "Sun") &&
-              today === "Mon"
-            ) {
-              packAmount =
-                ext.previousPackage[ext.previousPackage?.length - 1].amount;
-              await mainFuncOfROI(ext, packAmount);
-            }
-            if (
-              (newTopupDateCheck?.packageInfo?.date.split(" ")[0] === "Sat" ||
-                newTopupDateCheck?.packageInfo?.date.split(" ")[0] === "Sun") &&
-              today === "Mon"
-            ) {
-              await PackageRoi.findOneAndUpdate(
-                { packageId: ext.packageId, isMondayCheck: false },
-                { $set: { isMondayCheck: true } }
-              );
-            }
-          } else {
-            packAmount = ext.currentPackage;
-            await mainFuncOfROI(ext, packAmount);
-          }
-        })
-      );
-      console.log("Distribute ROI");
-    }
-    {
-      function getISTDate() {
-        // Get current date and time in UTC
-        const currentDate = new Date();
-
-        // Create an Intl.DateTimeFormat object for Indian Standard Time (IST)
-        const istOptions = {
-          timeZone: "Asia/Kolkata",
-          year: "numeric",
-          month: "2-digit",
-          day: "2-digit",
-        };
-        const istFormatter = new Intl.DateTimeFormat("en-IN", istOptions);
-
-        // Format the date in IST
-        const istDateStr = istFormatter.format(currentDate);
-
-        return istDateStr;
+      for (package of existPackage) {
+        const packageAmount = package.packageAmount;
+        const commissionAmount = (packageAmount * commissionPercentage) / 100;
+        console.log({ commissionAmount });
+        await checkPackageLimit(
+          package,
+          commissionAmount,
+          commissionPercentage
+        );
       }
-      // Example usage
-      const istDate = getISTDate();
-      console.log({ istDate });
-      await LastRoiData.findOneAndUpdate(
-        {},
-        {
-          date: istDate,
-        },
-        { upsert: true }
-      );
+      console.log("Distribute ROI");
     }
   } catch (error) {
     console.log(error);
   }
 };
 
+const checkPackageLimit = async (
+  package,
+  CommissionAmount,
+  commissionPercentage
+) => {
+  if (package.totalReturnedAmount + CommissionAmount > package.packageLimit) {
+  } else {
+    const updatePackage = await PackageBuyInfo.findOneAndUpdate(
+      { packageId: package.packageId },
+      {
+        $inc: {
+          incomeDay: +1,
+          totalReturnedAmount: +CommissionAmount,
+        },
+      }
+    );
+
+    console.log({ updatePackage });
+    await Wallet.findOneAndUpdate(
+      { userId: package.userId },
+      {
+        $inc: {
+          roiIncome: +CommissionAmount,
+          totalIncome: +CommissionAmount,
+          activeIncome: +CommissionAmount,
+        },
+      },
+      { new: true }
+    );
+
+    await createROIHistory(
+      package.userId,
+      package.userFullName,
+      package.packageAmount,
+      commissionPercentage,
+      CommissionAmount,
+      updatePackage.incomeDay
+    );
+
+    if (updatePackage.totalReturnedAmount >= package.packageLimit) {
+      await PackageBuyInfo.findOneAndUpdate(
+        { packageId: package.packageId },
+        {
+          $set: {
+            isComplect: true,
+            isActive: false,
+          },
+        }
+      );
+    }
+  }
+  // await PackageRoi.create({
+  //   userId,
+  //   fullName,
+  //   package: packageAmount,
+  //   commissionPercentagePerDay: commissionPercentage,
+  //   commissionAmount: Number(commissionPercentagePerDay).toFixed(3),
+  //   // totalCommissionAmount: Number(
+  //   //   ext?.totalReturnedAmount + roiPerDayCommissionAmount
+  //   // ).toFixed(3),
+  //   incomeDay: incomeDayInc,
+  //   incomeDate: new Date(getIstTime().date).toDateString(),
+  //   incomeTime: getIstTime().time,
+  //   incomeDateInt: new Date(getIstTime().date).getTime(),
+  //   transactionId: generateRandomString(),
+  // });
+};
+const createROIHistory = async (
+  userId,
+  fullName,
+  packageAmount,
+  commissionPercentage,
+  commissionAmount,
+  incomeDay
+) => {
+  console.log("crate ROI");
+  console.log({
+    userId,
+    fullName,
+    packageAmount,
+    commissionPercentage,
+    commissionAmount,
+    incomeDay,
+  });
+  await PackageRoi.create({
+    userId,
+    fullName,
+    package: packageAmount,
+    commissionPercentage: commissionPercentage,
+    commissionAmount: Number(commissionAmount).toFixed(3),
+    // totalCommissionAmount: Number(
+    //   ext?.totalReturnedAmount + roiPerDayCommissionAmount
+    // ).toFixed(3),
+    incomeDay,
+    incomeDate: new Date(getIstTime().date).toDateString(),
+    incomeTime: getIstTime().time,
+    incomeDateInt: new Date(getIstTime().date).getTime(),
+    transactionId: generateRandomString(),
+  });
+};
 const mainFuncOfROI = async (ext, prevPackAmount) => {
   if (ext.isActive) {
     // const prevPackAmount = packAmount;

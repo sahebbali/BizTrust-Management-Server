@@ -9,144 +9,79 @@ const getIstTime = require("../../config/getTime");
 
 const createTopupController = async (req, res) => {
   try {
+    // Get the current Pakistan Standard Time (PST)
     const ISTTime = await getIstTimeWithInternet();
     const dateStringToCheck = new Date(
-      ISTTime?.date ? ISTTime?.date : getIstTime().date
+      ISTTime?.date || getIstTime().date
     ).toDateString();
-    const isSatOrSun =
+    const isWeekend =
       dateStringToCheck.includes("Sat") || dateStringToCheck.includes("Sun");
 
-    // if (isSatOrSun) {
+    // Uncomment to restrict top-ups on weekends
+    // if (isWeekend) {
     //   return res
     //     .status(400)
     //     .json({ message: "Top up isn't available on Saturday and Sunday" });
     // }
 
-    let { packageAmount, type } = req.body;
+    const { packageAmount, type } = req.body;
+    console.log({ packageAmount, type });
+    // Validate input
+    if (!type) {
+      return res.status(400).json({ message: "Package type is required" });
+    }
+    if (!packageAmount || packageAmount < 100000) {
+      return res
+        .status(400)
+        .json({ message: "Minimum package amount is Rs 100000" });
+    }
 
-    // Find existing Package Buying Info
+    // Fetch the latest package buy info for the user
     const extPackageBuyInfo = await PackageBuyInfo.findOne({
       userId: req.auth.id,
     }).sort({ createdAt: -1 });
-    let amount;
 
-    if (extPackageBuyInfo) {
-      console.log("ext package");
-      amount = packageAmount - extPackageBuyInfo?.packageInfo?.amount;
-    } else {
-      console.log("not ext package");
-      amount = packageAmount;
+    if (extPackageBuyInfo && packageAmount <= extPackageBuyInfo.packageAmount) {
+      return res.status(400).json({
+        message: `You can only buy a package larger than Rs ${extPackageBuyInfo.packageAmount}`,
+      });
     }
-    console.log("Amount", Math.abs(amount));
-    // Find existing Package ROI
-    const extPackageRoi = await PackageRoi.findOne({ userId: req.auth.id });
-    // Get current user
-    const currentUser = await User.findOne({ userId: req.auth.id });
-    console.log("body", req.body);
-    if (!type) {
-      return res.status(400).json({ message: "Invalid Request" });
-    }
-    if (!packageAmount) {
-      return res.status(400).json({ message: "Package is required" });
-    }
-  
-    const startDate = new Date(
-      new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" })
-    );
-    startDate.setDate(startDate.getDate() + 1);
-    // Extracting the balance of user
+
+    // Check user balance
     const { depositBalance = 0, activeIncome = 0 } = await Wallet.findOne({
       userId: req.auth.id,
     });
-    /**********
-     * If user status true then amount will deduct (currentPackageAmount - prevPackageAmount),
-     * Or user status false then amount will deduct only currentPackageAmount
-     *
-     * ******/
-    let prevPackDeductPackAmount =
-      currentUser?.isActive && extPackageRoi?.isActive
-        ? packageAmount - extPackageRoi?.currentPackage
-        : packageAmount;
 
-    if (depositBalance + activeIncome < prevPackDeductPackAmount) {
+    if (depositBalance + activeIncome < packageAmount) {
       return res.status(409).json({ message: "Insufficient balance!" });
     }
 
-    if (type === "activate") {
-      if (currentUser?.isActive && extPackageRoi?.isActive) {
-        return res.status(400).json({
-          message: "You already activated a package. You need to upgrade.",
-        });
-      }
-      if (
-        currentUser?.isActive === false &&
-        extPackageRoi?.isActive === false
-      ) {
-        // if (extPackageRoi?.currentPackage > packageAmount) {
-        //   return res.status(400).json({
-        //     message:
-        //       "You need to activate with the same or greater than the current package.",
-        //   });
-        // }
-        await processPackageAction(
-          req.auth.id,
-          packageAmount,
-          prevPackDeductPackAmount,
-          extPackageBuyInfo,
-          depositBalance,
-          activeIncome,
-          startDate,
-          "Nothing",
-          "Again Buy"
-        );
-        return res
-          .status(201)
-          .json({ message: "Package Activated Successfully" });
-      }
-      await processPackageAction(
-        req.auth.id,
-        packageAmount,
-        prevPackDeductPackAmount,
-        extPackageBuyInfo,
-        depositBalance,
-        activeIncome,
-        startDate,
-        "Buy",
-        "Nothing"
-      );
-      return res
-        .status(201)
-        .json({ message: "Package Activated Successfully" });
-    } else if (type === "upgrade") {
-      if (!extPackageBuyInfo) {
-        return res
-          .status(400)
-          .json({ message: "You have to activate a package first" });
-      }
-      if (extPackageBuyInfo?.packageInfo?.amount >= packageAmount) {
-        return res.status(400).json({
-          message:
-            "You can't upgrade with less than or the same current package",
-        });
-      }
-      await processPackageAction(
-        req.auth.id,
-        packageAmount,
-        prevPackDeductPackAmount,
-        extPackageBuyInfo,
-        depositBalance,
-        activeIncome,
-        startDate,
-        "Upgrade",
-        "Nothing"
-      );
-      return res.status(200).json({ message: "Package Upgraded Successfully" });
-    }
+    // Fetch the user's ROI and information
+    const extPackageRoi = await PackageRoi.findOne({ userId: req.auth.id });
+    const currentUser = await User.findOne({ userId: req.auth.id });
+
+    // Calculate the start date in PST
+    const startDate = new Date(
+      new Date().toLocaleString("en-US", { timeZone: "Asia/Karachi" })
+    );
+    startDate.setDate(startDate.getDate() + 1);
+
+    // Process package activation
+    await processPackageAction(
+      req.auth.id,
+      packageAmount,
+      depositBalance,
+      activeIncome,
+      startDate
+    );
+
+    return res.status(201).json({ message: "Package Activated Successfully" });
   } catch (error) {
-    console.log(error);
+    console.error("Error in createTopupController:", error);
     return res.status(500).json({ message: "Something went wrong" });
   }
 };
+
 // Get topup history
 const getTopupHistoryController = async (req, res) => {
   try {
