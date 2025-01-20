@@ -19,6 +19,7 @@ const packageBuyInfoSchema = new mongoose.Schema(
     },
     isActive: { type: Boolean, default: true },
     isComplect: { type: Boolean, default: false },
+    isExpired: { type: Boolean, default: false },
     isMondayCheck: Boolean,
     incomeDay: {
       type: Number,

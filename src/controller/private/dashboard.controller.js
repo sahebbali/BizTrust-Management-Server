@@ -1,6 +1,7 @@
 const User = require("../../models/auth.model");
 const LastRoiData = require("../../models/lastRoiData");
 const Wallet = require("../../models/wallet.model");
+const checkPackageValidation = require("../../utils/checkPackageValidation");
 const handleROI = require("../../utils/handleROI");
 const levelIncome = require("../../utils/levelIncome");
 
@@ -38,25 +39,26 @@ const getAdminDashboardStatsController = async (_req, res) => {
 };
 const runROIStaticController = async (req, res) => {
   try {
-    await handleROI(),
-      function getISTDate() {
-        // Get current date and time in UTC
-        const currentDate = new Date();
+    // await handleROI(),
+    await checkPackageValidation();
+    function getISTDate() {
+      // Get current date and time in UTC
+      const currentDate = new Date();
 
-        // Create an Intl.DateTimeFormat object for Indian Standard Time (IST)
-        const istOptions = {
-          timeZone: "Asia/Kolkata",
-          year: "numeric",
-          month: "2-digit",
-          day: "2-digit",
-        };
-        const istFormatter = new Intl.DateTimeFormat("en-IN", istOptions);
-
-        // Format the date in IST
-        const istDateStr = istFormatter.format(currentDate);
-
-        return istDateStr;
+      // Create an Intl.DateTimeFormat object for Indian Standard Time (IST)
+      const istOptions = {
+        timeZone: "Asia/Kolkata",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
       };
+      const istFormatter = new Intl.DateTimeFormat("en-IN", istOptions);
+
+      // Format the date in IST
+      const istDateStr = istFormatter.format(currentDate);
+
+      return istDateStr;
+    }
     // Example usage
     const istDate = getISTDate();
     const lastUpdatedDate = await LastRoiData.findOne({});
