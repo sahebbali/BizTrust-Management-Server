@@ -35,26 +35,16 @@ const levelIncomeSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    levelUserPackageInfo: {
-      type: {
-        amount: {
-          type: Number,
-          required: true,
-        },
-        date: String,
-        time: String,
-      },
+    type: {
+      type: String,
       required: true,
     },
-    selfPackageInfo: {
-      type: {
-        amount: {
-          type: Number,
-          required: true,
-        },
-        date: String,
-        time: String,
-      },
+    levelUserPackageInfoAmount: {
+      type: Number,
+      required: true,
+    },
+    selfPackageInfoAmount: {
+      type: Number,
       required: true,
     },
     transactionID: {

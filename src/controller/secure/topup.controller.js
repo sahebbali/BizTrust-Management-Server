@@ -26,10 +26,11 @@ const createTopupController = async (req, res) => {
 
     const { packageAmount, type } = req.body;
     console.log({ packageAmount, type });
+    console.log(req.body);
     // Validate input
-    if (!type) {
-      return res.status(400).json({ message: "Package type is required" });
-    }
+    // if (!type) {
+    //   return res.status(400).json({ message: "Package type is required" });
+    // }
     if (!packageAmount || packageAmount < 100000) {
       return res
         .status(400)

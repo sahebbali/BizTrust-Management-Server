@@ -216,7 +216,7 @@ const registerController = async (req, res) => {
             indirectIncome: 0,
             depositBalance: 0,
             totalIncome: 0,
-            joiningBonus: 0,
+
             investmentAmount: 0,
             activeIncome: 0,
           });

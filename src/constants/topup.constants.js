@@ -9,13 +9,18 @@ const roiCommissionPercentage = {
 };
 
 const levelCommissionPerCentage = {
-  1: 0.15,
-  2: 0.1,
-  3: 0.05,
-  4: 0.01,
-  5: 0.01,
-  6: 0.01,
-  7: 0.01,
+  1: 6,
+  2: 2,
+  3: 1,
+  4: 0.5,
+  5: 0.5,
+};
+const ProfitSharingCommissionPerCentage = {
+  1: 8,
+  2: 6,
+  3: 4,
+  4: 2,
+  5: 1,
 };
 
 const rankRewardAmount = {
@@ -117,4 +122,5 @@ module.exports = {
   levelCommissionPerCentage,
   forbiddenDates,
   rankRewardAmount,
+  ProfitSharingCommissionPerCentage,
 };

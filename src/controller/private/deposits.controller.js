@@ -245,27 +245,27 @@ const updateDepositStatus = async (req, res) => {
           }
         );
 
-        sendEmailNotification(
-          currentUser?.userId,
-          currentUser?.fullName,
-          currentUser?.email,
-          "Deposit Request Status Update",
-          existingDeposit.amount,
-          "Your deposit request has been successfully processed, and the funds have been added to your wallet",
-          "deposit"
-        );
+        // sendEmailNotification(
+        //   currentUser?.userId,
+        //   currentUser?.fullName,
+        //   currentUser?.email,
+        //   "Deposit Request Status Update",
+        //   existingDeposit.amount,
+        //   "Your deposit request has been successfully processed, and the funds have been added to your wallet",
+        //   "deposit"
+        // );
         message = "Deposit succeeded";
       } else {
         // Send mail notifiction to user email with request status
-        sendEmailNotification(
-          currentUser?.userId,
-          currentUser?.fullName,
-          currentUser?.email,
-          "Deposit Request Status Update",
-          existingDeposit?.amount,
-          `Unfortunately, Your deposit request for $${existingDeposit?.amount} amount has been rejected.`,
-          "deposit"
-        );
+        // sendEmailNotification(
+        //   currentUser?.userId,
+        //   currentUser?.fullName,
+        //   currentUser?.email,
+        //   "Deposit Request Status Update",
+        //   existingDeposit?.amount,
+        //   `Unfortunately, Your deposit request for $${existingDeposit?.amount} amount has been rejected.`,
+        //   "deposit"
+        // );
         message = "Deposit Rejected";
       }
       return res.status(200).json({

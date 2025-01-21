@@ -133,20 +133,18 @@ const getRoiIncomeController = async (req, res) => {
     const matchStage = {
       $match: {
         $and: [
-          searchById ? { "history.userId": searchById } : {},
+          searchById ? { userId: searchById } : {},
           searchByStartDate && searchByEndDate
             ? {
                 $or: [
                   {
-                    "history.incomeDateInt": {
+                    incomeDateInt: {
                       $gte: searchByStartDate,
                       $lte: searchByEndDate,
                     },
                   },
                   {
-                    "history.incomeDate": new Date(
-                      searchByStartDate
-                    ).toDateString(),
+                    incomeDate: new Date(searchByStartDate).toDateString(),
                   },
                 ],
               }
@@ -156,35 +154,19 @@ const getRoiIncomeController = async (req, res) => {
     };
 
     const histories = await PackageRoi.aggregate([
-      { $unwind: "$history" },
       matchStage,
-      { $sort: { "history.incomeDateInt": -1 } },
+      { $sort: { incomeDateInt: -1 } },
       { $skip: (page - 1) * limit },
       { $limit: limit },
-      {
-        $project: {
-          _id: 0,
-          userId: "$history.userId",
-          fullName: "$history.fullName",
-          package: "$history.package",
-          commissionPercentagePerDay: "$history.commissionPercentagePerDay",
-          commissionAmount: "$history.commissionAmount",
-          totalCommissionAmount: "$history.totalCommissionAmount",
-          incomeDate: "$history.incomeDate",
-          incomeTime: "$history.incomeTime",
-          transactionId: "$history.transactionId",
-        },
-      },
     ]);
 
     const totalHistoryPipleine = [
-      { $unwind: "$history" },
       matchStage,
       {
         $group: {
           _id: null,
           count: { $sum: 1 },
-          totalAmount: { $sum: "$history.commissionAmount" },
+          totalAmount: { $sum: "$commissionAmount" },
         },
       },
     ];
@@ -213,21 +195,20 @@ const getRoiIncomeController = async (req, res) => {
     // Download CSV
     if (downloadCSV === "csv") {
       const result = await PackageRoi.aggregate([
-        { $unwind: "$history" },
         matchStage,
-        { $sort: { "history.incomeDateInt": -1 } },
+        { $sort: { incomeDateInt: -1 } },
         {
           $project: {
             _id: 0,
-            userId: "$history.userId",
-            fullName: "$history.fullName",
-            package: "$history.package",
-            commissionPercentagePerDay: "$history.commissionPercentagePerDay",
-            commissionAmount: "$history.commissionAmount",
-            totalCommissionAmount: "$history.totalCommissionAmount",
-            incomeDate: "$history.incomeDate",
-            incomeTime: "$history.incomeTime",
-            transactionId: "$history.transactionId",
+            userId,
+            fullName,
+            package,
+            commissionPercentagePerDay,
+            commissionAmount,
+            totalCommissionAmount,
+            incomeDate,
+            incomeTime,
+            transactionId,
           },
         },
       ]);
@@ -243,6 +224,7 @@ const getRoiIncomeController = async (req, res) => {
       return res.status(400).json({ message: "History Not Found" });
     }
   } catch (error) {
+    console.log(error);
     return res.status(500).json({ message: "Something went wrong" });
   }
 };
