@@ -12,7 +12,7 @@ const profitSharingIncome = async (userId, amount) => {
   console.log("hello");
   try {
     const levels = await Level.find({ "level.userId": userId });
-    // console.log({ levels });
+    console.log({ levels });
     for (const lvl of levels) {
       console.log("userId", lvl?.userId);
       // find distributor level user level

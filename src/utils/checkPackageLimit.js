@@ -56,7 +56,8 @@ const checkPackageLimit = async (
   CommissionAmount,
   levelUserPackage,
   level,
-  type
+  type,
+  percentage
 ) => {
   console.log("-------------------------------------");
   //   console.log({ package, CommissionAmount });
@@ -80,7 +81,8 @@ const checkPackageLimit = async (
         levelUserPackage.packageAmount,
         level,
         pendingAmount,
-        type
+        type,
+        percentage
       );
     } else if (type === "profit-sharing") {
       await CreateLevelIncomeHistory(
@@ -92,7 +94,8 @@ const checkPackageLimit = async (
         levelUserPackage.packageAmount,
         level,
         pendingAmount,
-        type
+        type,
+        percentage
       );
     }
 
@@ -134,7 +137,8 @@ const checkPackageLimit = async (
         levelUserPackage.packageAmount,
         level,
         CommissionAmount,
-        type
+        type,
+        percentage
       );
     } else if (type === "profit-sharing") {
       await CreateLevelIncomeHistory(
@@ -145,8 +149,9 @@ const checkPackageLimit = async (
         levelUserPackage.userFullName,
         levelUserPackage.packageAmount,
         level,
-        pendingAmount,
-        type
+        CommissionAmount,
+        type,
+        percentage
       );
     }
     if (updatePackage.totalReturnedAmount >= package.packageLimit) {

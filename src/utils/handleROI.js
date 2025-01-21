@@ -7,6 +7,7 @@ const {
 const { PackageRoi, PackageBuyInfo } = require("../models/topup.model");
 const Wallet = require("../models/wallet.model");
 const LastRoiData = require("../models/lastRoiData");
+const profitSharingIncome = require("./profitSharingIncome");
 
 const handleROI = async () => {
   try {
@@ -49,6 +50,40 @@ const checkPackageLimit = async (
   commissionPercentage
 ) => {
   if (package.totalReturnedAmount + CommissionAmount > package.packageLimit) {
+    console.log("limit up");
+    const totalAmount = package.totalReturnedAmount + CommissionAmount;
+    const extraAmount = totalAmount - package.packageLimit;
+    const pendingAmount = package.packageLimit - package.totalReturnedAmount;
+    const type = "roi-income";
+    await UpdateWallet(package.userId, pendingAmount, type);
+
+    await createROIHistory(
+      package.userId,
+      package.userFullName,
+      package.packageAmount,
+      commissionPercentage,
+      pendingAmount,
+      updatePackage.incomeDay
+    );
+    await CreateExtraEarning(
+      package.userId,
+      package.userFullName,
+      extraAmount,
+      type
+    );
+    await PackageBuyInfo.findOneAndUpdate(
+      { packageId: package.packageId },
+      {
+        $set: {
+          isComplect: true,
+          isActive: false,
+        },
+        $inc: {
+          incomeDay: +1,
+          totalReturnedAmount: +pendingAmount,
+        },
+      }
+    );
   } else {
     const updatePackage = await PackageBuyInfo.findOneAndUpdate(
       { packageId: package.packageId },
@@ -82,6 +117,7 @@ const checkPackageLimit = async (
       updatePackage.incomeDay
     );
 
+    await profitSharingIncome(package.userId, CommissionAmount);
     if (updatePackage.totalReturnedAmount >= package.packageLimit) {
       await PackageBuyInfo.findOneAndUpdate(
         { packageId: package.packageId },

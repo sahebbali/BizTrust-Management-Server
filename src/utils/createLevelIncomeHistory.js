@@ -11,7 +11,8 @@ const CreateLevelIncomeHistory = async (
   levelUserPackageInfoAmount,
   level,
   commissionAmount,
-  type
+  type,
+  percentage
 ) => {
   try {
     await LevelIncome.create({
@@ -27,6 +28,7 @@ const CreateLevelIncomeHistory = async (
       levelUserPackageInfoAmount,
       selfPackageInfoAmount,
       transactionID: generateString(15),
+      percentage
     });
   } catch (error) {
     console.log({ error });

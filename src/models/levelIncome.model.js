@@ -52,6 +52,9 @@ const levelIncomeSchema = new mongoose.Schema(
       required: true,
       unique: true,
     },
+    percentage: {
+      type: Number,
+    },
   },
   { timestamps: true }
 );

@@ -49,7 +49,8 @@ const levelIncome = async (userId, roiPerDayCommissionAmount) => {
           commissionAmount,
           packageInfo,
           level,
-          "level-income"
+          "level-income",
+          percentage
         );
       }
     }
