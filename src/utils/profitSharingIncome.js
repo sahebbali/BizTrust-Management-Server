@@ -52,7 +52,8 @@ const profitSharingIncome = async (userId, amount) => {
           commissionAmount,
           packageInfo,
           level,
-          "profit-sharing"
+          "profit-sharing",
+          percentage
         );
       }
     }

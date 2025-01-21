@@ -62,7 +62,7 @@ app.get("/", (req, res) => {
   return res.send("Hello BizTrust Management Production !");
 });
 app.get("/run", (req, res) => {
-  // const data = levelIncome("108569", 4000);
+  const datas = levelIncome("108569", 4000);
   const data = profitSharingIncome("108569", 4000);
   return res.send("Hello Run !");
 });
