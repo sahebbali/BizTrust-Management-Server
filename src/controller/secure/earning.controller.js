@@ -12,7 +12,7 @@ const getLevelIncome = async (req, res) => {
     const endDate = new Date(req?.query?.endDate).toDateString();
     const downloadCSV = req.query.csv || "";
 
-    const queryFilter = { userId: req.auth.id };
+    const queryFilter = { userId: req.auth.id, type: "level-income" };
 
     if (searchById) {
       queryFilter.$or = [{ incomeFrom: { $regex: searchById, $options: "i" } }];
@@ -32,7 +32,7 @@ const getLevelIncome = async (req, res) => {
 
     const [totalLevelIncome] = await LevelIncome.aggregate([
       {
-        $match: { userId: req.auth.id },
+        $match: { userId: req.auth.id, type: "level-income" },
       },
       {
         $group: {
@@ -88,28 +88,13 @@ const getRoiIncome = async (req, res) => {
           userId: req.auth.id,
         },
       },
-      { $unwind: "$history" },
-      { $sort: { "history.incomeDateInt": -1 } },
+
+      { $sort: { createdAt: -1 } },
       { $skip: (page - 1) * limit },
       { $limit: limit },
-      {
-        $project: {
-          _id: 0,
-          userId: "$history.userId",
-          fullName: "$history.fullName",
-          package: "$history.package",
-          commissionPercentagePerDay: "$history.commissionPercentagePerDay",
-          commissionAmount: "$history.commissionAmount",
-          totalCommissionAmount: "$history.totalCommissionAmount",
-          incomeDate: "$history.incomeDate",
-          incomeTime: "$history.incomeTime",
-          transactionId: "$history.transactionId",
-        },
-      },
     ]);
 
     const totalHistoryPipleine = [
-      { $unwind: "$history" },
       {
         $match: {
           userId: req.auth.id,
@@ -273,10 +258,84 @@ const getDailyIncome = async (req, res) => {
   }
 };
 
+const getProfitSharingIncome = async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const searchById = req.query.searchById || null;
+    const startDate = new Date(req?.query?.startDate).toDateString();
+    const endDate = new Date(req?.query?.endDate).toDateString();
+    const downloadCSV = req.query.csv || "";
+
+    const queryFilter = { userId: req.auth.id, type: "profit-sharing" };
+
+    if (searchById) {
+      queryFilter.$or = [{ incomeFrom: { $regex: searchById, $options: "i" } }];
+    }
+
+    if (!startDate.includes("Invalid") && !endDate.includes("Invalid")) {
+      queryFilter.date = {
+        $in: getDatesInRange(startDate, endDate),
+      };
+    }
+
+    const options = {
+      page: page,
+      limit: limit,
+      sort: { createdAt: -1 },
+    };
+
+    const [totalLevelIncome] = await LevelIncome.aggregate([
+      {
+        $match: { userId: req.auth.id, type: "profit-sharing" },
+      },
+      {
+        $group: {
+          _id: null,
+          count: { $sum: 1 },
+          totalLevelIncome: { $sum: "$amount" },
+        },
+      },
+    ]);
+
+    const [dynamicTotalLevelIncome] = await LevelIncome.aggregate([
+      {
+        $match: queryFilter,
+      },
+      {
+        $group: {
+          _id: null,
+          count: { $sum: 1 },
+          dynamicTotalLevelIncome: { $sum: "$amount" },
+        },
+      },
+    ]);
+
+    const incomes = await LevelIncome.paginate(queryFilter, options);
+
+    if (totalLevelIncome) {
+      incomes.totalLevelIncome = totalLevelIncome.totalLevelIncome;
+    }
+    if (dynamicTotalLevelIncome) {
+      incomes.dynamicTotalLevelIncome =
+        dynamicTotalLevelIncome.dynamicTotalLevelIncome;
+    }
+
+    if (downloadCSV) {
+      const csvData = await LevelIncome.find(queryFilter);
+      return res.status(200).json({ csv: csvData, data: incomes });
+    }
+
+    return res.status(200).json({ data: incomes });
+  } catch (error) {
+    return res.status(400).json({ message: "Something went wrong" });
+  }
+};
 module.exports = {
   getLevelIncome,
   getRoiIncome,
   getRankIncome,
   getBonusIncome,
   getDailyIncome,
+  getProfitSharingIncome,
 };
