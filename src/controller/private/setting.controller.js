@@ -318,6 +318,125 @@ const createManageROI = async (req, res) => {
     return res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
+const getAllManageROI = async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const searchById = req.query.searchById || "";
+    const searchByStartDate = new Date(req.query.startDate).getTime() || "";
+    const searchByEndDate = new Date(req.query.endDate).getTime() || "";
+    const downloadCSV = req.query.csv || "";
+
+    const matchStage = {
+      $match: {
+        $and: [
+          searchById ? { userId: searchById } : {},
+          searchByStartDate && searchByEndDate
+            ? {
+                $or: [
+                  {
+                    "levelDate.miliSec": {
+                      $gte: searchByStartDate,
+                      $lte: searchByEndDate,
+                    },
+                  },
+                  {
+                    date: new Date(searchByStartDate).toDateString(),
+                  },
+                ],
+              }
+            : {},
+        ],
+      },
+    };
+
+    const histories = await ManageROIHistory.aggregate([
+      {
+        $addFields: {
+          "levelDate.miliSec": { $toLong: { $toDate: "$date" } },
+        },
+      },
+      matchStage,
+      { $sort: { createdAt: -1 } },
+      { $skip: (page - 1) * limit },
+      { $limit: limit },
+      {
+        $project: {
+          __v: 0,
+        },
+      },
+    ]);
+
+    const totalHistoryPipleine = [
+      {
+        $addFields: {
+          "levelDate.miliSec": { $toLong: { $toDate: "$date" } },
+        },
+      },
+      matchStage,
+      {
+        $group: {
+          _id: null,
+          count: { $sum: 1 },
+        },
+      },
+    ];
+
+    const totalHistories = await ManageROIHistory.aggregate(
+      totalHistoryPipleine
+    );
+
+    const totalItems = totalHistories.length > 0 ? totalHistories[0].count : 0;
+    const totalPages = Math.ceil(totalItems / limit);
+    const hasNextPage = page < totalPages;
+    const nextPage = hasNextPage ? page + 1 : null;
+
+    const response = {
+      totalDocs: totalItems,
+      limit: limit,
+      totalPages: totalPages,
+      totalAmount: totalHistories[0]?.totalAmount,
+      page: page,
+      pagingCounter: page,
+      hasPrevPage: page > 1,
+      hasNextPage: hasNextPage,
+      prevPage: page > 1 ? page - 1 : null,
+      nextPage: nextPage,
+      docs: histories,
+    };
+    // Download CSV
+    if (downloadCSV === "csv") {
+      const result = await ManageROIHistory.aggregate([
+        {
+          $addFields: {
+            "levelDate.miliSec": { $toLong: { $toDate: "$date" } },
+          },
+        },
+        matchStage,
+        {
+          $project: {
+            __v: 0,
+          },
+        },
+      ]);
+      return res.status(200).json({ csv: result, data: response });
+    }
+
+    if (totalHistories.length > 0) {
+      return res.status(200).json({
+        message: "Retrieved the all Level Income History",
+        data: response,
+      });
+    } else {
+      return res.status(400).json({ message: "History Not Found" });
+    }
+  } catch (error) {
+    return res.status(400).json({
+      message: "Something went wrong",
+    });
+  }
+};
 module.exports = {
   changePassword,
   updateEmail,
@@ -331,4 +450,5 @@ module.exports = {
   createPopUpImage,
 
   createManageROI,
+  getAllManageROI,
 };
