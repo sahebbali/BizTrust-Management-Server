@@ -437,6 +437,31 @@ const getAllManageROI = async (req, res) => {
     });
   }
 };
+
+const deleteManageROI = async (req, res) => {
+  try {
+    const { objectId } = req.body;
+
+    if (!objectId) {
+      return res.status(400).json({ message: "objectId is required" });
+    }
+
+    // Find and remove the ROI by its ID
+    const deletedManageROI = await ManageROIHistory.findByIdAndRemove(objectId);
+
+    if (deletedManageROI) {
+      return res.status(200).json({ message: "Delete Successful" });
+    } else {
+      return res.status(404).json({ message: "ROI not found" });
+    }
+  } catch (error) {
+    console.error("Error deleting ROI:", error);
+    return res
+      .status(500)
+      .json({ message: "Internal Server Error", error: error.message });
+  }
+};
+
 module.exports = {
   changePassword,
   updateEmail,
@@ -451,4 +476,5 @@ module.exports = {
 
   createManageROI,
   getAllManageROI,
+  deleteManageROI,
 };
