@@ -12,6 +12,7 @@ const {
   createManageROI,
   getAllManageROI,
   deleteManageROI,
+  editManageROI,
 } = require("../../controller/private/setting.controller");
 const { createNews } = require("../../controller/private/support.controller");
 const multer = require("../../middleware/multer");
@@ -34,5 +35,6 @@ router.delete("/delete_vedio_byId", deleteVedio);
 router.post("/create-manage-roi", createManageROI);
 router.get("/get-manage-roi", getAllManageROI);
 router.delete("/delete-manage-roi", deleteManageROI);
+router.put("/edit-manage-roi", editManageROI);
 
 module.exports = router;

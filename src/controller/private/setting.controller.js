@@ -462,6 +462,41 @@ const deleteManageROI = async (req, res) => {
   }
 };
 
+const editManageROI = async (req, res) => {
+  try {
+    const { objectId, date, percentage } = req.body;
+
+    // Validate required fields
+    if (!objectId) {
+      return res.status(400).json({ message: "objectId is required" });
+    }
+    if (!percentage) {
+      return res.status(400).json({ message: "Percentage is required" });
+    }
+
+    // Find and update the ROI entry
+    const updatedManageROI = await ManageROIHistory.findByIdAndUpdate(
+      objectId,
+      { $set: percentage },
+      { new: true, runValidators: true } // Returns the updated document and enforces schema validation
+    );
+
+    // Check if the document exists and was updated
+    if (updatedManageROI) {
+      return res
+        .status(200)
+        .json({ message: "Update Successful", data: updatedManageROI });
+    } else {
+      return res.status(404).json({ message: "ROI not found" });
+    }
+  } catch (error) {
+    console.error("Error updating ROI:", error);
+    return res
+      .status(500)
+      .json({ message: "Internal Server Error", error: error.message });
+  }
+};
+
 module.exports = {
   changePassword,
   updateEmail,
@@ -477,4 +512,5 @@ module.exports = {
   createManageROI,
   getAllManageROI,
   deleteManageROI,
+  editManageROI,
 };
