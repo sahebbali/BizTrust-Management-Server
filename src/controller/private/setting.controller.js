@@ -477,7 +477,7 @@ const editManageROI = async (req, res) => {
     // Find and update the ROI entry
     const updatedManageROI = await ManageROIHistory.findByIdAndUpdate(
       objectId,
-      { $set: percentage },
+      { $set: { percentage } },
       { new: true, runValidators: true } // Returns the updated document and enforces schema validation
     );
 
