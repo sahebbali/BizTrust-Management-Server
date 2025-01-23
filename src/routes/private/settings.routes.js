@@ -9,6 +9,7 @@ const {
   getVedio,
   deleteVedio,
   createPopUpImage,
+  createManageROI,
 } = require("../../controller/private/setting.controller");
 const { createNews } = require("../../controller/private/support.controller");
 const multer = require("../../middleware/multer");
@@ -27,5 +28,7 @@ router.delete("/delete_image_byId", deleteImage);
 router.post("/create_vedio", createVedio);
 router.get("/get_all_vedio", getVedio);
 router.delete("/delete_vedio_byId", deleteVedio);
+
+router.post("/create-manage-roi", createManageROI);
 
 module.exports = router;

@@ -8,6 +8,7 @@ const generateRandomString = require("../../config/generateRandomId");
 const VedioData = require("../../models/vedio.model");
 const Image = require("../../models/image.model");
 const PopupImage = require("../../models/popupImagemodel");
+const ManageROIHistory = require("../../models/manageROI");
 
 const changePassword = async (req, res) => {
   try {
@@ -296,6 +297,27 @@ const createPopUpImage = async (req, res) => {
     return res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
+const createManageROI = async (req, res) => {
+  try {
+    const { date, percentage } = req.body;
+    const today = new Date(date).toDateString();
+    const existROIHistory = await ManageROIHistory.findOne({ date: today });
+    if (existROIHistory) {
+      return res.status(400).json({ message: "Already Exist Manage ROI Date" });
+    }
+    // Create a new image document
+    const manageROI = await ManageROIHistory.create({
+      date: today,
+      percentage,
+    });
+    // Respond with the saved document
+    return res.status(201).json({ message: "Successful", manageROI });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
 module.exports = {
   changePassword,
   updateEmail,
@@ -307,4 +329,6 @@ module.exports = {
   getVedio,
   deleteVedio,
   createPopUpImage,
+
+  createManageROI,
 };
