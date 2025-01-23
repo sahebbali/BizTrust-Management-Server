@@ -7,6 +7,7 @@ const PDFData = require("../../models/setting.model");
 const generateRandomString = require("../../config/generateRandomId");
 const VedioData = require("../../models/vedio.model");
 const Image = require("../../models/image.model");
+const PopupImage = require("../../models/popupImagemodel");
 
 const changePassword = async (req, res) => {
   try {
@@ -267,6 +268,34 @@ const deleteVedio = async (req, res) => {
     return res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
+const createPopUpImage = async (req, res) => {
+  try {
+    if (!req.file?.path)
+      res.status(400).json({
+        message: "Image is missing",
+      });
+
+    const image = await Cloudinary.uploader.upload(req.file.path);
+    // console.log("image", image);
+    const avatar = {
+      avatar: image.secure_url,
+      avatarPublicUrl: image.public_id,
+    };
+    const upImage = await PopupImage.create({
+      avatar: avatar.avatar,
+      avatar_public_url: avatar.avatarPublicUrl,
+    });
+    if (upImage) {
+      return res.status(200).json({ message: "Image uploaded" });
+    } else {
+      return res.status(400).json({ message: "Cannot upload Image" });
+    }
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
+};
 module.exports = {
   changePassword,
   updateEmail,
@@ -277,4 +306,5 @@ module.exports = {
   createVedio,
   getVedio,
   deleteVedio,
+  createPopUpImage,
 };
