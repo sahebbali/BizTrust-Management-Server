@@ -20,6 +20,7 @@ const runPackageROI = require("./src/utils/runPackageROI");
 const { runRankIncomeDistribution } = require("./src/utils/rankIncome");
 const levelIncome = require("./src/utils/levelIncome");
 const profitSharingIncome = require("./src/utils/profitSharingIncome");
+const rewardIncome = require("./src/utils/rewardIncome");
 
 const corsOptions = {
   origin: [
@@ -62,8 +63,9 @@ app.get("/", (req, res) => {
   return res.send("Hello BizTrust Management Production !");
 });
 app.get("/run", (req, res) => {
-  const datas = levelIncome("108569", 4000);
-  const data = profitSharingIncome("108569", 4000);
+  // const datas = levelIncome("108569", 4000);
+  // const data = profitSharingIncome("108569", 4000);
+  const data = rewardIncome("745904");
   return res.send("Hello Run !");
 });
 
