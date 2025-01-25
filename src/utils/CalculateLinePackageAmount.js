@@ -14,6 +14,7 @@ const CalculateLinePackageAmount = async (userId) => {
 
     // Extract userId values dynamically
     const userIds = distributorLvl?.map((d) => d.userId) || [];
+    userIds.push(userId);
     console.log("User Id Array: ", userIds);
 
     // Fetch investment amount and user count
