@@ -3,9 +3,9 @@ const mongoosePlugin = require("mongoose-paginate-v2");
 
 const ManageLevelIncomeSchema = new mongoose.Schema(
   {
-    level: { type: Number, require: true, unique: true },
+    level: { type: Number, require: true },
     percentage: { type: Number, require: true },
-    type: { type: Number, require: true },
+    type: { type: String, require: true },
   },
   { timestamps: true }
 );

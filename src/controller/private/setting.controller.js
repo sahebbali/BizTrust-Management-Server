@@ -301,15 +301,21 @@ const createPopUpImage = async (req, res) => {
 
 const createManageLevelIncome = async (req, res) => {
   try {
-    const { date, percentage } = req.body;
-    const today = new Date(date).toDateString();
-    const existROIHistory = await ManageLevelIncome.findOne({ date: today });
+    const { level, type, percentage } = req.body;
+    console.log(req.body);
+    if (!level || !type || !percentage) {
+      return res.status(400).json({ message: "All Felid Are Required" });
+    }
+    const existROIHistory = await ManageLevelIncome.findOne({ level, type });
     if (existROIHistory) {
-      return res.status(400).json({ message: "Already Exist Manage ROI Date" });
+      return res
+        .status(400)
+        .json({ message: "Already Exist Manage This Level" });
     }
     // Create a new image document
     const manageROI = await ManageLevelIncome.create({
-      date: today,
+      level,
+      type,
       percentage,
     });
     // Respond with the saved document
@@ -328,10 +334,12 @@ const getAllManageLevelIncome = async (req, res) => {
     const searchByStartDate = new Date(req.query.startDate).getTime() || "";
     const searchByEndDate = new Date(req.query.endDate).getTime() || "";
     const downloadCSV = req.query.csv || "";
-
+    const type = req.query.type || "";
+    console.log({ type });
     const matchStage = {
       $match: {
         $and: [
+          { type },
           searchById ? { userId: searchById } : {},
           searchByStartDate && searchByEndDate
             ? {
@@ -359,7 +367,7 @@ const getAllManageLevelIncome = async (req, res) => {
         },
       },
       matchStage,
-      { $sort: { createdAt: -1 } },
+      { $sort: { level: 1 } },
       { $skip: (page - 1) * limit },
       { $limit: limit },
       {
