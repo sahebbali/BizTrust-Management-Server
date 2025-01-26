@@ -589,6 +589,55 @@ const getPin = async (req, res) => {
   }
 };
 
+const addUserWalletInfo = async (req, res) => {
+  try {
+    const { bankName, accountTitle, accountNumber, branchName } = req.body;
+    const user_id = req.auth.id;
+    console.log(req.body);
+    // Validate request data
+    if (!bankName) {
+      return res.status(400).json({ message: "Bank Name is missing" });
+    }
+
+    if (!accountTitle) {
+      return res.status(400).json({ message: "Account Title is missing" });
+    }
+
+    if (!accountNumber) {
+      return res
+        .status(400)
+        .json({ message: "Account Number IBAN is Missing" });
+    }
+
+    if (!branchName) {
+      return res.status(400).json({ message: "Branch Name is missing" });
+    }
+
+    // Find the user
+    const user = await User.findOne({ userId: user_id });
+
+    // Update or create the Pin record
+    const walletData = {
+      userId: user_id,
+      fullName: user.fullName,
+      bankName,
+      accountTitle,
+      accountNoIBAN: accountNumber,
+      branchCode: branchName,
+    };
+
+    const userPin = await WalletAddress.findOneAndUpdate(
+      { userId: user_id },
+      { $set: walletData },
+      { upsert: true }
+    );
+
+    return res.status(200).json({ message: "Pin created successfully" });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
 module.exports = {
   createOtpForEmailAddress,
   matchCurrentEmailOtp,
@@ -603,4 +652,5 @@ module.exports = {
   upLoadProofPic,
   addPin,
   getPin,
+  addUserWalletInfo,
 };
