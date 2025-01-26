@@ -11,7 +11,7 @@ const walletAddressSchema = new mongoose.Schema(
     branchCode: { type: String, require: true },
     date: { type: String, require: true },
     time: { type: String, require: true },
-    isAdmin: { type: Boolean },
+    isAdmin: { type: Boolean, default: false },
   },
   { timestamps: true }
 );

@@ -13,6 +13,10 @@ const {
   getAllManageROI,
   deleteManageROI,
   editManageROI,
+  createManageLevelIncome,
+  getAllManageLevelIncome,
+  deleteManageLevelIncome,
+  editManageLevelIncome,
 } = require("../../controller/private/setting.controller");
 const { createNews } = require("../../controller/private/support.controller");
 const multer = require("../../middleware/multer");
@@ -36,5 +40,10 @@ router.post("/create-manage-roi", createManageROI);
 router.get("/get-manage-roi", getAllManageROI);
 router.delete("/delete-manage-roi", deleteManageROI);
 router.put("/edit-manage-roi", editManageROI);
+
+router.post("/create-manage-level-income", createManageLevelIncome);
+router.get("/get-manage-level-income", getAllManageLevelIncome);
+router.delete("/delete-manage-level-income", deleteManageLevelIncome);
+router.put("/edit-manage-level-income", editManageLevelIncome);
 
 module.exports = router;
