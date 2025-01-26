@@ -899,20 +899,27 @@ const deleteSystemWallet = async (req, res) => {
 
 const editSystemWallet = async (req, res) => {
   try {
-    const { objectId, date, percentage } = req.body;
+    const { _id, branchCode, bankName, accountTitle, accountNoIBAN } = req.body;
 
+    // console.log(req.body);
     // Validate required fields
-    if (!objectId) {
-      return res.status(400).json({ message: "objectId is required" });
+    if (!branchCode) {
+      return res.status(400).json({ message: "Branch Code is required" });
     }
-    if (!percentage) {
-      return res.status(400).json({ message: "Percentage is required" });
+    if (!bankName) {
+      return res.status(400).json({ message: "Bank Name is required" });
+    }
+    if (!accountTitle) {
+      return res.status(400).json({ message: "Account Title is required" });
+    }
+    if (!accountNoIBAN) {
+      return res.status(400).json({ message: "Account No IBAN is required" });
     }
 
     // Find and update the ROI entry
     const updatedManageROI = await WalletAddress.findByIdAndUpdate(
-      objectId,
-      { $set: { percentage } },
+      _id,
+      { $set: { bankName, accountTitle, accountNoIBAN, branchCode } },
       { new: true, runValidators: true } // Returns the updated document and enforces schema validation
     );
 
