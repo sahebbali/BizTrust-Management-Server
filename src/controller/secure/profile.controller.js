@@ -632,7 +632,7 @@ const addUserWalletInfo = async (req, res) => {
       { upsert: true }
     );
 
-    return res.status(200).json({ message: "Pin created successfully" });
+    return res.status(200).json({ message: "Add Wallet successfully" });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Internal Server Error" });

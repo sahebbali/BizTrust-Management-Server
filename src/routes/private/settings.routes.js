@@ -17,6 +17,10 @@ const {
   getAllManageLevelIncome,
   deleteManageLevelIncome,
   editManageLevelIncome,
+  addSystemWalletInfo,
+  getAllSystemWallet,
+  deleteSystemWallet,
+  editSystemWallet,
 } = require("../../controller/private/setting.controller");
 const { createNews } = require("../../controller/private/support.controller");
 const multer = require("../../middleware/multer");
@@ -45,5 +49,10 @@ router.post("/create-manage-level-income", createManageLevelIncome);
 router.get("/get-manage-level-income", getAllManageLevelIncome);
 router.delete("/delete-manage-level-income", deleteManageLevelIncome);
 router.put("/edit-manage-level-income", editManageLevelIncome);
+
+router.post("/add-system-wallet-info", addSystemWalletInfo);
+router.get("/get-system-wallet-info", getAllSystemWallet);
+router.delete("/delete-system-wallet-info", deleteSystemWallet);
+router.put("/edit-system-wallet-info", editSystemWallet);
 
 module.exports = router;

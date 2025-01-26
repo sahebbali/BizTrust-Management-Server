@@ -10,6 +10,7 @@ const Image = require("../../models/image.model");
 const PopupImage = require("../../models/popupImagemodel");
 const ManageROIHistory = require("../../models/manageROI");
 const ManageLevelIncome = require("../../models/manageLevelIncome");
+const WalletAddress = require("../../models/walletAddress.model");
 
 const changePassword = async (req, res) => {
   try {
@@ -707,6 +708,229 @@ const editManageROI = async (req, res) => {
   }
 };
 
+const addSystemWalletInfo = async (req, res) => {
+  try {
+    const { bankName, accountTitle, accountNumber, branchName } = req.body;
+    const user_id = req.auth.id;
+    console.log(req.body);
+    // Validate request data
+    if (!bankName) {
+      return res.status(400).json({ message: "Bank Name is missing" });
+    }
+
+    if (!accountTitle) {
+      return res.status(400).json({ message: "Account Title is missing" });
+    }
+
+    if (!accountNumber) {
+      return res
+        .status(400)
+        .json({ message: "Account Number IBAN is Missing" });
+    }
+
+    if (!branchName) {
+      return res.status(400).json({ message: "Branch Name is missing" });
+    }
+
+    // Find the user
+    const user = await User.findOne({ userId: user_id });
+
+    // Update or create the Pin record
+    const walletData = {
+      userId: user_id,
+      fullName: user.fullName,
+      bankName,
+      accountTitle,
+      accountNoIBAN: accountNumber,
+      branchCode: branchName,
+      isAdmin: true,
+    };
+
+    const userPin = await WalletAddress.create(walletData);
+
+    return res.status(200).json({ message: "Add System Wallet successfully" });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+const getAllSystemWallet = async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const searchById = req.query.searchById || "";
+    const searchByStartDate = new Date(req.query.startDate).getTime() || "";
+    const searchByEndDate = new Date(req.query.endDate).getTime() || "";
+    const downloadCSV = req.query.csv || "";
+
+    const matchStage = {
+      $match: {
+        $and: [
+          { isAdmin: true },
+          searchById ? { userId: searchById } : {},
+          searchByStartDate && searchByEndDate
+            ? {
+                $or: [
+                  {
+                    "levelDate.miliSec": {
+                      $gte: searchByStartDate,
+                      $lte: searchByEndDate,
+                    },
+                  },
+                  {
+                    date: new Date(searchByStartDate).toDateString(),
+                  },
+                ],
+              }
+            : {},
+        ],
+      },
+    };
+
+    const histories = await WalletAddress.aggregate([
+      {
+        $addFields: {
+          "levelDate.miliSec": { $toLong: { $toDate: "$date" } },
+        },
+      },
+      matchStage,
+      { $sort: { createdAt: -1 } },
+      { $skip: (page - 1) * limit },
+      { $limit: limit },
+      {
+        $project: {
+          __v: 0,
+        },
+      },
+    ]);
+
+    const totalHistoryPipleine = [
+      {
+        $addFields: {
+          "levelDate.miliSec": { $toLong: { $toDate: "$date" } },
+        },
+      },
+      matchStage,
+      {
+        $group: {
+          _id: null,
+          count: { $sum: 1 },
+        },
+      },
+    ];
+
+    const totalHistories = await WalletAddress.aggregate(totalHistoryPipleine);
+
+    const totalItems = totalHistories.length > 0 ? totalHistories[0].count : 0;
+    const totalPages = Math.ceil(totalItems / limit);
+    const hasNextPage = page < totalPages;
+    const nextPage = hasNextPage ? page + 1 : null;
+
+    const response = {
+      totalDocs: totalItems,
+      limit: limit,
+      totalPages: totalPages,
+      totalAmount: totalHistories[0]?.totalAmount,
+      page: page,
+      pagingCounter: page,
+      hasPrevPage: page > 1,
+      hasNextPage: hasNextPage,
+      prevPage: page > 1 ? page - 1 : null,
+      nextPage: nextPage,
+      docs: histories,
+    };
+    // Download CSV
+    if (downloadCSV === "csv") {
+      const result = await WalletAddress.aggregate([
+        {
+          $addFields: {
+            "levelDate.miliSec": { $toLong: { $toDate: "$date" } },
+          },
+        },
+        matchStage,
+        {
+          $project: {
+            __v: 0,
+          },
+        },
+      ]);
+      return res.status(200).json({ csv: result, data: response });
+    }
+
+    if (totalHistories.length > 0) {
+      return res.status(200).json({
+        message: "Retrieved the all Level Income History",
+        data: response,
+      });
+    } else {
+      return res.status(400).json({ message: "History Not Found" });
+    }
+  } catch (error) {
+    return res.status(400).json({
+      message: "Something went wrong",
+    });
+  }
+};
+
+const deleteSystemWallet = async (req, res) => {
+  try {
+    const { objectId } = req.body;
+
+    if (!objectId) {
+      return res.status(400).json({ message: "objectId is required" });
+    }
+
+    // Find and remove the ROI by its ID
+    const deletedManageROI = await WalletAddress.findByIdAndRemove(objectId);
+
+    if (deletedManageROI) {
+      return res.status(200).json({ message: "Delete Successful" });
+    } else {
+      return res.status(404).json({ message: "ROI not found" });
+    }
+  } catch (error) {
+    console.error("Error deleting ROI:", error);
+    return res
+      .status(500)
+      .json({ message: "Internal Server Error", error: error.message });
+  }
+};
+
+const editSystemWallet = async (req, res) => {
+  try {
+    const { objectId, date, percentage } = req.body;
+
+    // Validate required fields
+    if (!objectId) {
+      return res.status(400).json({ message: "objectId is required" });
+    }
+    if (!percentage) {
+      return res.status(400).json({ message: "Percentage is required" });
+    }
+
+    // Find and update the ROI entry
+    const updatedManageROI = await WalletAddress.findByIdAndUpdate(
+      objectId,
+      { $set: { percentage } },
+      { new: true, runValidators: true } // Returns the updated document and enforces schema validation
+    );
+
+    // Check if the document exists and was updated
+    if (updatedManageROI) {
+      return res
+        .status(200)
+        .json({ message: "Update Successful", data: updatedManageROI });
+    } else {
+      return res.status(404).json({ message: "ROI not found" });
+    }
+  } catch (error) {
+    console.error("Error updating ROI:", error);
+    return res
+      .status(500)
+      .json({ message: "Internal Server Error", error: error.message });
+  }
+};
 module.exports = {
   changePassword,
   updateEmail,
@@ -728,4 +952,9 @@ module.exports = {
   getAllManageLevelIncome,
   deleteManageLevelIncome,
   editManageLevelIncome,
+
+  addSystemWalletInfo,
+  getAllSystemWallet,
+  editSystemWallet,
+  deleteSystemWallet,
 };
