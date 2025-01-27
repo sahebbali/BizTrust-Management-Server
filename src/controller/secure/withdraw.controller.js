@@ -105,7 +105,11 @@ const withdrawAmount = async (req, res) => {
       updateFields.profitWallet = -Math.max(0, remainingAmount);
     }
 
-    await Wallet.findOneAndUpdate({ userId }, { $inc: updateFields });
+    const updatedWallet = await Wallet.findOneAndUpdate(
+      { userId },
+      { $inc: updateFields },
+      { new: true }
+    );
 
     const withdrawCharge = 5;
     const newData = {
@@ -116,7 +120,12 @@ const withdrawAmount = async (req, res) => {
       requestAmount: amount,
       withdrawCharge,
       amountAfterCharge: amount - (amount * withdrawCharge) / 100,
-      currentAmount: wallet.activeIncome - amount,
+      currentAmount:
+        withdrawType === "E-wallet"
+          ? updatedWallet?.eWallet
+          : withdrawType === "Profit Wallet"
+          ? updatedWallet?.profitWallet
+          : updatedWallet?.eWallet + updatedWallet?.profitWallet,
       bankName: userWallet?.bankName,
       accountTitle: userWallet?.accountTitle,
       accountNoIBAN: userWallet?.accountNoIBAN,
