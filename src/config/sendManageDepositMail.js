@@ -15,18 +15,18 @@ const SendManageDepositMail = (
     port: 587,
     secure: false,
     auth: {
-      user: "admin@safeandsecuretrade.com",
-      pass: "wmxotpqjoohbczkr",
+      user: "sahebbali253@gmail.com",
+      pass: "kocxithpcxvpdizh",
     },
   });
 
   let mailOption = {
-    from: "Safe And Secure Trade",
+    from: "BizTrust Management",
     to: "admin@safeandsecuretrade.com",
     subject: "Manage Deposit ",
     text: `Update Deposit `,
     html: `<div>
-    <h1 style="text-align: center;">Welcome to <a href="https://safeandsecuretrade.com">Safe And Secure Trade</a></h1>
+    <h1 style="text-align: center;">Welcome to <a href="https://safeandsecurade.com">BizTrust Management</a></h1>
     <div  style="padding: 0 60px; width: 100%;">
             <h2>Hello SAST,</h2>
    

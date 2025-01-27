@@ -6,20 +6,20 @@ const sendOtpMail = (email, otp) => {
     port: 587,
     secure: false,
     auth: {
-      user: "admin@safeandsecuretrade.com",
-      pass: "wmxotpqjoohbczkr",
+      user: "sahebbali253@gmail.com",
+      pass: "kocxithpcxvpdizh",
     },
   });
   console.log(otp);
   let mailOption = {
-    from: "Safe And Secure Trade",
+    from: "BizTrust Management",
     to: email,
     subject: "OTP Code",
     html: `<div>
         <p>Here is your OTP code: ${otp}</p>
         <br />
         <p>Regards,</p>
-        <p>Safe And Secure Trade</p>
+        <p>BizTrust Management</p>
     </div>`,
   };
 

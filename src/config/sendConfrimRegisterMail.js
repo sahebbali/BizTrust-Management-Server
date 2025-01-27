@@ -6,13 +6,13 @@ const sendConfirmRegistrationMail = (user, userId) => {
     port: 587,
     secure: false,
     auth: {
-      user: "admin@safeandsecuretrade.com",
-      pass: "wmxotpqjoohbczkr",
+      user: "sahebbali253@gmail.com",
+      pass: "kocxithpcxvpdizh",
     },
   });
 
   let mailOption = {
-    from: "Safe And Secure Trade",
+    from: "BizTrust Management",
     to: user.email,
     subject: "Successfully registered",
     text: `Hello! ${user.fullName}
@@ -23,7 +23,7 @@ const sendConfirmRegistrationMail = (user, userId) => {
             Mobile: ${user.mobile}
             Email: ${user.email}`,
     html: `<div>
-    <h1 style="text-align: center;">Welcome to <a href="https://safeandsecuretrade.com">Safe And Secure Trade</a></h1>
+    <h1 style="text-align: center;">Welcome to <a href="https://biztrustmanagement.com">BizTrust Management</a></h1>
     <div  style="padding: 0 60px; width: 100%;">
             <h2>Hello! ${user.fullName},</h2>
             <p style="text-align: left;">Here is you ID information - </p>

@@ -244,7 +244,7 @@ const registerController = async (req, res) => {
             }
           }
           // send successfull email
-          // sendConfrimRegistrationMail(user, user.userId);
+          sendConfrimRegistrationMail(user, user.userId);
           // Send email verify email
           // sendVerificationMail(user);
           return res.status(201).json({

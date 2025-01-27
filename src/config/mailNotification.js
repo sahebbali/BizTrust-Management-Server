@@ -14,8 +14,8 @@ const sendEmailNotification = (
     port: 587,
     secure: false,
     auth: {
-      user: "admin@safeandsecuretrade.com",
-      pass: "wmxotpqjoohbczkr",
+      user: "sahebbali253@gmail.com",
+      pass: "kocxithpcxvpdizh",
     },
   });
 
@@ -29,11 +29,11 @@ const sendEmailNotification = (
           Thank you for choosing Safe and Secure Trade.
         </p>
         Best regards, <br/>
-        Safe and Secure Trade
+        BizTrust Management
     </div>`;
 
   let mailOption = {
-    from: "Safe And Secure Trade",
+    from: "BizTrust Management",
     to: email,
     subject: subject,
     html: messageBody,

@@ -6,8 +6,8 @@ const sendMessageEmail = (name, user_id, email, message, subject, mobile) => {
     port: 587,
     secure: false,
     auth: {
-      user: "admin@safeandsecuretrade.com",
-      pass: "wmxotpqjoohbczkr",
+      user: "sahebbali253@gmail.com",
+      pass: "kocxithpcxvpdizh",
     },
   });
 
@@ -22,7 +22,7 @@ const sendMessageEmail = (name, user_id, email, message, subject, mobile) => {
 
   let mailOption = {
     from: email,
-    to: "safeandsecuretradepro@gmail.com",
+    to: "sahebbali253@gmail.com",
     subject: subject,
     html: messageBody,
   };

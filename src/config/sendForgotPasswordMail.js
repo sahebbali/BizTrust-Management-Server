@@ -11,13 +11,13 @@ const sendForgotPasswordMail = (email, token) => {
     //   pass: "wmxotpqjoohbczkr",
     // },
     auth: {
-      user: "admin@safeandsecuretrade.com",
-      pass: "wmxotpqjoohbczkr",
+      user: "sahebbali253@gmail.com",
+      pass: "kocxithpcxvpdizh",
     },
   });
 
   let mailOption = {
-    from: "Safe And Secure Trade",
+    from: "BizTrust Management",
     to: email,
     subject: "Forgot Password",
     html: `<div style="width: 100%; padding: 20px 10px; font-weight: 600">
@@ -40,7 +40,7 @@ const sendForgotPasswordMail = (email, token) => {
       </p>
     </div>
     <p>Regards,</p>
-    <a>Safe And Secure Trade</a>
+    <a>BizTrust Management</a>
   </div>`,
   };
 

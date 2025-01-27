@@ -5,12 +5,12 @@ const sendVerificationMail = async (user) => {
     port: 587,
     secure: false,
     auth: {
-      user: "admin@safeandsecuretrade.com",
-      pass: "wmxotpqjoohbczkr",
+      user: "sahebbali253@gmail.com",
+      pass: "kocxithpcxvpdizh",
     },
   });
   const mailOptions = {
-    from: "Safe And Secure Trade",
+    from: "BizTrust Management",
     to: user?.email,
     subject: "Verify Your Email",
     html: `<div style="width: 100%; padding: 20px 10px; font-weight: 600">
@@ -21,7 +21,7 @@ const sendVerificationMail = async (user) => {
         </p>
         <p style="width: 100%; text-align: center; margin-top: 30px">
           <a
-            href="https://safeandsecuretrade.com/login/${user?.token}"
+            href="https://biztrustmanagement.com/login/${user?.token}"
             style="
               padding: 12px 8px;
               background-color: #348edb;
@@ -34,7 +34,7 @@ const sendVerificationMail = async (user) => {
         </p>
       </div>
       <p>Regards,</p>
-      <a target="_blank" href="https://safeandsecuretrade.com">safeandsecuretrade</a>
+      <a target="_blank" href="https://biztrustmanagement.com">BizTrust Management</a>
     </div>`,
   };
 
