@@ -10,11 +10,13 @@ const getAllLevelIncomeController = async (req, res) => {
     const searchByStartDate = new Date(req.query.startDate).getTime() || "";
     const searchByEndDate = new Date(req.query.endDate).getTime() || "";
     const downloadCSV = req.query.csv || "";
+    const type = req.query.type || "";
+
 
     const matchStage = {
       $match: {
         $and: [
-          { type: "level-income" },
+          { type },
           searchById ? { userId: searchById } : {},
           searchByStartDate && searchByEndDate
             ? {
