@@ -5,6 +5,7 @@ const Wallet = require("../../models/wallet.model");
 const generateRandomString = require("../../config/generateRandomId");
 const { getIstTimeWithInternet } = require("../../config/internetTime");
 const getIstTime = require("../../config/getTime");
+const WalletAddress = require("../../models/walletAddress.model");
 
 // deposite
 const depositeAmount = async (req, res) => {
@@ -127,7 +128,7 @@ const checkHash = async (req, res) => {
       hash,
       $or: [{ status: "success" }, { status: "pending" }],
     });
-    console.log({ existHash });
+    // console.log({ existHash });
     if (existHash) {
       return res.status(400).json({ message: "Hash already used" });
     } else {
@@ -140,9 +141,26 @@ const checkHash = async (req, res) => {
   }
 };
 
+const getSystemWallet = async (req, res) => {
+  try {
+    const existWallet = await WalletAddress.find({ isAdmin: true }).sort({
+      createdAt: -1,
+    });
+    if (existWallet) {
+      return res.status(200).json({ data: existWallet });
+    } else {
+      return res.status(400).json({ message: "Data Not Found" });
+    }
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ message: "Something went wrong", error: error.message });
+  }
+};
 module.exports = {
   depositeAmount,
   depositeHistory,
   getMyWallet,
   checkHash,
+  getSystemWallet,
 };
