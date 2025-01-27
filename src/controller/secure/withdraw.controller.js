@@ -9,132 +9,139 @@ const ValidationErrorMsg = require("../../helpers/ValidationErrorMsg");
 const Pin = require("../../models/pin.model");
 const { getIstTimeWithInternet } = require("../../config/internetTime");
 const { forbiddenDates } = require("../../constants/topup.constants");
+const Otp = require("../../models/otp.model");
+const WalletAddress = require("../../models/walletAddress.model");
 
 // Withdraw
 const withdrawAmount = async (req, res) => {
-  // Withdraw Validation
-  const error = validationResult(req).formatWith(ValidationErrorMsg);
-  if (!error.isEmpty()) {
-    let msg;
-    Object.keys(req.body).map((d) => {
-      if (error.mapped()[d] !== undefined) {
-        msg = error.mapped()[d];
-      }
-    });
-    if (msg !== undefined) {
-      return res.status(400).json({
-        message: msg,
-      });
-    }
-  }
   try {
-    const { amount, trx_address, withdrawType, myChain, pin } = req.body;
+    // Validate the request body
+    const error = validationResult(req).formatWith(ValidationErrorMsg);
+    if (!error.isEmpty()) {
+      const msg = Object.values(error.mapped())[0]?.msg;
+      return res.status(400).json({ message: msg || "Validation error" });
+    }
+
+    const { accountNoIBAN, amount, otpCode, withdrawType } = req.body;
     const userId = req.auth.id;
+
+    // Fetch user and wallet details
     const user = await User.findOne({ userId });
-    const MyChain = await User.findOne({ myChain });
+    if (!user) return res.status(404).json({ message: "User not found" });
+
     const wallet = await Wallet.findOne({ userId });
-    const PIN = await Pin.findOne({ userId });
+    const userWallet = await WalletAddress.findOne({ userId });
+    // console.log({ userWallet });
+    const otp = await Otp.findOne({ email: user.email });
+    if (!wallet) return res.status(404).json({ message: "Wallet not found" });
+
+    // Get current date and check if it is the last day of the month
     const ISTTime = await getIstTimeWithInternet();
-    const today = new Date(ISTTime?.date ? ISTTime?.date : getIstTime().date).toDateString().split(" ")[0];
-    if (!PIN) {
-      return res.status(400).json({
-        message: "Please Set Your PIN",
-      });
-    }
-    if (!MyChain) {
-      return res.status(400).json({
-        message: "Please Set Your My Chain",
-      });
-    }
-    if (PIN?.new_pin !== pin) {
-      return res.status(400).json({
-        message: "Invild PIN",
-      });
-    }
-    if (
-      forbiddenDates.includes(
-        new Date(ISTTime?.date ? ISTTime?.date : getIstTime().date).toDateString().split(" ").slice(1, 3).join(" ")
-      )
-    ) {
-      // console.log("Withdraw isn't available on Dec 24 to Jan 03");
-      return res.status(400).json({
-        message: "Withdraw isn't available on Dec 24 to Jan 03",
-      });
-    }
-    if (today === "Sat" || today === "Sun") {
-      return res.status(400).json({
-        message: "Withdraw isn't available on Saturday and Sunday",
-      });
+    const currentDate = new Date(ISTTime?.date || getIstTime().date);
+    console.log({ currentDate });
+    const isLastDayOfMonth =
+      new Date(
+        currentDate.getFullYear(),
+        currentDate.getMonth() + 1,
+        0
+      ).getDate() === currentDate.getDate();
+    console.log({ isLastDayOfMonth });
+    // Check OTP
+    if (!otp || parseInt(otp?.code) !== parseInt(otpCode)) {
+      return res.status(400).json({ message: "Invalid OTP" });
     }
 
-    if (user?.isActive) {
-      if (
-        (withdrawType === "investment" &&
-          Number(amount) === wallet.investmentAmount) ||
-          (withdrawType === "profit" && Number(amount) >= 10 && Number(amount) <= wallet.activeIncome)
-      ) {
-        const updateFields = {};
-        const newData = {};
-
-        if (withdrawType === "investment") {
-          updateFields.investmentAmount = -Number(amount);
-          await User.findOneAndUpdate(
-            { userId },
-            { $set: { isActive: false, "packageInfo.amount": 0 } }
-          ),
-            await PackageRoi.findOneAndUpdate(
-              { userId },
-              { $set: { isActive: false } }
-            ),
-            (newData.message = "Investment withdraw successfully");
-        } else if (withdrawType === "profit") {
-          updateFields.activeIncome = -Number(amount);
-          newData.currentAmount = wallet.activeIncome - Number(amount);
-          newData.message = "Profit withdraw successfully";
-        }
-
-        await Promise.all([
-          Wallet.findOneAndUpdate({ userId }, { $inc: updateFields }),
-        ]);
-
-        newData.userId = userId;
-        newData.fullName = user.fullName;
-        newData.sponsorId = user.sponsorId;
-        newData.sponsorName = user.sponsorName;
-        newData.requestAmount = Number(amount);
-        newData.withdrawCharge = 6;
-        newData.amountAfterCharge = Number(amount) - (Number(amount) / 100) * 6;
-        newData.currentAmount =
-          withdrawType === "profit" ? wallet.activeIncome - Number(amount) : 0;
-        newData.trxAddress = trx_address;
-        newData.status = "pending";
-        newData.transactionId = generateRandomString();
-        newData.transactionHash = "";
-        newData.withdrawType = withdrawType;
-        newData.date = new Date(getIstTime().date).toDateString();
-        newData.time = getIstTime().time;
-        newData.myChain = myChain;
-
-        const createdData = await Withdraw.create(newData);
-        if (createdData) {
-          return res.status(201).json({ message: newData.message });
-        }
-      } else {
-        return res.status(400).json({
-          message:
-            withdrawType === "investment"
-              ? "You must withdraw the full investment amount"
-              : "Minimum withdraw amount is $10",
-        });
-      }
-    } else {
+    // Ensure user is active
+    if (!user.isActive) {
       return res.status(400).json({ message: "You are an inactive user" });
     }
+
+    // Validate minimum withdrawal amount
+    if (amount < 10) {
+      return res
+        .status(400)
+        .json({ message: "Minimum withdrawal amount is Rs10" });
+    }
+
+    // Check wallet balance based on withdrawal type
+    let sufficientBalance = false;
+    // console.log("e wallet", wallet.eWallet);
+    // console.log("profit wallet", wallet.profitWallet);
+    // console.log("Active ", wallet.activeIncome);
+    // console.log("amount", amount);
+    if (withdrawType === "E-wallet") {
+      sufficientBalance = amount <= wallet.eWallet;
+    } else if (withdrawType === "Profit Wallet") {
+      if (!isLastDayOfMonth) {
+        return res.status(400).json({
+          message:
+            "Profit Wallet withdrawals are allowed only on the last day of the month",
+        });
+      }
+      sufficientBalance = amount <= wallet.profitWallet;
+    } else if (withdrawType === "Both") {
+      if (!isLastDayOfMonth) {
+        return res.status(400).json({
+          message:
+            "'Both' withdrawals are allowed only on the last day of the month",
+        });
+      }
+      sufficientBalance = amount <= wallet.profitWallet + wallet.eWallet;
+    }
+
+    if (!sufficientBalance) {
+      return res.status(400).json({ message: "Insufficient Balance" });
+    }
+
+    // Deduct amount from wallet and create withdrawal record
+    const updateFields = {};
+    if (withdrawType === "E-wallet") {
+      updateFields.eWallet = -amount;
+    } else if (withdrawType === "Profit Wallet") {
+      updateFields.profitWallet = -amount;
+    } else if (withdrawType === "Both") {
+      const remainingAmount = amount - wallet.eWallet;
+      updateFields.eWallet = -Math.min(amount, wallet.eWallet);
+      updateFields.profitWallet = -Math.max(0, remainingAmount);
+    }
+
+    await Wallet.findOneAndUpdate({ userId }, { $inc: updateFields });
+
+    const withdrawCharge = 5;
+    const newData = {
+      userId,
+      fullName: user.fullName,
+      sponsorId: user.sponsorId,
+      sponsorName: user.sponsorName,
+      requestAmount: amount,
+      withdrawCharge,
+      amountAfterCharge: amount - (amount * withdrawCharge) / 100,
+      currentAmount: wallet.activeIncome - amount,
+      bankName: userWallet?.bankName,
+      accountTitle: userWallet?.accountTitle,
+      accountNoIBAN: userWallet?.accountNoIBAN,
+      branchCode: userWallet?.branchCode,
+      status: "pending",
+      transactionId: generateRandomString(),
+      transactionHash: "",
+      withdrawType,
+      date: currentDate.toDateString(),
+      time: getIstTime().time,
+    };
+
+    const createdData = await Withdraw.create(newData);
+    if (createdData) {
+      return res
+        .status(201)
+        .json({ message: "Withdrawal request created successfully" });
+    }
+
+    return res
+      .status(500)
+      .json({ message: "Failed to create withdrawal request" });
   } catch (error) {
-    console.log(error);
-    return res.status(500).json({
-      message: "Something went wrong",
-    });
+    console.error(error);
+    return res.status(500).json({ message: "Something went wrong" });
   }
 };
 

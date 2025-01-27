@@ -14,6 +14,8 @@ const walletSchema = new mongoose.Schema(
     depositBalance: { type: Number, default: 0 },
     totalIncome: { type: Number, default: 0 },
     activeIncome: { type: Number, default: 0 },
+    eWallet: { type: Number, default: 0 },
+    profitWallet: { type: Number, default: 0 },
   },
   { timestamps: true }
 );
