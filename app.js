@@ -27,15 +27,7 @@ const corsOptions = {
   origin: [
     "http://localhost:3000", // localhost
     "http://localhost:3001", // localhost
-    "https://sast2.netlify.app", // For testing on production (Netlify)
-    "https://safesecure.netlify.app", // For testing on production (Netlify)
-    "https://safeandsecuretrade.com", // this for only production
-    "https://safeandsecuretrade-backend.vercel.app",
-    "https://6587bf257e948ffdaad02fe7--poetic-cheesecake-782870.netlify.app",
-    "https://admin.safeandsecuretrade.com",
-    "https://adminsafe.netlify.app",
-    "https://development.admin.safeandsecuretrade.com",
-    "https://development.safeandsecuretrade.com",
+    "https://biztrustmanagement.netlify.app",
   ],
   optionsSuccessStatus: 200,
 };
