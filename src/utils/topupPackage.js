@@ -10,7 +10,8 @@ const levelIncome = require("./levelIncome");
 const topupPackageBuyInfoCreate = async (
   currentUser,
   packageAmount,
-  startDate
+  startDate,
+  isAdmin
 ) => {
   const extraEarning = await ExtraEarning.findOne({
     userId: currentUser.userId,
@@ -36,6 +37,7 @@ const topupPackageBuyInfoCreate = async (
     endDate: endDateObj.toDateString(), // Use the formatted end date
     endDateInt: endDateObj.getTime(), // Use timestamp for endDateInt
     packageType: "Buy",
+    isAdmin: isAdmin ? true : false,
   });
   if (extraEarning) {
     await DistributionExtraEarning(
@@ -79,6 +81,18 @@ const topupWalletUpdate = async (
 
   //     );
 };
+const topupAdminUpdateWallet = async (packageAmount, userId) => {
+  // First Deposit Amount then active amount
+
+  await Wallet.findOneAndUpdate(
+    { userId: userId },
+    {
+      $inc: {
+        investmentAmount: +packageAmount,
+      },
+    }
+  );
+};
 
 const processPackageAction = async (
   userId,
@@ -91,7 +105,9 @@ const processPackageAction = async (
   const today = new Date(ISTTime?.date ? ISTTime?.date : getIstTime().date)
     .toDateString()
     .split(" ")[0];
+
   await topupWalletUpdate(depositBalance, activeIncome, packageAmount, userId);
+
   // Get Current user
   const updatedUser = await User.findOneAndUpdate(
     { userId: userId },
@@ -113,8 +129,39 @@ const processPackageAction = async (
 
   await levelIncome(updatedUser, packageAmount);
 };
+const processAdminPackageAction = async (userId, packageAmount, startDate) => {
+  const ISTTime = await getIstTimeWithInternet();
+  const today = new Date(ISTTime?.date ? ISTTime?.date : getIstTime().date)
+    .toDateString()
+    .split(" ")[0];
+
+  await topupAdminUpdateWallet(packageAmount, userId);
+
+  // Get Current user
+  const updatedUser = await User.findOneAndUpdate(
+    { userId: userId },
+    {
+      $set: {
+        isActive: true,
+        activationDate: new Date(
+          ISTTime?.date ? ISTTime?.date : getIstTime().date
+        ).toDateString(),
+        packageInfo: {
+          amount: packageAmount,
+        },
+      },
+    },
+    { new: true }
+  );
+
+  await topupPackageBuyInfoCreate(updatedUser, packageAmount, startDate, true);
+
+  await levelIncome(updatedUser, packageAmount);
+};
 module.exports = {
   topupPackageBuyInfoCreate,
   topupWalletUpdate,
   processPackageAction,
+  topupAdminUpdateWallet,
+  processAdminPackageAction,
 };

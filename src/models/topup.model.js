@@ -50,6 +50,8 @@ const packageBuyInfoSchema = new mongoose.Schema(
     packageType: String,
     date: String,
     time: String,
+    isAdmin: Boolean,
+    isFirstROI: {type: Boolean, default: true},
     upgradedAmount: Number,
   },
   { timestamps: true }
