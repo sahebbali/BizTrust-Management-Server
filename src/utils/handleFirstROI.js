@@ -9,8 +9,9 @@ const Wallet = require("../models/wallet.model");
 const LastRoiData = require("../models/lastRoiData");
 const profitSharingIncome = require("./profitSharingIncome");
 const ManageROIHistory = require("../models/manageROI");
+const { UpdateWallet } = require("./checkPackageLimit");
 
-const handleFristROI = async () => {
+const handleFirstROI = async () => {
   try {
     console.log("hello Run");
     {
@@ -24,7 +25,7 @@ const handleFristROI = async () => {
       const existPackage = await PackageBuyInfo.find({
         isActive: true,
         isFirstROI: true,
-        startDateInt: { $gte: dateInt },
+        startDateInt: { $lte: dateInt },
       });
       console.log({ existPackage });
       for (package of existPackage) {
@@ -49,12 +50,12 @@ const checkPackageLimit = async (
   CommissionAmount,
   commissionPercentage
 ) => {
+  const type = "roi-income";
   if (package.totalReturnedAmount + CommissionAmount > package.packageLimit) {
     console.log("limit up");
     const totalAmount = package.totalReturnedAmount + CommissionAmount;
     const extraAmount = totalAmount - package.packageLimit;
     const pendingAmount = package.packageLimit - package.totalReturnedAmount;
-    const type = "roi-income";
     await UpdateWallet(package.userId, pendingAmount, type);
 
     await createROIHistory(
@@ -98,19 +99,9 @@ const checkPackageLimit = async (
       }
     );
 
-    console.log({ updatePackage });
-    await Wallet.findOneAndUpdate(
-      { userId: package.userId },
-      {
-        $inc: {
-          roiIncome: +CommissionAmount,
-          totalIncome: +CommissionAmount,
-          activeIncome: +CommissionAmount,
-        },
-      },
-      { new: true }
-    );
+    // console.log({ updatePackage });
 
+    await UpdateWallet(package.userId, CommissionAmount, type);
     await createROIHistory(
       package.userId,
       package.userFullName,
@@ -168,65 +159,6 @@ const createROIHistory = async (
     transactionId: generateRandomString(),
   });
 };
-const mainFuncOfROI = async (ext, prevPackAmount) => {
-  if (ext.isActive) {
-    // const prevPackAmount = packAmount;
-    const incomeDayInc = ext.incomeDay + 1;
-    const roiPerDayCommissionAmount =
-      prevPackAmount <= 500
-        ? (prevPackAmount / 100) * roiCommissionPercentage.thirtyTo5Hundred
-        : prevPackAmount >= 700 && prevPackAmount <= 3500
-        ? (prevPackAmount / 100) * roiCommissionPercentage.sevenHundredTo3k
-        : (prevPackAmount / 100) * roiCommissionPercentage.fiveKToN;
-    const roiPerDayCommissionPercentage =
-      prevPackAmount <= 500
-        ? roiCommissionPercentage.thirtyTo5Hundred
-        : prevPackAmount >= 700 && prevPackAmount <= 3500
-        ? roiCommissionPercentage.sevenHundredTo3k
-        : roiCommissionPercentage.fiveKToN;
 
-    await Wallet.findOneAndUpdate(
-      { userId: ext.userId },
-      {
-        $inc: {
-          roiIncome: +roiPerDayCommissionAmount,
-          totalIncome: +roiPerDayCommissionAmount,
-          activeIncome: +roiPerDayCommissionAmount,
-        },
-      },
-      { new: true }
-    );
 
-    await PackageRoi.findOneAndUpdate(
-      { packageId: ext.packageId },
-      {
-        $inc: {
-          incomeDay: +1,
-          totalReturnedAmount: +roiPerDayCommissionAmount,
-        },
-        $set: {
-          isMondayCheck: true,
-        },
-        $push: {
-          history: {
-            userId: ext.userId,
-            fullName: ext.fullName,
-            package: prevPackAmount,
-            commissionPercentagePerDay: roiPerDayCommissionPercentage,
-            commissionAmount: Number(roiPerDayCommissionAmount).toFixed(3),
-            totalCommissionAmount: Number(
-              ext?.totalReturnedAmount + roiPerDayCommissionAmount
-            ).toFixed(3),
-            incomeDay: incomeDayInc,
-            incomeDate: new Date(getIstTime().date).toDateString(),
-            incomeTime: getIstTime().time,
-            incomeDateInt: new Date(getIstTime().date).getTime(),
-            transactionId: generateRandomString(),
-          },
-        },
-      }
-    );
-  }
-};
-
-module.exports = handleFristROI;
+module.exports = handleFirstROI;

@@ -21,7 +21,8 @@ const { runRankIncomeDistribution } = require("./src/utils/rankIncome");
 const levelIncome = require("./src/utils/levelIncome");
 const profitSharingIncome = require("./src/utils/profitSharingIncome");
 const rewardIncome = require("./src/utils/rewardIncome");
-const handleFristROI = require("./src/utils/handleFristROI");
+const handleFristROI = require("./src/utils/handleFirstROI");
+const runPackageFirstROI = require("./src/utils/runPackageFirstROI");
 
 const corsOptions = {
   origin: [
@@ -43,7 +44,7 @@ connectDB();
 
 // Run Function
 runPackageROI();
-runRankIncomeDistribution();
+// runPackageFirstROI();
 
 // Here will be custom routes
 app.use("/api/v1/public", publicRoutes);

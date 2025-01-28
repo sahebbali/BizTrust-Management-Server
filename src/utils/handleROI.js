@@ -23,9 +23,10 @@ const handleROI = async () => {
       //     .status(400)
       //     .json({ message: "ROI isn't distributed on Saturday and Sunday" });
       // }
-      const existPackage = await PackageBuyInfo.find({ isActive: true }).select(
-        "-history"
-      );
+      const existPackage = await PackageBuyInfo.find({
+        isActive: true,
+        isFirstROI: false,
+      }).select("-history");
 
       for (package of existPackage) {
         const packageAmount = package.packageAmount;
@@ -49,12 +50,13 @@ const checkPackageLimit = async (
   CommissionAmount,
   commissionPercentage
 ) => {
+  const type = "roi-income";
   if (package.totalReturnedAmount + CommissionAmount > package.packageLimit) {
     console.log("limit up");
     const totalAmount = package.totalReturnedAmount + CommissionAmount;
     const extraAmount = totalAmount - package.packageLimit;
     const pendingAmount = package.packageLimit - package.totalReturnedAmount;
-    const type = "roi-income";
+
     await UpdateWallet(package.userId, pendingAmount, type);
 
     await createROIHistory(
@@ -96,18 +98,8 @@ const checkPackageLimit = async (
     );
 
     console.log({ updatePackage });
-    await Wallet.findOneAndUpdate(
-      { userId: package.userId },
-      {
-        $inc: {
-          roiIncome: +CommissionAmount,
-          totalIncome: +CommissionAmount,
-          activeIncome: +CommissionAmount,
-        },
-      },
-      { new: true }
-    );
 
+    await UpdateWallet(package.userId, CommissionAmount, type);
     await createROIHistory(
       package.userId,
       package.userFullName,

@@ -14,6 +14,7 @@ const UpdateWallet = async (userId, CommissionAmount, type) => {
           levelIncome: +CommissionAmount,
           totalIncome: +CommissionAmount,
           activeIncome: +CommissionAmount,
+          eWallet: +CommissionAmount,
         },
       };
     } else if (type === "profit-sharing") {
@@ -22,6 +23,7 @@ const UpdateWallet = async (userId, CommissionAmount, type) => {
           profitSharingIncome: +CommissionAmount,
           totalIncome: +CommissionAmount,
           activeIncome: +CommissionAmount,
+          profitWallet: +CommissionAmount,
         },
       };
     } else if (type === "roi-income") {
@@ -30,6 +32,7 @@ const UpdateWallet = async (userId, CommissionAmount, type) => {
           roiIncome: +CommissionAmount,
           totalIncome: +CommissionAmount,
           activeIncome: +CommissionAmount,
+          profitWallet: +CommissionAmount,
         },
       };
     } else if (type === "reward-income") {
@@ -38,6 +41,7 @@ const UpdateWallet = async (userId, CommissionAmount, type) => {
           rewardIncome: +CommissionAmount,
           totalIncome: +CommissionAmount,
           activeIncome: +CommissionAmount,
+          eWallet: +CommissionAmount,
         },
       };
     }
