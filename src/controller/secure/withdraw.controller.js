@@ -11,6 +11,7 @@ const { getIstTimeWithInternet } = require("../../config/internetTime");
 const { forbiddenDates } = require("../../constants/topup.constants");
 const Otp = require("../../models/otp.model");
 const WalletAddress = require("../../models/walletAddress.model");
+const Kyc = require("../../models/KYCSchema");
 
 // Withdraw
 const withdrawAmount = async (req, res) => {
@@ -22,7 +23,7 @@ const withdrawAmount = async (req, res) => {
       return res.status(400).json({ message: msg || "Validation error" });
     }
 
-    const { accountNoIBAN, amount, otpCode, withdrawType } = req.body;
+    const { accountNoIBAN, amount, otpCode, withdrawType, pin } = req.body;
     const userId = req.auth.id;
 
     // Fetch user and wallet details
@@ -31,10 +32,17 @@ const withdrawAmount = async (req, res) => {
 
     const wallet = await Wallet.findOne({ userId });
     const userWallet = await WalletAddress.findOne({ userId });
+    const userPIN = await Pin.findOne({ userId });
+    const userKYC = await Kyc.findOne({ userId, status: "succeed" });
     // console.log({ userWallet });
     const otp = await Otp.findOne({ email: user.email });
     if (!wallet) return res.status(404).json({ message: "Wallet not found" });
+    if (!userPIN) return res.status(404).json({ message: "PIN not found" });
+    if (!userKYC) return res.status(404).json({ message: "Please Set Kyc!" });
 
+    if (userPIN?.new_pin != pin) {
+      return res.status(404).json({ message: "PIN not Match" });
+    }
     // Get current date and check if it is the last day of the month
     const ISTTime = await getIstTimeWithInternet();
     const currentDate = new Date(ISTTime?.date || getIstTime().date);
