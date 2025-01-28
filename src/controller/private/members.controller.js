@@ -17,6 +17,7 @@ const sendOtpMail = require("../../config/sendOtpMail");
 const { getIstTimeWithInternet } = require("../../config/internetTime");
 const getIstTime = require("../../config/getTime");
 const { checkDate } = require("../../utils/rankIncome");
+const Kyc = require("../../models/KYCSchema");
 
 const findThisMonthTotalTeamBusiness = async (req, res) => {
   try {
@@ -1424,6 +1425,112 @@ const getAllPin = async (req, res) => {
   }
 };
 
+const getAllKYCController = async (req, res) => {
+  try {
+    const page = parseInt(req?.query?.page) || 1;
+    const pageSize = parseInt(req?.query?.limit) || 10;
+    const searchById = req.query.searchById || "";
+    const searchByStartDate = new Date(req.query.startDate).getTime() || "";
+    const searchByEndDate = new Date(req.query.endDate).getTime() || "";
+
+    const matchStage = {
+      $and: [
+        searchById ? { userId: { $eq: searchById } } : {},
+        searchByStartDate && searchByEndDate
+          ? {
+              $or: [
+                {
+                  "date.miliSec": {
+                    $gte: searchByStartDate,
+                    $lte: searchByEndDate,
+                  },
+                },
+                {
+                  submissionDate: new Date(searchByStartDate).toDateString(),
+                },
+              ],
+            }
+          : {},
+      ],
+    };
+
+    const countPipeline = [
+      {
+        $addFields: {
+          "date.miliSec": { $toLong: { $toDate: "$submissionDate" } },
+        },
+      },
+      { $match: matchStage },
+      { $count: "totalDocs" },
+    ];
+
+    const dataPipeline = [
+      { $match: matchStage },
+      { $sort: { createdAt: -1 } },
+      { $skip: (page - 1) * pageSize },
+      { $limit: pageSize },
+    ];
+
+    const [countResult, dataResult] = await Promise.all([
+      Kyc.aggregate(countPipeline),
+      Kyc.aggregate(dataPipeline),
+    ]);
+
+    const totalItems = countResult.length > 0 ? countResult[0].totalDocs : 0;
+    const totalPages = Math.ceil(totalItems / pageSize);
+    const hasNextPage = page < totalPages;
+    const nextPage = hasNextPage ? page + 1 : null;
+    const hasPrevPage = page > 1;
+    const prevPage = hasPrevPage ? page - 1 : null;
+    const pagingCounter = (page - 1) * pageSize + 1;
+
+    const response = {
+      totalDocs: totalItems,
+      limit: pageSize,
+      totalPages: totalPages,
+      page: page,
+      pagingCounter: pagingCounter,
+      hasPrevPage: hasPrevPage,
+      hasNextPage: hasNextPage,
+      prevPage: prevPage,
+      nextPage: nextPage,
+      docs: dataResult,
+    };
+
+    if (dataResult.length > 0) {
+      return res.status(200).json({ data: response });
+    } else {
+      return res.status(400).json({ message: "There is no user" });
+    }
+  } catch (error) {
+    console.log(error);
+    return res.status(400).json({
+      message: "Something went wrong",
+    });
+  }
+};
+const updateKycController = async (req, res) => {
+  try {
+    const result = await Kyc.findOneAndUpdate(
+      { userId: req.body.userId, status: "pending" },
+      { $set: { status: req.body.status } },
+      { new: true } // Return the updated document
+    );
+
+    if (result) {
+      return res.status(200).json({ message: "KYC updated" });
+    } else {
+      return res
+        .status(403)
+        .json({ message: "KYC update not possible", data: null });
+    }
+  } catch (error) {
+    console.error(error);
+    return res
+      .status(500)
+      .json({ message: "Something went wrong", data: null });
+  }
+};
 module.exports = {
   findThisMonthTotalTeamBusiness,
   createOtpForEditUserByAdminController,
@@ -1439,4 +1546,6 @@ module.exports = {
   getTeamStatsDetails,
   getTeamBusinessHistory,
   getAllPin,
+  getAllKYCController,
+  updateKycController
 };

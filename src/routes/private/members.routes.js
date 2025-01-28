@@ -16,6 +16,8 @@ const {
   getAddressHistoryByAdmin,
   createOtpForEditUserByAdminController,
   findThisMonthTotalTeamBusiness,
+  getAllKYCController,
+  updateKycController,
 } = require("../../controller/private/members.controller");
 const {
   uploadRewardImage,
@@ -50,5 +52,7 @@ router.get("/user/get_team_stats_details", getTeamStatsDetails);
 router.get("/user/get_upgrade_team_stats_details", getUpgradeTeamStatsDetails);
 router.get("/user/getTeamBusinessHistory", getTeamBusinessHistory);
 router.get("/user/get_all_pin", getAllPin);
+router.get("/getAllKYCAdmin", getAllKYCController);
+router.patch("/updateKycAdmin", updateKycController);
 
 module.exports = router;
