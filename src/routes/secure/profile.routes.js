@@ -13,6 +13,8 @@ const {
   matchCurrentEmailOtp,
   createOtpForEmailAddress,
   addUserWalletInfo,
+  createKyc,
+  getKyc,
 } = require("../../controller/secure/profile.controller");
 
 const router = require("express").Router();
@@ -35,4 +37,6 @@ router.get("/user/get_pin", getPin); // upload profile pic
 
 router.post("/add_user_wallet_info", addUserWalletInfo); // upload profile pic
 
+router.post("/createKyc", createKyc);
+router.get("/getKyc", getKyc);
 module.exports = router;

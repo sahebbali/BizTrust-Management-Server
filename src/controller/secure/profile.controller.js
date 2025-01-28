@@ -11,6 +11,7 @@ const getIstTime = require("../../config/getTime");
 const sendOtpMail = require("../../config/sendOtpMail");
 const EmailAddress = require("../../models/emailAddress.model");
 const Level = require("../../models/level.model");
+const Kyc = require("../../models/KYCSchema");
 
 const getAddressHistoryByUser = async (req, res) => {
   try {
@@ -638,6 +639,102 @@ const addUserWalletInfo = async (req, res) => {
     return res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
+const createKyc = async (req, res) => {
+  const { date } = getIstTime();
+
+  const sendResponse = (res, success, message, data) => {
+    return res.json({
+      success,
+      message,
+      data,
+    });
+  };
+
+  try {
+    // Get the request body
+    const kycData = req.body;
+
+    console.log(req.auth.id);
+    // Check if the user already has a KYC in "success" or "pending" status
+    const existingKyc = await Kyc.findOne({
+      userId: req.auth.id,
+      status: { $in: ["succeed", "pending"] },
+    });
+
+    if (!existingKyc) {
+      // Set the user ID and create the KYC document
+      kycData.userId = req.auth.id;
+      kycData.submissionDate = new Date(date).toDateString();
+      console.log({ kycData });
+      const createdKyc = await Kyc.create(kycData);
+
+      if (createdKyc) {
+        // Return a success response
+        return sendResponse(res, true, "KYC created successfully", createdKyc);
+      } else {
+        // Handle the case where KYC creation failed
+        return sendResponse(res, false, "KYC creation failed", null);
+      }
+    } else {
+      // Handle the case where the user already has a KYC
+      return sendResponse(
+        res,
+        false,
+        "User already has a KYC in progress or completed",
+        null
+      );
+    }
+  } catch (error) {
+    // Handle unexpected errors
+    console.error(error);
+    return sendResponse(res, false, "Something went wrong", null);
+  }
+};
+
+const getKyc = async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+
+    const queryFilter = { userId: req.auth.id };
+
+    const options = {
+      page: page,
+      limit: limit,
+      sort: { createdAt: -1 }, // Sorting by _id in descending order
+    };
+
+    const histories = await Kyc.paginate(queryFilter, options);
+
+    if (histories?.docs?.length > 0) {
+      return res.status(200).json({ data: histories });
+    } else {
+      return res.status(400).json({
+        message: "There is KYC history",
+      });
+    }
+  } catch (error) {
+    return res.status(500).json({ message: "Something went wrong" });
+  }
+};
+
+const getKycSuccess = async (req, res) => {
+  try {
+    const userKyc = await Kyc.find({ userId: req.auth.id, status: "success" });
+
+    if (userKyc && userKyc.length > 0) {
+      res.status(200).json({ message: "KYC Document Found", data: userKyc });
+    } else {
+      res.status(500).json({ message: "SNo KYC documents found for the user" });
+    }
+  } catch (error) {
+    console.error(error);
+    res
+      .status(500)
+      .json({ message: "Something went wrong while fetching KYC documents" });
+  }
+};
 module.exports = {
   createOtpForEmailAddress,
   matchCurrentEmailOtp,
@@ -653,4 +750,7 @@ module.exports = {
   addPin,
   getPin,
   addUserWalletInfo,
+  createKyc,
+  getKyc,
+  getKycSuccess,
 };
