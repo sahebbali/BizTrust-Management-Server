@@ -13,6 +13,7 @@ const rewardSchema = new mongoose.Schema(
     line2: Number,
     line3: Number,
     line4: Number,
+    line5: Number,
     date: String,
     time: String,
     transactionId: String,

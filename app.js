@@ -59,8 +59,8 @@ app.get("/", (req, res) => {
 app.get("/run", (req, res) => {
   // const datas = levelIncome("108569", 4000);
   // const data = profitSharingIncome("108569", 4000);
-  // const data = rewardIncome("745904");
-  const data = handleFristROI("745904");
+  const data = rewardIncome("745904");
+  // const data = handleFristROI("745904");
   return res.send("Hello Run !");
 });
 
