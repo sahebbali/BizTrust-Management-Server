@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const rewardSchema = new mongoose.Schema(
+const rewardIncomeSchema = new mongoose.Schema(
   {
     userId: String,
     fullName: String,
@@ -8,7 +8,7 @@ const rewardSchema = new mongoose.Schema(
     sponsorName: String,
     rewardDesignation: String,
     rewardPosition: Number,
-    rewardAmount: Number,
+    rewardAmount: String,
     line1: Number,
     line2: Number,
     line3: Number,
@@ -21,6 +21,6 @@ const rewardSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const Reward = mongoose.model("Reward", rewardSchema);
+const RewardIncomeModel = mongoose.model("Reward-Income", rewardIncomeSchema);
 
-module.exports = { Reward };
+module.exports = RewardIncomeModel;

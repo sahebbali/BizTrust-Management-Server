@@ -1,53 +1,160 @@
 const Level = require("../models/level.model");
+const RewardIncomeModel = require("../models/rewardIncome.model");
 const CalculateLinePackageAmount = require("./CalculateLinePackageAmount");
+const User = require("../models/auth.model");
+const getPSTime = require("../config/getPSTime");
 
-const CreateRewardHistory = async(user, designation, amount, position)=>{
+const CreateRewardHistory = async (
+  userId,
+  designation,
+  amount,
+  position,
+  line1,
+  line2,
+  line3,
+  line4,
+  line5
+) => {
+  const { date, time } = getPSTime();
+  const currentUser = await User.findOne({ userId });
 
-}
+  if (!currentUser) {
+    console.log("User not found:", userId);
+    return;
+  }
+
+  console.log("Current User:", currentUser);
+
+  const existReward = await RewardIncomeModel.findOne({
+    userId,
+    rewardDesignation: designation,
+    rewardPosition: position,
+  });
+
+  if (existReward) {
+    console.log("Reward already exists for:", designation);
+    return;
+  }
+
+  await RewardIncomeModel.create({
+    userId: currentUser.userId,
+    fullName: currentUser.fullName,
+    sponsorId: currentUser.sponsorId,
+    sponsorName: currentUser.sponsorName,
+    rewardDesignation: designation,
+    rewardPosition: position,
+    rewardAmount: amount,
+    line1,
+    line2,
+    line3,
+    line4,
+    line5,
+    date: new Date(date).toDateString(),
+    time,
+  });
+};
+
 const rewardIncome = async (userId) => {
   try {
     console.log("Fetching levels for user:", userId);
-    
-    // Find the document for the specified userId
+
     const levels = await Level.findOne({ userId });
     if (!levels) {
       console.log("No levels found for user:", userId);
       return [];
     }
 
-    // Filter users at level 1
     const distributorLvl = levels.level?.filter((d) => d.level === "1") || [];
     console.log("Filtered Level 1 Users:", distributorLvl);
 
-    // Use Promise.all to handle async operations properly
-    const allLine = await Promise.all(
-      distributorLvl.map(async (user) => {
-        console.log("Processing userId:", user.userId);
-        return CalculateLinePackageAmount(user.userId);
-      })
+    let allLine = await Promise.all(
+      distributorLvl.map(async (user) =>
+        CalculateLinePackageAmount(user.userId)
+      )
     );
-  // Sort data by totalInvestmentAmount in descending order
-  allLine.sort((a, b) => b.totalInvestmentAmount - a.totalInvestmentAmount);
-    console.log("Calculated Line Packages:", allLine);
-    console.log(allLine.length)
-    if(allLine[0] >=3000000 && allLine[1] >=1500000 ){
-      await CreateRewardHistory(userId,"Relationship Manager",  150000, 1 )
-    } 
-    
-    else if(allLine[0] >=6000000 && allLine[1] >=5000000 && allLine[2] >= 4000000){
-      await CreateRewardHistory(userId,"Branch Manager",  300000, 2 )
+
+    allLine.sort((a, b) => b.totalInvestmentAmount - a.totalInvestmentAmount);
+    console.log("Calculated Line Packages (Sorted):", allLine);
+    const line1 = allLine[0].totalInvestmentAmount;
+    const line2 = allLine[1].totalInvestmentAmount;
+    const line3 = allLine[2].totalInvestmentAmount;
+    const line4 = allLine[3].totalInvestmentAmount;
+    const line5 = allLine[4].totalInvestmentAmount;
+    // console.log({ line1, line2, line3, line4, line5 });
+    // await CreateRewardHistory(
+    //   userId,
+    //   "Relationship Manager",
+    //   150000,
+    //   1,
+    //   line1,
+    //   line2
+    // );
+    if (allLine.length >= 2 && line1 >= 3000000 && line2 >= 1500000) {
+      await CreateRewardHistory(
+        userId,
+        "Relationship Manager",
+        150000,
+        1,
+        line1,
+        line2
+      );
+    } else if (
+      allLine.length >= 3 &&
+      line1 >= 6000000 &&
+      line2 >= 5000000 &&
+      line3 >= 4000000
+    ) {
+      await CreateRewardHistory(
+        userId,
+        "Branch Manager",
+        300000,
+        2,
+        line1,
+        line2,
+        line3
+      );
+    } else if (
+      allLine.length >= 4 &&
+      line1 >= 60000000 &&
+      line2 >= 60000000 &&
+      line3 >= 45000000 &&
+      line4 >= 1000000
+    ) {
+      await CreateRewardHistory(
+        userId,
+        "Area Manager",
+        "1300CC CAR",
+        3,
+        line1,
+        line2,
+        line3,
+        line4
+      );
+    } else if (
+      allLine.length >= 5 &&
+      line1 >= 114000000 &&
+      line2 >= 85000000 &&
+      line3 >= 85000000 &&
+      line4 >= 75000000 &&
+      line5 >= 75000000
+    ) {
+      await CreateRewardHistory(
+        userId,
+        "Regional Manager",
+        "1800CC CAR",
+        4,
+        line1,
+        line2,
+        line3,
+        line4,
+        line5
+      );
     }
-    else if(allLine[0] >=60000000 && allLine[1] >=60000000 && allLine[2] >= 45000000 && allLine[3] >=1000000){
-      await CreateRewardHistory(userId,"Area Manager",  "1300CC CAR", 3 )
-    }
-    else if(allLine[0] >=114000000 && allLine[1] >=85000000 && allLine[2] >= 85000000 && allLine[3] >=75000000 && allLine[4] >=75000000
-    ){
-      await CreateRewardHistory(userId,"Regional Manager",  "1800CC CAR", 4 )
-    }
-    return distributorLvl;
+
+    console.log("level income");
   } catch (error) {
     console.error("Error in rewardIncome:", error);
-    throw error; // Rethrow error for better error handling
+    throw error;
   }
 };
 
