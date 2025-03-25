@@ -37,7 +37,7 @@ const getUpdates = async (req, res) => {
 
 // Support ticket
 const createSupportTicket = async (req, res) => {
-  const ISTTime = await getIstTimeWithInternet();
+  const ISTTime = getIstTime();
   try {
     const { purpose, previous_ticket_reff, question } = req.body;
     const user_id = req.auth.id;
@@ -93,10 +93,8 @@ const createSupportTicket = async (req, res) => {
               previous_ticket_reff: previous_ticket_reff,
               image: avatar,
               question: question,
-              date: new Date(
-                ISTTime?.date ? ISTTime?.date : getIstTime().date
-              ).toDateString(),
-              time: ISTTime?.time ? ISTTime?.time : getIstTime().time,
+              date: new Date(ISTTime?.date).toDateString(),
+              time: ISTTime?.time,
             },
           ],
         });
@@ -110,6 +108,7 @@ const createSupportTicket = async (req, res) => {
           });
         }
       } else {
+        console.log({ ISTTime });
         // update existing support
         const updateSupport = await SupportTicket.findOneAndUpdate(
           { userId: user_id },
@@ -123,10 +122,8 @@ const createSupportTicket = async (req, res) => {
                 previous_ticket_reff: previous_ticket_reff,
                 image: avatar,
                 question: question,
-                date: new Date(
-                  ISTTime?.date ? ISTTime?.date : getIstTime().date
-                ).toDateString(),
-                time: ISTTime?.time ? ISTTime?.time : getIstTime().time,
+                date: new Date(ISTTime?.date).toDateString(),
+                time: ISTTime?.time,
               },
             },
           }

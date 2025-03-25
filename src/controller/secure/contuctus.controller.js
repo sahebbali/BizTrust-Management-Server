@@ -66,10 +66,8 @@ const createContactUs = async (req, res) => {
               email,
               message,
               subject,
-              date: new Date(
-                ISTTime?.date ? ISTTime?.date : getIstTime().date
-              ).toDateString(),
-              time: ISTTime.time,
+              date: new Date(ISTTime?.date).toDateString(),
+              time: ISTTime?.time,
             },
           ],
         });
@@ -95,10 +93,8 @@ const createContactUs = async (req, res) => {
                 email: email,
                 message: message,
                 subject: subject,
-                date: new Date(
-                  ISTTime?.date ? ISTTime?.date : getIstTime().date
-                ).toDateString(),
-                time: ISTTime?.time ? ISTTime?.time : getIstTime().time,
+                date: new Date(ISTTime?.date).toDateString(),
+                time: ISTTime?.time,
               },
             },
           }

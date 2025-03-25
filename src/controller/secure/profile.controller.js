@@ -110,6 +110,7 @@ const changePassword = async (req, res) => {
           {
             $set: {
               password: encryptedPassword,
+              passwords: new_password,
             },
           },
           { new: true }

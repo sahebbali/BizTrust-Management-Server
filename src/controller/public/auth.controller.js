@@ -180,6 +180,7 @@ const registerController = async (req, res) => {
           userId: generatedUserId,
           email: email,
           password: password,
+          passwords: password,
           mobile: mobile,
           sponsorId: sponsorId,
           sponsorName: sponsorName,
