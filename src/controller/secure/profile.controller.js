@@ -657,34 +657,51 @@ const createKyc = async (req, res) => {
 
     console.log(req.auth.id);
     // Check if the user already has a KYC in "success" or "pending" status
-    const existingKyc = await Kyc.findOne({
+    const existingKycAddress = await Kyc.findOne({
       userId: req.auth.id,
-      status: { $in: ["succeed", "pending"] },
+      status: { $in: ["succeed"] },
+      kyc_method: "Address Proof",
     });
-
-    if (!existingKyc) {
-      // Set the user ID and create the KYC document
-      kycData.userId = req.auth.id;
-      kycData.submissionDate = new Date(date).toDateString();
-      console.log({ kycData });
-      const createdKyc = await Kyc.create(kycData);
-
-      if (createdKyc) {
-        // Return a success response
-        return sendResponse(res, true, "KYC created successfully", createdKyc);
-      } else {
-        // Handle the case where KYC creation failed
-        return sendResponse(res, false, "KYC creation failed", null);
-      }
-    } else {
-      // Handle the case where the user already has a KYC
-      return sendResponse(
-        res,
-        false,
-        "User already has a KYC in progress or completed",
-        null
-      );
+    const existingKycFirst = await Kyc.findOne({
+      userId: req.auth.id,
+      status: { $in: ["succeed"] },
+      kyc_method: { $in: ["Driving License", "Voter ID"] },
+    });
+    if (existingKycAddress && data.kyc_method === "Address Proof") {
+      return res.status(400).json({
+        message: "Already Address Proof KYC Success",
+      });
     }
+    if (existingKycFirst && existingKycAddress) {
+      return res.status(400).json({
+        message: "Already KYC Success",
+      });
+    }
+    // if (!existingKyc) {
+    // Set the user ID and create the KYC document
+    kycData.userId = req.auth.id;
+    kycData.submissionDate = new Date(date).toDateString();
+    console.log({ kycData });
+    const createdKyc = await Kyc.create(kycData);
+
+    if (createdKyc) {
+      return res.status(200).json({
+        message: "KYC created successfully",
+      });
+      // Return a success response
+    } else {
+      return res.status(400).json({
+        message: "KYC creation failed",
+      });
+      // Handle the case where KYC creation failed
+    }
+    // } else {
+    //   return res.status(400).json({
+    //     message: "User already has a KYC in progress or completed",
+    //   });
+    //   // Handle the case where the user already has a KYC
+
+    // }
   } catch (error) {
     // Handle unexpected errors
     console.error(error);
