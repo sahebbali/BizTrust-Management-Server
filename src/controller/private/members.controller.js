@@ -1512,7 +1512,7 @@ const getAllKYCController = async (req, res) => {
 const updateKycController = async (req, res) => {
   try {
     const result = await Kyc.findOneAndUpdate(
-      { userId: req.body.userId, status: "pending" },
+      { _id: req.body.id, userId: req.body.userId, status: "pending" },
       { $set: { status: req.body.status } },
       { new: true } // Return the updated document
     );
@@ -1547,5 +1547,5 @@ module.exports = {
   getTeamBusinessHistory,
   getAllPin,
   getAllKYCController,
-  updateKycController
+  updateKycController,
 };
