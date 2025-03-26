@@ -19,3 +19,5 @@ const updatePackageAmount = async (userId, amount) => {
     console.log("error update package amount", error);
   }
 };
+
+module.exports = { updatePackageAmount };
