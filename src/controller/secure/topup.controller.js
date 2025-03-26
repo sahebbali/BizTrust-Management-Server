@@ -3,7 +3,10 @@ const User = require("../../models/auth.model");
 const { PackageBuyInfo, PackageRoi } = require("../../models/topup.model");
 const Wallet = require("../../models/wallet.model");
 const { ThisMonthTeamBusiness } = require("../../utils/thisMonthTeamBusniess");
-const { processPackageAction } = require("../../utils/topupPackage");
+const {
+  processPackageAction,
+  topupWalletUpdate,
+} = require("../../utils/topupPackage");
 const { getIstTimeWithInternet } = require("../../config/internetTime");
 const getIstTime = require("../../config/getTime");
 
@@ -17,20 +20,10 @@ const createTopupController = async (req, res) => {
     const isWeekend =
       dateStringToCheck.includes("Sat") || dateStringToCheck.includes("Sun");
 
-    // Uncomment to restrict top-ups on weekends
-    // if (isWeekend) {
-    //   return res
-    //     .status(400)
-    //     .json({ message: "Top up isn't available on Saturday and Sunday" });
-    // }
-
     const { packageAmount, type } = req.body;
     console.log({ packageAmount, type });
     console.log(req.body);
-    // Validate input
-    // if (!type) {
-    //   return res.status(400).json({ message: "Package type is required" });
-    // }
+
     if (!packageAmount || packageAmount < 100000) {
       return res
         .status(400)
@@ -61,22 +54,28 @@ const createTopupController = async (req, res) => {
     const extPackageRoi = await PackageRoi.findOne({ userId: req.auth.id });
     const currentUser = await User.findOne({ userId: req.auth.id });
 
-    // Calculate the start date in PST
-    const startDate = new Date(
-      new Date().toLocaleString("en-US", { timeZone: "Asia/Karachi" })
-    );
-    startDate.setDate(startDate.getDate() + 1);
-
-    // Process package activation
-    await processPackageAction(
-      req.auth.id,
-      packageAmount,
+    await topupWalletUpdate(
       depositBalance,
       activeIncome,
-      startDate
+      packageAmount,
+      currentUser.userId
     );
-
-    return res.status(201).json({ message: "Package Activated Successfully" });
+    const createPackage = await PackageBuyInfo.create({
+      userId: currentUser.userId,
+      userFullName: currentUser.fullName,
+      sponsorId: currentUser.sponsorId,
+      sponsorName: currentUser.sponsorName,
+      packageId:
+        Date.now().toString(36) + Math.random().toString(36).substring(2),
+      packageAmount: packageAmount,
+      packageLimit: packageAmount * 2,
+      date: new Date(getIstTime().date).toDateString(),
+      time: getIstTime().time,
+      packageType: "Buy",
+    });
+    if (createPackage) {
+      return res.status(201).json({ message: "Package Create Successfully" });
+    }
   } catch (error) {
     console.error("Error in createTopupController:", error);
     return res.status(500).json({ message: "Something went wrong" });

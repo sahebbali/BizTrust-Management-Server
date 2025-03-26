@@ -73,8 +73,8 @@ const userSchema = new mongoose.Schema(
     rank: String,
     rankIncomeCurrentDate: Number,
     rankIncomeCurrentDateString: String,
-    walletAddress: String,
-    myChain: String,
+    packageAmount: Number,
+    openLevel: Number,
   },
   { timestamps: true }
 );

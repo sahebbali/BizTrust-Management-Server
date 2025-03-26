@@ -17,7 +17,7 @@ const packageBuyInfoSchema = new mongoose.Schema(
       type: Number,
       require: true,
     },
-    isActive: { type: Boolean, default: true },
+    isActive: { type: Boolean, default: false },
     isComplect: { type: Boolean, default: false },
     isExpired: { type: Boolean, default: false },
     isMondayCheck: Boolean,
@@ -33,26 +33,27 @@ const packageBuyInfoSchema = new mongoose.Schema(
     },
     startDate: {
       type: String,
-      required: true,
     },
     startDateInt: {
       type: Number,
-      required: true,
     },
     endDate: {
       type: String,
-      required: true,
     },
     endDateInt: {
       type: Number,
-      required: true,
     },
     packageType: String,
     date: String,
     time: String,
     isAdmin: Boolean,
-    isFirstROI: {type: Boolean, default: true},
+    isFirstROI: { type: Boolean, default: true },
     upgradedAmount: Number,
+    status: {
+      type: String,
+      enum: ["pending", "success", "rejected"],
+      default: "pending",
+    },
   },
   { timestamps: true }
 );
