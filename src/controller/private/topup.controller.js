@@ -3,10 +3,12 @@ const getIstTime = require("../../config/getTime");
 const { getIstTimeWithInternet } = require("../../config/internetTime");
 const User = require("../../models/auth.model");
 const { PackageBuyInfo } = require("../../models/topup.model");
+const Wallet = require("../../models/wallet.model");
 const {
   processPackageAction,
   processAdminPackageAction,
 } = require("../../utils/topupPackage");
+const { updatePackageAmount } = require("../../utils/updatePackageAmount");
 
 const getTopupHistory = async (req, res) => {
   try {
@@ -124,5 +126,82 @@ const createTopupController = async (req, res) => {
     return res.status(500).json({ message: "Something went wrong" });
   }
 };
+const updateTopUpStatus = async (req, res) => {
+  try {
+    const { userId, packageId, status } = req.body;
 
-module.exports = { getTopupHistory, createTopupController };
+    const extUser = await User.findOne({
+      userId,
+    });
+    if (!extUser) {
+      return res.status(400).json({
+        message: `User Not Found`,
+      });
+    }
+    // Fetch the latest package buy info for the user
+    const extPackageBuyInfo = await PackageBuyInfo.findOne({
+      packageId,
+      status,
+    }).sort({ createdAt: -1 });
+
+    if (extPackageBuyInfo) {
+      await PackageBuyInfo.findOneAndUpdate(
+        {
+          packageId,
+        },
+        { $set: { status } }
+      );
+    } else {
+      return res.status(400).json({
+        message: `Package Not Found!`,
+      });
+    }
+    // Calculate the start date in PST
+    if (status === "success") {
+      const startDate = new Date(
+        new Date().toLocaleString("en-US", { timeZone: "Asia/Karachi" })
+      );
+
+      // Add 48 hours to the start date
+      startDate.setTime(startDate.getTime() + 48 * 60 * 60 * 1000); // 48 hours in milliseconds
+      const startDateObj = new Date(startDate);
+      const endDateObj = new Date(startDateObj);
+      endDateObj.setFullYear(endDateObj.getFullYear() + 2); // Add 2 years to the start date
+
+      const updatePackage = await PackageBuyInfo.findOneAndUpdate(
+        {
+          packageId,
+        },
+        {
+          isActive: True,
+          startDate: startDateObj.toDateString(), // Use the formatted start date
+          startDateInt: startDateObj.getTime(), // Use timestamp for startDateInt
+          endDate: endDateObj.toDateString(), // Use the formatted end date
+          endDateInt: endDateObj.getTime(), // Use timestamp for endDateInt
+        }
+      );
+      await levelIncome(updatePackage.userId, packageAmount);
+      await updatePackageAmount(
+        extPackageBuyInfo?.userId,
+        extPackageBuyInfo?.packageAmount
+      );
+      // Process package activation
+      await processAdminPackageAction(userId, packageAmount, startDate, true);
+
+      return res
+        .status(201)
+        .json({ message: "Package Activated Successfully" });
+    } else {
+      await Wallet.findOneAndUpdate(
+        { userId: userId },
+        { $inc: { depositBalance: +extPackageBuyInfo?.packageAmount } },
+        { new: true }
+      );
+    }
+  } catch (error) {
+    console.error("Error in createTopupController:", error);
+    return res.status(500).json({ message: "Something went wrong" });
+  }
+};
+
+module.exports = { getTopupHistory, createTopupController, updateTopUpStatus };
