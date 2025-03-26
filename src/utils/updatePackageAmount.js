@@ -1,10 +1,11 @@
 const User = require("../models/auth.model");
 
 const updatePackageAmount = async (userId, amount) => {
+  console.log({ amount, userId });
   try {
-    const existUser = await User.findOne(userId);
-    const totalPackageAmount = existUser?.packageAmount + amount;
-
+    const existUser = await User.findOne({ userId });
+    const totalPackageAmount = existUser?.packageAmount || 0 + amount;
+    console.log({ totalPackageAmount });
     await User.findOneAndUpdate(
       { userId },
       {

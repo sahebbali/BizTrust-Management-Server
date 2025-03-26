@@ -4,6 +4,7 @@ const { getIstTimeWithInternet } = require("../../config/internetTime");
 const User = require("../../models/auth.model");
 const { PackageBuyInfo } = require("../../models/topup.model");
 const Wallet = require("../../models/wallet.model");
+const levelIncome = require("../../utils/levelIncome");
 const {
   processPackageAction,
   processAdminPackageAction,
@@ -138,10 +139,13 @@ const updateTopUpStatus = async (req, res) => {
         message: `User Not Found`,
       });
     }
+    if (status === "pending") {
+      return;
+    }
     // Fetch the latest package buy info for the user
     const extPackageBuyInfo = await PackageBuyInfo.findOne({
       packageId,
-      status,
+      status: "pending",
     }).sort({ createdAt: -1 });
 
     if (extPackageBuyInfo) {
@@ -173,20 +177,18 @@ const updateTopUpStatus = async (req, res) => {
           packageId,
         },
         {
-          isActive: True,
+          isActive: true,
           startDate: startDateObj.toDateString(), // Use the formatted start date
           startDateInt: startDateObj.getTime(), // Use timestamp for startDateInt
           endDate: endDateObj.toDateString(), // Use the formatted end date
           endDateInt: endDateObj.getTime(), // Use timestamp for endDateInt
         }
       );
-      await levelIncome(updatePackage.userId, packageAmount);
       await updatePackageAmount(
         extPackageBuyInfo?.userId,
         extPackageBuyInfo?.packageAmount
       );
-      // Process package activation
-      await processAdminPackageAction(userId, packageAmount, startDate, true);
+      await levelIncome(updatePackage.userId, updatePackage.packageAmount);
 
       return res
         .status(201)
@@ -197,9 +199,10 @@ const updateTopUpStatus = async (req, res) => {
         { $inc: { depositBalance: +extPackageBuyInfo?.packageAmount } },
         { new: true }
       );
+      return res.status(400).json({ message: "Package Rejected" });
     }
   } catch (error) {
-    console.error("Error in createTopupController:", error);
+    console.error("Error in Update Topup Controller:", error);
     return res.status(500).json({ message: "Something went wrong" });
   }
 };
