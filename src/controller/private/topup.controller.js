@@ -127,29 +127,32 @@ const createTopupController = async (req, res) => {
     const dateStringToCheck = new Date(
       ISTTime?.date || getIstTime().date
     ).toDateString();
-    const isWeekend =
-      dateStringToCheck.includes("Sat") || dateStringToCheck.includes("Sun");
-
-    // Uncomment to restrict top-ups on weekends
-    // if (isWeekend) {
-    //   return res
-    //     .status(400)
-    //     .json({ message: "Top up isn't available on Saturday and Sunday" });
-    // }
 
     const { userId, amount, type } = req.body;
     const packageAmount = amount;
     console.log({ packageAmount, type });
     console.log(req.body);
 
-    const extUser = await User.findOne({
+    const currentUser = await User.findOne({
       userId,
     });
-    if (!extUser) {
+    if (!currentUser) {
       return res.status(400).json({
         message: `User Not Found`,
       });
     }
+    if (!type) {
+      return res.status(400).json({
+        message: `Type are Required`,
+      });
+    }
+
+    if (packageAmount < 100000) {
+      return res
+        .status(400)
+        .json({ message: "Minimum package amount is Rs 100000" });
+    }
+
     // Fetch the latest package buy info for the user
     const extPackageBuyInfo = await PackageBuyInfo.findOne({
       userId,
@@ -170,9 +173,45 @@ const createTopupController = async (req, res) => {
     startDate.setTime(startDate.getTime() + 48 * 60 * 60 * 1000); // 48 hours in milliseconds
 
     console.log(startDate);
+    // Add 48 hours to the start date
+    startDate.setTime(startDate.getTime() + 48 * 60 * 60 * 1000); // 48 hours in milliseconds
+    const startDateObj = new Date(startDate);
+    const endDateObj = new Date(startDateObj);
+    endDateObj.setFullYear(endDateObj.getFullYear() + 2); // Add 2 years to the start date
 
+    const createPackage = await PackageBuyInfo.create({
+      userId: currentUser.userId,
+      userFullName: currentUser.fullName,
+      sponsorId: currentUser.sponsorId,
+      sponsorName: currentUser.sponsorName,
+      packageId:
+        Date.now().toString(36) + Math.random().toString(36).substring(2),
+      packageAmount: packageAmount,
+      packageLimit: packageAmount * 2,
+      date: new Date(getIstTime().date).toDateString(),
+      time: getIstTime().time,
+      packageType: "Gift",
+      isActive: true,
+      status: "success",
+      isFirstROI: type === "ROIFree" ? false : true,
+      isROIFree: type === "ROIFree" ? true : false,
+      isAdmin: true,
+      startDate: startDateObj.toDateString(), // Use the formatted start date
+      startDateInt: startDateObj.getTime(), // Use timestamp for startDateInt
+      endDate: endDateObj.toDateString(), // Use the formatted end date
+      endDateInt: endDateObj.getTime(), // Use timestamp for endDateInt
+    });
+
+    await updatePackageAmount(
+      createPackage?.userId,
+      createPackage?.packageAmount
+    );
+    await levelIncome(createPackage.userId, createPackage.packageAmount);
+    if (createPackage) {
+      return res.status(201).json({ message: "Package Create Successfully" });
+    }
     // Process package activation
-    await processAdminPackageAction(userId, packageAmount, startDate, true);
+    // await processAdminPackageAction(userId, packageAmount, startDate, true);
 
     return res.status(201).json({ message: "Package Activated Successfully" });
   } catch (error) {

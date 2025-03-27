@@ -1,23 +1,29 @@
 const User = require("../models/auth.model");
 
 const updatePackageAmount = async (userId, amount) => {
-  console.log({ amount, userId });
   try {
+    console.log({ userId, amount });
+
     const existUser = await User.findOne({ userId });
-    const totalPackageAmount = existUser?.packageAmount || 0 + amount;
-    console.log({ totalPackageAmount });
-    await User.findOneAndUpdate(
+    if (!existUser) {
+      console.log("User not found");
+      return;
+    }
+
+    const totalPackageAmount = (existUser.packageAmount || 0) + amount;
+    const openLevel = totalPackageAmount >= 1000000 ? 5 : 2;
+
+    const updatedUser = await User.findOneAndUpdate(
       { userId },
-      {
-        $set: {
-          packageAmount: totalPackageAmount,
-          openLevel: totalPackageAmount >= 1000000 ? 5 : 2,
-        },
-      },
+      { $set: { packageAmount: totalPackageAmount, openLevel } },
       { new: true }
     );
+
+    console.log("Updated user:", updatedUser);
+    return updatedUser;
   } catch (error) {
-    console.log("error update package amount", error);
+    console.error("Error updating package amount:", error);
+    throw error;
   }
 };
 

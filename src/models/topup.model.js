@@ -20,6 +20,9 @@ const packageBuyInfoSchema = new mongoose.Schema(
     isActive: { type: Boolean, default: false },
     isComplect: { type: Boolean, default: false },
     isExpired: { type: Boolean, default: false },
+    isFirstROI: { type: Boolean, default: true },
+    isROIFree: { type: Boolean, default: false },
+    isAdmin: Boolean,
     isMondayCheck: Boolean,
     incomeDay: {
       type: Number,
@@ -46,8 +49,6 @@ const packageBuyInfoSchema = new mongoose.Schema(
     packageType: String,
     date: String,
     time: String,
-    isAdmin: Boolean,
-    isFirstROI: { type: Boolean, default: true },
     upgradedAmount: Number,
     status: {
       type: String,
