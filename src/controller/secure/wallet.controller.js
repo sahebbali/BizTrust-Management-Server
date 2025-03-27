@@ -6,6 +6,7 @@ const generateRandomString = require("../../config/generateRandomId");
 const { getIstTimeWithInternet } = require("../../config/internetTime");
 const getIstTime = require("../../config/getTime");
 const WalletAddress = require("../../models/walletAddress.model");
+const { PackageBuyInfo } = require("../../models/topup.model");
 
 // deposite
 const depositeAmount = async (req, res) => {
@@ -106,9 +107,27 @@ const depositeHistory = async (req, res) => {
 // Get My wallet
 const getMyWallet = async (req, res) => {
   try {
+    const queryFilter = {
+      userId: req.auth.id,
+      isActive: true,
+    };
+
+    // Use aggregation to calculate the sum of packageAmount
+    const result = await PackageBuyInfo.aggregate([
+      { $match: queryFilter }, // Filter documents based on the query
+      {
+        $group: {
+          _id: null, // Group all documents together
+          totalPackageAmount: { $sum: "$packageAmount" }, // Sum the packageAmount field
+        },
+      },
+    ]);
     const wallet = await Wallet.findOne({ userId: req.auth.id });
     if (wallet) {
-      return res.status(200).json({ data: wallet });
+      return res.status(200).json({
+        data: wallet,
+        totalPackageAmount: result[0].totalPackageAmount,
+      });
     }
   } catch (error) {
     return res.status(400).json({ message: "Something went wrong" });
