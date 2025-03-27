@@ -255,11 +255,12 @@ const getRejectedWithdraws = async (req, res) => {
     const searchByStartDate = new Date(req.query.startDate).getTime() || "";
     const searchByEndDate = new Date(req.query.endDate).getTime() || "";
     const downloadCSV = req.query.csv || "";
+    const status = req.query.status || "";
 
     const matchStage = {
       $match: {
         $and: [
-          { status: "reject" },
+          { status },
           searchById ? { userId: searchById } : {},
           searchByStartDate && searchByEndDate
             ? {

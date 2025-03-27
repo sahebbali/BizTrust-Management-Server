@@ -108,8 +108,8 @@ const showSuccessDeposits = async (req, res) => {
     const startDate = new Date(req?.query?.startDate).toDateString();
     const endDate = new Date(req?.query?.endDate).toDateString();
     const downloadCSV = req.query.csv || "";
-
-    const queryFilter = { status: "success" };
+    const status = req.query.status || "";
+    const queryFilter = { status };
 
     if (searchById) {
       queryFilter.userId = searchById;
