@@ -23,6 +23,7 @@ const profitSharingIncome = require("./src/utils/profitSharingIncome");
 const rewardIncome = require("./src/utils/rewardIncome");
 const handleFristROI = require("./src/utils/handleFirstROI");
 const runPackageFirstROI = require("./src/utils/runPackageFirstROI");
+const handleROI = require("./src/utils/handleROI");
 
 const corsOptions = {
   origin: [
@@ -57,10 +58,11 @@ app.get("/", (req, res) => {
   return res.send("Hello BizTrust Management Production !");
 });
 app.get("/run", (req, res) => {
-  const datas = levelIncome("108569", 100000);
+  // const datas = levelIncome("108569", 100000);
   // const data = profitSharingIncome("108569", 4000);
   // const data = rewardIncome("745904");
   // const data = handleFristROI("745904");
+  const data = handleROI();
   return res.send("Hello Run !");
 });
 

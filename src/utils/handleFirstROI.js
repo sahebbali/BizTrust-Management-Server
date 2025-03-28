@@ -1,47 +1,58 @@
 const generateRandomString = require("../config/generateRandomId");
 const getIstTime = require("../config/getTime");
-const {
-  forbiddenDates,
-  roiCommissionPercentage,
-} = require("../constants/topup.constants");
 const { PackageRoi, PackageBuyInfo } = require("../models/topup.model");
-const Wallet = require("../models/wallet.model");
-const LastRoiData = require("../models/lastRoiData");
 const profitSharingIncome = require("./profitSharingIncome");
 const ManageROIHistory = require("../models/manageROI");
 const { UpdateWallet } = require("./checkPackageLimit");
 
 const handleFirstROI = async () => {
   try {
-    console.log("hello Run");
-    {
-      const today = new Date(getIstTime().date).toDateString();
-      const dateInt = new Date(getIstTime().date).getTime();
-      const manageROI = await ManageROIHistory.findOne({ date: today });
-      console.log({ manageROI });
-      console.log({ dateInt });
-      const commissionPercentage = manageROI?.percentage;
-      // const commissionPercentage = 2;
-      const existPackage = await PackageBuyInfo.find({
-        isActive: true,
-        isFirstROI: true,
-        startDateInt: { $lte: dateInt },
-      });
-      console.log({ existPackage });
-      for (package of existPackage) {
-        const packageAmount = package.packageAmount;
-        const commissionAmount = (packageAmount * commissionPercentage) / 100;
-        console.log({ commissionAmount });
-        await checkPackageLimit(
-          package,
-          commissionAmount,
-          commissionPercentage
-        );
-      }
-      console.log("Distribute ROI");
+    console.log("Starting ROI Distribution");
+
+    const currentISTTime = new Date(getIstTime().date);
+    const today = currentISTTime.toDateString();
+    const dateInt = currentISTTime.getTime();
+
+    // console.log({ dateInt });
+
+    const manageROi = await ManageROIHistory.findOne({ date: today });
+
+    if (!manageROi || manageROi.percentage <= 0) {
+      console.log("No valid commission percentage found, exiting.");
+      return;
     }
+
+    const commissionPercentage = manageROi.percentage;
+    console.log({ commissionPercentage });
+
+    const activePackages = await PackageBuyInfo.find({
+      isActive: true,
+      isFirstROI: true,
+      startDateInt: { $lte: dateInt },
+      isROIFree: false,
+      status: "success",
+    });
+    console.log({ activePackages });
+    console.log(`Total active packages: ${activePackages.length}`);
+
+    if (activePackages.length === 0) {
+      console.log("No eligible packages for ROI distribution.");
+      return;
+    }
+
+    await Promise.all(
+      activePackages.map(async (pkg) => {
+        const commissionAmount =
+          (pkg.packageAmount * commissionPercentage) / 100;
+        console.log({ packageId: pkg._id, commissionAmount });
+
+        await checkPackageLimit(pkg, commissionAmount, commissionPercentage);
+      })
+    );
+
+    console.log("ROI Distribution Completed Successfully.");
   } catch (error) {
-    console.log(error);
+    console.error("Error in handleROI:", error);
   }
 };
 
@@ -57,7 +68,7 @@ const checkPackageLimit = async (
     const extraAmount = totalAmount - package.packageLimit;
     const pendingAmount = package.packageLimit - package.totalReturnedAmount;
     await UpdateWallet(package.userId, pendingAmount, type);
-
+    await profitSharingIncome(package.userId, pendingAmount);
     await createROIHistory(
       package.userId,
       package.userFullName,
@@ -93,9 +104,9 @@ const checkPackageLimit = async (
           incomeDay: +1,
           totalReturnedAmount: +CommissionAmount,
         },
-        $set:{
-          isFirstROI: false
-        }
+        $set: {
+          isFirstROI: false,
+        },
       }
     );
 
@@ -124,7 +135,6 @@ const checkPackageLimit = async (
       );
     }
   }
- 
 };
 const createROIHistory = async (
   userId,
@@ -159,6 +169,5 @@ const createROIHistory = async (
     transactionId: generateRandomString(),
   });
 };
-
 
 module.exports = handleFirstROI;
