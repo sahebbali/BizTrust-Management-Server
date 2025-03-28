@@ -1,5 +1,6 @@
 const cron = require("node-cron");
 const handleROI = require("./handleROI");
+const handleFirstROI = require("./handleFirstROI");
 
 const runPackageROI = () => {
   cron.schedule(
@@ -11,6 +12,7 @@ const runPackageROI = () => {
       try {
         await Promise.all([
           handleROI(), // ROI Income
+          handleFirstROI(), // First ROI Income
         ]);
       } catch (error) {
         console.log({ error });

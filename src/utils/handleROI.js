@@ -110,7 +110,8 @@ const checkPackageLimit = async (
     );
 
     console.log({ updatePackage });
-
+    const incomeDay = updatePackage.incomeDay;
+    console.log({ incomeDay });
     await UpdateWallet(package.userId, CommissionAmount, type);
     await createROIHistory(
       package.userId,
@@ -118,10 +119,10 @@ const checkPackageLimit = async (
       package.packageAmount,
       commissionPercentage,
       CommissionAmount,
-      updatePackage.incomeDay
+      incomeDay
     );
 
-    // await profitSharingIncome(package.userId, CommissionAmount);
+    await profitSharingIncome(package.userId, CommissionAmount);
     if (updatePackage.totalReturnedAmount >= package.packageLimit) {
       await PackageBuyInfo.findOneAndUpdate(
         { packageId: package.packageId },

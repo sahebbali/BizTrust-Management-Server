@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-
+const mongoosePlugin = require("mongoose-paginate-v2");
 const rewardIncomeSchema = new mongoose.Schema(
   {
     userId: String,
@@ -8,7 +8,8 @@ const rewardIncomeSchema = new mongoose.Schema(
     sponsorName: String,
     rewardDesignation: String,
     rewardPosition: Number,
-    rewardAmount: String,
+    rewardAmount: Number,
+    rewardGift: String,
     line1: Number,
     line2: Number,
     line3: Number,
@@ -20,7 +21,7 @@ const rewardIncomeSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
-
+rewardIncomeSchema.plugin(mongoosePlugin);
 const RewardIncomeModel = mongoose.model("Reward-Income", rewardIncomeSchema);
 
 module.exports = RewardIncomeModel;

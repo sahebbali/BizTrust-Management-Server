@@ -1,5 +1,6 @@
 const LevelIncome = require("../../models/levelIncome.model");
 const { RankIncome } = require("../../models/rankIncome.model");
+const RewardIncomeModel = require("../../models/rewardIncome.model");
 const { PackageRoi } = require("../../models/topup.model");
 
 const getAllLevelIncomeController = async (req, res) => {
@@ -11,7 +12,6 @@ const getAllLevelIncomeController = async (req, res) => {
     const searchByEndDate = new Date(req.query.endDate).getTime() || "";
     const downloadCSV = req.query.csv || "";
     const type = req.query.type || "";
-
 
     const matchStage = {
       $match: {
@@ -264,7 +264,7 @@ const getRankIncomeController = async (req, res) => {
       },
     };
 
-    const histories = await RankIncome.aggregate([
+    const histories = await RewardIncomeModel.aggregate([
       {
         $addFields: {
           "rankDate.miliSec": { $toLong: { $toDate: "$date" } },
@@ -297,7 +297,9 @@ const getRankIncomeController = async (req, res) => {
       },
     ];
 
-    const totalHistories = await RankIncome.aggregate(totalHistoryPipleine);
+    const totalHistories = await RewardIncomeModel.aggregate(
+      totalHistoryPipleine
+    );
 
     const totalItems = totalHistories.length > 0 ? totalHistories[0].count : 0;
     const totalPages = Math.ceil(totalItems / limit);
@@ -320,7 +322,7 @@ const getRankIncomeController = async (req, res) => {
 
     // Download CSV
     if (downloadCSV === "csv") {
-      const result = await RankIncome.aggregate([
+      const result = await RewardIncomeModel.aggregate([
         {
           $addFields: {
             "rankDate.miliSec": { $toLong: { $toDate: "$date" } },
@@ -338,7 +340,7 @@ const getRankIncomeController = async (req, res) => {
 
     if (totalHistories.length > 0) {
       return res.status(200).json({
-        message: "Retrieved the rank Income History",
+        message: "Retrieved the Reward Income History",
         data: response,
       });
     } else {

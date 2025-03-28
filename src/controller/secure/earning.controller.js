@@ -1,6 +1,7 @@
 const getDatesInRange = require("../../config/getDatesInRange");
 const LevelIncome = require("../../models/levelIncome.model");
 const { RankIncome } = require("../../models/rankIncome.model");
+const RewardIncomeModel = require("../../models/rewardIncome.model");
 const { PackageRoi } = require("../../models/topup.model");
 
 const getLevelIncome = async (req, res) => {
@@ -147,7 +148,7 @@ const getRankIncome = async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
 
-    const queryFilter = { userId: req.auth.id, rewardAmount: { $gt: 0 } };
+    const queryFilter = { userId: req.auth.id };
 
     const options = {
       page: page,
@@ -156,7 +157,7 @@ const getRankIncome = async (req, res) => {
       select: "-bonusAmount",
     };
 
-    const rankHistory = await RankIncome.paginate(queryFilter, options);
+    const rankHistory = await RewardIncomeModel.paginate(queryFilter, options);
 
     if (rankHistory?.docs?.length > 0) {
       return res.status(200).json({ data: rankHistory });
@@ -164,6 +165,7 @@ const getRankIncome = async (req, res) => {
       return res.status(400).json({ message: "There is no Rank history" });
     }
   } catch (error) {
+    console.log({ error });
     return res.status(400).json({ message: "Something went wrong" });
   }
 };

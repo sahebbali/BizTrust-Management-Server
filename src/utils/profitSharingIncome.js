@@ -7,9 +7,10 @@ const {
   ProfitSharingCommissionPerCentage,
 } = require("../constants/topup.constants");
 const { checkPackageLimit } = require("./checkPackageLimit");
+const ManageLevelIncome = require("../models/manageLevelIncome");
 
 const profitSharingIncome = async (userId, roiPerDayCommissionAmount) => {
-  console.log("Level Income Calculation Started");
+  console.log("Profit Sharing Income Calculation Started");
 
   try {
     // Fetch user levels

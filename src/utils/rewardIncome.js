@@ -3,6 +3,8 @@ const RewardIncomeModel = require("../models/rewardIncome.model");
 const CalculateLinePackageAmount = require("./CalculateLinePackageAmount");
 const User = require("../models/auth.model");
 const getPSTime = require("../config/getPSTime");
+const { UpdateWallet } = require("./checkPackageLimit");
+const generateRandomString = require("../config/generateRandomId");
 
 const CreateRewardHistory = async (
   userId,
@@ -23,7 +25,7 @@ const CreateRewardHistory = async (
     return;
   }
 
-  console.log("Current User:", currentUser);
+  // console.log("Current User:", currentUser);
 
   const existReward = await RewardIncomeModel.findOne({
     userId,
@@ -43,7 +45,8 @@ const CreateRewardHistory = async (
     sponsorName: currentUser.sponsorName,
     rewardDesignation: designation,
     rewardPosition: position,
-    rewardAmount: amount,
+    rewardAmount: typeof amount === "number" ? amount : 0,
+    rewardGift: typeof amount === "string" ? amount : "",
     line1,
     line2,
     line3,
@@ -51,7 +54,16 @@ const CreateRewardHistory = async (
     line5,
     date: new Date(date).toDateString(),
     time,
+    transactionId: generateRandomString(13),
   });
+  await User.findOneAndUpdate(
+    { userId: currentUser.userId },
+    { $set: { openLevel: 5 } },
+    { new: true }
+  );
+  if (typeof amount === "number") {
+    await UpdateWallet(currentUser.userId, amount, "reward-income");
+  }
 };
 
 const rewardIncome = async (userId) => {
@@ -80,7 +92,7 @@ const rewardIncome = async (userId) => {
     const line3 = allLine[2].totalInvestmentAmount;
     const line4 = allLine[3].totalInvestmentAmount;
     const line5 = allLine[4].totalInvestmentAmount;
-    // console.log({ line1, line2, line3, line4, line5 });
+    console.log({ line1, line2, line3, line4, line5 });
     // await CreateRewardHistory(
     //   userId,
     //   "Relationship Manager",
