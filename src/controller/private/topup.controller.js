@@ -5,6 +5,7 @@ const User = require("../../models/auth.model");
 const { PackageBuyInfo } = require("../../models/topup.model");
 const Wallet = require("../../models/wallet.model");
 const levelIncome = require("../../utils/levelIncome");
+const rewardIncome = require("../../utils/rewardIncome");
 const {
   processPackageAction,
   processAdminPackageAction,
@@ -207,6 +208,7 @@ const createTopupController = async (req, res) => {
       createPackage?.packageAmount
     );
     await levelIncome(createPackage.userId, createPackage.packageAmount);
+    await rewardIncome(createPackage?.sponsorId);
     if (createPackage) {
       return res.status(201).json({ message: "Package Create Successfully" });
     }
@@ -281,6 +283,7 @@ const updateTopUpStatus = async (req, res) => {
         extPackageBuyInfo?.packageAmount
       );
       await levelIncome(updatePackage.userId, updatePackage.packageAmount);
+      await rewardIncome(updatePackage?.sponsorId);
 
       return res
         .status(201)

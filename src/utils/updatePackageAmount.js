@@ -1,4 +1,5 @@
 const User = require("../models/auth.model");
+const Wallet = require("../models/wallet.model");
 
 const updatePackageAmount = async (userId, amount) => {
   try {
@@ -16,6 +17,11 @@ const updatePackageAmount = async (userId, amount) => {
     const updatedUser = await User.findOneAndUpdate(
       { userId },
       { $set: { packageAmount: totalPackageAmount, openLevel } },
+      { new: true }
+    );
+    await Wallet.findOneAndUpdate(
+      { userId },
+      { $inc: { investmentAmount: +amount } },
       { new: true }
     );
 
