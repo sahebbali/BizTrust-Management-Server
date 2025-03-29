@@ -18,6 +18,7 @@ const { getIstTimeWithInternet } = require("../../config/internetTime");
 const getIstTime = require("../../config/getTime");
 const { checkDate } = require("../../utils/rankIncome");
 const Kyc = require("../../models/KYCSchema");
+const CalculateLinePackageAmount = require("../../utils/CalculateLinePackageAmount");
 
 const findThisMonthTotalTeamBusiness = async (req, res) => {
   try {
@@ -755,7 +756,7 @@ const getTeamStatistics = async (req, res) => {
     const findLevel = await Level.findOne({ userId: userId });
 
     let allTeamBusinessAmount = 0;
-    for (let i = 1; i <= 7; i++) {
+    for (let i = 1; i <= 5; i++) {
       const levels = findLevel?.level?.filter((d) => d.level === `${i}`) || [];
       const totalTeam = +levels?.length; // total Team
 
@@ -818,6 +819,18 @@ const getTeamStatistics = async (req, res) => {
       levelInfo.push(data);
     }
 
+    const distributorLvl =
+      findLevel.level?.filter((d) => d.level === "1") || [];
+    console.log("Filtered Level 1 Users:", distributorLvl);
+
+    let allLine = await Promise.all(
+      distributorLvl.map(async (user) =>
+        CalculateLinePackageAmount(user.userId)
+      )
+    );
+
+    allLine.sort((a, b) => b.totalInvestmentAmount - a.totalInvestmentAmount);
+    console.log("Calculated Line Packages (Sorted):", allLine);
     const walletInfo = await Wallet.findOne({ userId });
 
     const withdrawalInfo = await Withdraw.aggregate([
@@ -885,40 +898,6 @@ const getTeamStatistics = async (req, res) => {
     const user = await User.findOne({ userId: userId });
     const rankIncomeCurrentDate = user?.rankIncomeCurrentDateString;
 
-    const checkNext30Days = new Date(rankIncomeCurrentDate);
-    checkNext30Days.setDate(checkNext30Days.getDate() + 29);
-    const next30Days = checkNext30Days.getTime();
-
-    const dates = getDatesInRange(
-      new Date(user?.rankIncomeCurrentDateString).toDateString(),
-      new Date(next30Days).toDateString()
-    );
-
-    let thisMonthTotalTeamBusiness = 0;
-
-    for (const lu of levelUsers[0]?.userIds) {
-      const packageBuyInfos = await PackageBuyInfo.find({
-        userId: lu.userId,
-      });
-      let withoutWithdrawAmountForAll = 0;
-      let withdrawAmountForAll = 0;
-
-      for (const p of packageBuyInfos) {
-        const isDateValid = dates.includes(p?.packageInfo?.date);
-
-        if (isDateValid) {
-          if (p?.packageType === "Withdraw IA") {
-            withdrawAmountForAll += p?.packageInfo?.amount;
-          } else {
-            withoutWithdrawAmountForAll += p?.upgradedAmount;
-          }
-        }
-      }
-
-      thisMonthTotalTeamBusiness +=
-        withoutWithdrawAmountForAll - withdrawAmountForAll;
-    }
-
     const info = {
       fullName: userInfo.fullName,
       rank: userInfo.rank,
@@ -931,10 +910,14 @@ const getTeamStatistics = async (req, res) => {
       roiIncome: walletInfo.roiIncome,
       levelIncome: walletInfo.levelIncome,
       rankIncome: walletInfo.rankIncome,
+      rewardIncome: walletInfo.rewardIncome,
+      depositBalance: walletInfo.depositBalance,
+      profitSharingIncome: walletInfo.profitSharingIncome,
+      eWallet: walletInfo.eWallet,
+      profitWallet: walletInfo.profitWallet,
       bonusIncome: walletInfo.rankBonusIncome,
       totalWithdraw: withdrawalInfo[0]?.totalWithdraw || 0,
-      allTeamBusinessAmount,
-      thisMonthTeamBusiness: thisMonthTotalTeamBusiness || 0,
+      allLine,
     };
 
     if (info) {
