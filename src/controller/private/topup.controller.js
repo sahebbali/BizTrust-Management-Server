@@ -170,9 +170,6 @@ const createTopupController = async (req, res) => {
       new Date().toLocaleString("en-US", { timeZone: "Asia/Karachi" })
     );
 
-    // Add 48 hours to the start date
-    startDate.setTime(startDate.getTime() + 48 * 60 * 60 * 1000); // 48 hours in milliseconds
-
     console.log(startDate);
     // Add 48 hours to the start date
     startDate.setTime(startDate.getTime() + 48 * 60 * 60 * 1000); // 48 hours in milliseconds

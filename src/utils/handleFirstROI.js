@@ -7,7 +7,7 @@ const { UpdateWallet } = require("./checkPackageLimit");
 
 const handleFirstROI = async () => {
   try {
-    console.log("Starting ROI Distribution");
+    console.log("Starting First ROI Distribution");
 
     const currentISTTime = new Date(getIstTime().date);
     const today = currentISTTime.toDateString();

@@ -1,11 +1,9 @@
 const cron = require("node-cron");
-const handleROI = require("./handleROI");
 const handleFirstROI = require("./handleFirstROI");
 
 const runPackageFirstROI = () => {
   cron.schedule(
     "*/5 * * * *", // Every 05 mins
-
     async () => {
       try {
         await Promise.all([
