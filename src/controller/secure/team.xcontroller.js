@@ -1,6 +1,7 @@
 const User = require("../../models/auth.model");
 const Level = require("../../models/level.model");
 const { PackageBuyInfo } = require("../../models/topup.model");
+const Wallet = require("../../models/wallet.model");
 
 // get level team
 const getLevelTeam = async (req, res) => {
@@ -298,88 +299,65 @@ const getDirectLevelTeam = async (req, res) => {
 //   }
 // };
 
+const CalculateLinePackageAmount = async (userId) => {
+  try {
+    // Find the document for the specified userId
+    const levels = await Level.findOne({ userId }); // Assuming one document per userId
+
+    const distributorLvl = levels?.level?.filter((d) => d?.userId);
+
+    const userIds = distributorLvl?.map((d) => d.userId) || [];
+    userIds.push(userId);
+    console.log("User Id Array: ", userIds);
+    const [investmentData] = await Wallet.aggregate([
+      {
+        $match: {
+          userId: { $in: userIds }, // Filter by userIds
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          totalInvestmentAmount: { $sum: "$investmentAmount" }, // Sum of investment amounts
+          userCount: { $sum: 1 }, // Count the number of users
+        },
+      },
+    ]);
+
+    // Prepare result
+    const result = {
+      totalInvestmentAmount: investmentData?.totalInvestmentAmount || 0,
+      userCount: investmentData?.userCount || 0,
+      rootLine: userId,
+    };
+
+    console.log("Result: ", result);
+    return result; // Return the result
+  } catch (error) {
+    console.log("Level Error", error);
+    throw error; // Re-throw the error to handle it at a higher level
+  }
+};
 const getLevelBusiness = async (req, res) => {
   try {
-    const levelInfo = [];
-    const findLevel = await Level.findOne({ userId: req.auth.id });
-    let finalTotalTeam = 0;
-    let finalActiveTeam = 0;
-    let finalTotalBusiness = 0;
-    for (let i = 1; i <= 7; i++) {
-      const levels = findLevel?.level?.filter((d) => d.level === `${i}`) || [];
-      const totalTeam = +levels?.length; // total Team
+    const userId = req.auth.id;
+    const findLevel = await Level.findOne({ userId: userId });
+    const distributorLvl =
+      findLevel.level?.filter((d) => d.level === "1") || [];
+    console.log("Filtered Level 1 Users:", distributorLvl);
 
-      // Get total business of level [i]
-      let totalBusinessAmount = 0;
-      let activeTeamCount = 0;
-      for (const singleLevel of levels) {
-        const activeUser = await User.countDocuments({
-          userId: singleLevel?.userId,
-          isActive: true,
-        });
-        if (activeUser) {
-          const latestPackageAmount = await PackageBuyInfo.aggregate([
-            {
-              $match: {
-                userId: singleLevel?.userId,
-              },
-            },
-            {
-              $sort: { createdAt: -1 }, // Sort by createdAt in descending order
-            },
-            {
-              $limit: 1, // Limit to the first result (latest)
-            },
-            {
-              $group: {
-                _id: "$userId",
-                totalAmount: { $last: "$packageInfo.amount" }, // Get the amount from the last document in each user group
-              },
-            },
-            {
-              $group: {
-                _id: null,
-                totalAmount: { $sum: "$totalAmount" },
-              },
-            },
-          ]);
+    let allLine = await Promise.all(
+      distributorLvl.map(async (user) =>
+        CalculateLinePackageAmount(user.userId)
+      )
+    );
 
-          activeTeamCount += await User.countDocuments({
-            userId: singleLevel?.userId,
-            isActive: true,
-          });
-
-          if (
-            latestPackageAmount.length > 0 &&
-            latestPackageAmount[0].totalAmount !== undefined
-          ) {
-            totalBusinessAmount += latestPackageAmount[0].totalAmount;
-          }
-        }
-      }
-
-      finalTotalTeam += totalTeam;
-      finalActiveTeam += activeTeamCount;
-      finalTotalBusiness += totalBusinessAmount;
-      const data = {
-        level: i,
-        totalTeam: totalTeam,
-        totalBusinessAmount: totalBusinessAmount,
-        activeTeamCount,
-      };
-      levelInfo.push(data);
-    }
-    levelInfo.push({
-      level: "Total",
-      totalTeam: finalTotalTeam,
-      activeTeamCount: finalActiveTeam,
-      totalBusinessAmount: finalTotalBusiness,
-    });
-
-    if (levelInfo?.length > 0) {
-      return res.status(200).json({ data: levelInfo });
+    allLine.sort((a, b) => b.totalInvestmentAmount - a.totalInvestmentAmount);
+    console.log("Calculated Line Packages (Sorted):", allLine);
+    if (allLine?.length > 0) {
+      return res.status(200).json({ data: allLine });
     } else {
-      return res.status(400).json({ message: "There is no history" });
+      return res.status(400).json({ message: "There is no Line" });
     }
   } catch (error) {
     return res.status(500).json({ message: "Something went wrong" });
