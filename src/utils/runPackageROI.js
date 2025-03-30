@@ -12,7 +12,7 @@ const runPackageROI = () => {
       try {
         await Promise.all([
           handleROI(), // ROI Income
-          handleFirstROI(), // First ROI Income
+          // handleFirstROI(), // First ROI Income
         ]);
       } catch (error) {
         console.log({ error });
