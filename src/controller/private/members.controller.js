@@ -1,5 +1,4 @@
 const getDatesInRange = require("../../config/getDatesInRange");
-const ThisMonthTeamBusinessIncome = require("../../models/ThisMonthTeamBusiness");
 const User = require("../../models/auth.model");
 const Level = require("../../models/level.model");
 const Pin = require("../../models/pin.model");
