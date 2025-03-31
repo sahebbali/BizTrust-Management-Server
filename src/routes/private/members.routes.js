@@ -11,7 +11,6 @@ const {
   getTeamStatistics,
   getTeamStatsDetails,
   getAllPin,
-  getTeamBusinessHistory,
   getUpgradeTeamStatsDetails,
   getAddressHistoryByAdmin,
   createOtpForEditUserByAdminController,
@@ -50,7 +49,7 @@ router.delete("/user/delete_reward_image", deleteRewardImage);
 router.post("/user/get_team_stats", getTeamStatistics);
 router.get("/user/get_team_stats_details", getTeamStatsDetails);
 router.get("/user/get_upgrade_team_stats_details", getUpgradeTeamStatsDetails);
-router.get("/user/getTeamBusinessHistory", getTeamBusinessHistory);
+
 router.get("/user/get_all_pin", getAllPin);
 router.get("/getAllKYCAdmin", getAllKYCController);
 router.patch("/updateKycAdmin", updateKycController);

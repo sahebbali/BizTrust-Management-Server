@@ -4,14 +4,10 @@ const User = require("../../models/auth.model");
 const Level = require("../../models/level.model");
 const Pin = require("../../models/pin.model");
 const { RankIncome } = require("../../models/rankIncome.model");
-const {
-  ThisMonthTeamBusinessHistory,
-} = require("../../models/thisMonthTeamBusinessHistory");
 const { PackageBuyInfo } = require("../../models/topup.model");
 const Wallet = require("../../models/wallet.model");
 const WalletAddress = require("../../models/walletAddress.model");
 const Withdraw = require("../../models/withdraw.model");
-const { ThisMonthTeamBusiness } = require("../../utils/thisMonthTeamBusniess");
 const Otp = require("../../models/otp.model");
 const sendOtpMail = require("../../config/sendOtpMail");
 const { getIstTimeWithInternet } = require("../../config/internetTime");
@@ -1328,50 +1324,6 @@ const getUpgradeTeamStatsDetails = async (req, res) => {
   }
 };
 
-const getTeamBusinessHistory = async (req, res) => {
-  try {
-    const userId = req.query.userId;
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const searchById = req.query.searchById || null;
-    const startDate = new Date(req?.query?.startDate).toDateString();
-    const endDate = new Date(req?.query?.endDate).toDateString();
-    const downloadCSV = req.query.csv || "";
-
-    const queryFilter = { parentUserId: userId };
-
-    if (searchById) {
-      queryFilter.userId = searchById;
-    }
-
-    if (!startDate.includes("Invalid") && !endDate.includes("Invalid")) {
-      queryFilter.date = {
-        $in: getDatesInRange(startDate, endDate),
-      };
-    }
-
-    const options = {
-      page: page,
-      limit: limit,
-      sort: { createdAt: -1 },
-    };
-
-    const getTeamBusiness = await ThisMonthTeamBusinessHistory.paginate(
-      queryFilter,
-      options
-    );
-
-    if (downloadCSV) {
-      const csvData = await ThisMonthTeamBusinessHistory.find(queryFilter);
-      return res.status(200).json({ csv: csvData, data: getTeamBusiness });
-    }
-
-    return res.status(200).json({ data: getTeamBusiness });
-  } catch (error) {
-    return res.status(500).json({ message: "Something went wrong" });
-  }
-};
-
 const getAllPin = async (req, res) => {
   try {
     const page = parseInt(req?.query?.page) || 1;
@@ -1527,7 +1479,6 @@ module.exports = {
   deleteUser,
   getTeamStatistics,
   getTeamStatsDetails,
-  getTeamBusinessHistory,
   getAllPin,
   getAllKYCController,
   updateKycController,
