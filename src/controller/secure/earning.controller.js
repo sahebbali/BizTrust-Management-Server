@@ -58,6 +58,10 @@ const getLevelIncome = async (req, res) => {
     ]);
 
     const incomes = await LevelIncome.paginate(queryFilter, options);
+    if (downloadCSV) {
+      const csvData = await Deposit.find(queryFilter);
+      return res.status(200).json({ csv: csvData });
+    }
 
     if (totalLevelIncome) {
       incomes.totalLevelIncome = totalLevelIncome.totalLevelIncome;
