@@ -157,25 +157,8 @@ const findThisMonthTotalTeamBusiness = async (req, res) => {
       businesses: filteredData.sort(
         (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
       ),
-      // .slice(skip, endIndex),
     };
 
-    // const totalPages = Math.ceil(filteredData.length / limit);
-    // const hasNextPage = page < totalPages;
-    // const nextPage = hasNextPage ? page + 1 : null;
-    // const response = {
-    //   totalDocs: filteredData.length,
-    //   limit: limit,
-    //   totalPages: totalPages,
-    //   totalAmount: thisMonthTotalTeamBusiness,
-    //   page: page,
-    //   pagingCounter: page,
-    //   hasPrevPage: page > 1,
-    //   hasNextPage: hasNextPage,
-    //   prevPage: page > 1 ? page - 1 : null,
-    //   nextPage: nextPage,
-    //   docs: filteredData,
-    // };
     return res.status(200).json({ data: data });
   } catch (error) {
     console.log(error);
