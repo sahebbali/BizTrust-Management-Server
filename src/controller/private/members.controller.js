@@ -1448,6 +1448,58 @@ const updateKycController = async (req, res) => {
       .json({ message: "Something went wrong", data: null });
   }
 };
+
+const updateUserWalletInfo = async (req, res) => {
+  try {
+    const { bankName, accountTitle, accountNumber, branchName, userId } =
+      req.body;
+
+    console.log(req.body);
+    // Validate request data
+    if (!bankName) {
+      return res.status(400).json({ message: "Bank Name is missing" });
+    }
+
+    if (!accountTitle) {
+      return res.status(400).json({ message: "Account Title is missing" });
+    }
+
+    if (!accountNumber) {
+      return res
+        .status(400)
+        .json({ message: "Account Number IBAN is Missing" });
+    }
+
+    if (!branchName) {
+      return res.status(400).json({ message: "Branch Name is missing" });
+    }
+
+    // Find the user
+    const user = await User.findOne({ userId });
+
+    // Update or create the Pin record
+    const walletData = {
+      userId,
+      fullName: user.fullName,
+      bankName,
+      accountTitle,
+      accountNoIBAN: accountNumber,
+      branchCode: branchName,
+    };
+
+    const userPin = await WalletAddress.findOneAndUpdate(
+      { userId },
+      { $set: walletData },
+      { upsert: true }
+    );
+
+    return res.status(200).json({ message: "Wallet Update successfully" });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
 module.exports = {
   findThisMonthTotalTeamBusiness,
   createOtpForEditUserByAdminController,
@@ -1464,4 +1516,5 @@ module.exports = {
   getAllPin,
   getAllKYCController,
   updateKycController,
+  updateUserWalletInfo,
 };
