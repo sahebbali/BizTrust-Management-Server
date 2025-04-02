@@ -1451,7 +1451,7 @@ const updateKycController = async (req, res) => {
 
 const updateUserWalletInfo = async (req, res) => {
   try {
-    const { bankName, accountTitle, accountNumber, branchName, userId } =
+    const { bankName, accountTitle, accountNoIBAN, branchCode, userId } =
       req.body;
 
     console.log(req.body);
@@ -1464,14 +1464,14 @@ const updateUserWalletInfo = async (req, res) => {
       return res.status(400).json({ message: "Account Title is missing" });
     }
 
-    if (!accountNumber) {
+    if (!accountNoIBAN) {
       return res
         .status(400)
         .json({ message: "Account Number IBAN is Missing" });
     }
 
-    if (!branchName) {
-      return res.status(400).json({ message: "Branch Name is missing" });
+    if (!branchCode) {
+      return res.status(400).json({ message: "Branch code is missing" });
     }
 
     // Find the user
@@ -1483,8 +1483,8 @@ const updateUserWalletInfo = async (req, res) => {
       fullName: user.fullName,
       bankName,
       accountTitle,
-      accountNoIBAN: accountNumber,
-      branchCode: branchName,
+      accountNoIBAN: accountNoIBAN,
+      branchCode: branchCode,
     };
 
     const userPin = await WalletAddress.findOneAndUpdate(
