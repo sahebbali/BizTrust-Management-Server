@@ -96,6 +96,7 @@ const getRoiIncome = async (req, res) => {
         $group: {
           _id: null,
           count: { $sum: 1 },
+          totalAmount: { $sum: "$commissionAmount" },
         },
       },
     ];
@@ -109,6 +110,7 @@ const getRoiIncome = async (req, res) => {
 
     const response = {
       totalDocs: totalItems,
+      totalAmount: totalHistories[0].totalAmount || 0,
       limit: limit,
       totalPages: totalPages,
       page: page,
@@ -156,30 +158,58 @@ const getRoiIncome = async (req, res) => {
 // Get Rank income
 const getRankIncome = async (req, res) => {
   try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
+    const { page = 1, limit = 10, csv: downloadCSV } = req.query;
+    const userId = req.auth.id;
 
-    const queryFilter = { userId: req.auth.id };
-
+    const queryFilter = { userId };
     const options = {
-      page: page,
-      limit: limit,
-      sort: { createdAt: -1 }, // Sorting by _id in descending order
-      select: "-bonusAmount",
+      page: parseInt(page),
+      limit: parseInt(limit),
+      sort: { createdAt: -1 },
     };
 
-    const rankHistory = await RewardIncomeModel.paginate(queryFilter, options);
+    const totalHistoryPipeline = [
+      { $match: { userId } },
+      {
+        $group: {
+          _id: null,
+          totalAmount: { $sum: "$rewardAmount" },
+        },
+      },
+    ];
 
-    if (rankHistory?.docs?.length > 0) {
-      return res.status(200).json({ data: rankHistory });
-    } else {
-      return res.status(400).json({ message: "There is no Rank history" });
+    const csvPipeline = [
+      { $match: { userId } },
+      { $project: { __v: 0, _id: 0, createdAt: 0, updatedAt: 0 } },
+    ];
+
+    // Run queries in parallel
+    const [totalHistories, rankHistory, csvData] = await Promise.all([
+      RewardIncomeModel.aggregate(totalHistoryPipeline),
+      RewardIncomeModel.paginate(queryFilter, options),
+      downloadCSV === "csv"
+        ? RewardIncomeModel.aggregate(csvPipeline)
+        : Promise.resolve(null),
+    ]);
+
+    // If CSV is requested, return it
+    if (csvData) {
+      return res.status(200).json({ csv: csvData, data: rankHistory });
     }
+
+    // If no history is found
+    if (!rankHistory?.docs?.length) {
+      return res.status(404).json({ message: "No rank history found" });
+    }
+    const totalAmount = totalHistories[0]?.totalAmount || 0;
+
+    return res.status(200).json({ data: rankHistory, totalAmount });
   } catch (error) {
-    console.log({ error });
-    return res.status(400).json({ message: "Something went wrong" });
+    console.error("Error in getRankIncome:", error);
+    return res.status(500).json({ message: "Internal server error" });
   }
 };
+
 const getBonusIncome = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
@@ -275,22 +305,10 @@ const getProfitSharingIncome = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
-    const searchById = req.query.searchById || null;
-    const startDate = new Date(req?.query?.startDate).toDateString();
-    const endDate = new Date(req?.query?.endDate).toDateString();
+
     const downloadCSV = req.query.csv || "";
 
     const queryFilter = { userId: req.auth.id, type: "profit-sharing" };
-
-    if (searchById) {
-      queryFilter.$or = [{ incomeFrom: { $regex: searchById, $options: "i" } }];
-    }
-
-    if (!startDate.includes("Invalid") && !endDate.includes("Invalid")) {
-      queryFilter.date = {
-        $in: getDatesInRange(startDate, endDate),
-      };
-    }
 
     const options = {
       page: page,
@@ -335,7 +353,9 @@ const getProfitSharingIncome = async (req, res) => {
     }
 
     if (downloadCSV) {
-      const csvData = await LevelIncome.find(queryFilter);
+      const csvData = await LevelIncome.find(queryFilter).select(
+        "-_id -type -transactionID -createdAt -updatedAt -__v"
+      );
       return res.status(200).json({ csv: csvData, data: incomes });
     }
 
