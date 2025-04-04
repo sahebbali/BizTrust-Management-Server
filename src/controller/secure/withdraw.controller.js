@@ -183,7 +183,7 @@ const withdrawHistory = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
-
+    const downloadCSV = req.query.csv || "";
     const queryFilter = { userId: req.auth.id };
 
     const options = {
@@ -193,6 +193,12 @@ const withdrawHistory = async (req, res) => {
     };
 
     const withdrawInfo = await Withdraw.paginate(queryFilter, options);
+    if (downloadCSV) {
+      const csvData = await Withdraw.find(queryFilter).select(
+        "-_id  -transactionID -createdAt -updatedAt -__v"
+      );
+      return res.status(200).json({ csv: csvData, data: withdrawInfo });
+    }
 
     if (withdrawInfo?.docs?.length > 0) {
       return res.status(200).json({ data: withdrawInfo });

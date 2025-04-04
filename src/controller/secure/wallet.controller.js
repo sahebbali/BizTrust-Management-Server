@@ -87,6 +87,7 @@ const depositeHistory = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
+    const downloadCSV = req.query.csv || "";
 
     const queryFilter = { userId: req.auth.id };
 
@@ -97,6 +98,13 @@ const depositeHistory = async (req, res) => {
     };
 
     const deposits = await Deposit.paginate(queryFilter, options);
+    if (downloadCSV) {
+      const csvData = await Deposit.find(queryFilter).select(
+        "-_id  -transactionID -hash -createdAt -updatedAt -__v -proofPic"
+      );
+      return res.status(200).json({ csv: csvData, data: deposits });
+    }
+
     return res.status(200).json({ data: deposits });
   } catch (error) {
     return res.status(500).json({

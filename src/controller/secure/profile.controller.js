@@ -668,7 +668,7 @@ const createKyc = async (req, res) => {
       status: { $in: ["succeed"] },
       kyc_method: { $in: ["Driving License", "Voter ID"] },
     });
-    if (existingKycAddress && data.kyc_method === "Address Proof") {
+    if (existingKycAddress && kycData.kyc_method === "Address Proof") {
       return res.status(400).json({
         message: "Already Address Proof KYC Success",
       });
