@@ -8,22 +8,10 @@ const getLevelIncome = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
-    const searchById = req.query.searchById || null;
-    const startDate = new Date(req?.query?.startDate).toDateString();
-    const endDate = new Date(req?.query?.endDate).toDateString();
+
     const downloadCSV = req.query.csv || "";
 
     const queryFilter = { userId: req.auth.id, type: "level-income" };
-
-    if (searchById) {
-      queryFilter.$or = [{ incomeFrom: { $regex: searchById, $options: "i" } }];
-    }
-
-    if (!startDate.includes("Invalid") && !endDate.includes("Invalid")) {
-      queryFilter.date = {
-        $in: getDatesInRange(startDate, endDate),
-      };
-    }
 
     const options = {
       page: page,
@@ -59,8 +47,10 @@ const getLevelIncome = async (req, res) => {
 
     const incomes = await LevelIncome.paginate(queryFilter, options);
     if (downloadCSV) {
-      const csvData = await Deposit.find(queryFilter);
-      return res.status(200).json({ csv: csvData });
+      const csvData = await LevelIncome.find(queryFilter).select(
+        "-_id -type -transactionID -createdAt -updatedAt -__v"
+      );
+      return res.status(200).json({ csv: csvData, data: incomes });
     }
 
     if (totalLevelIncome) {
@@ -71,13 +61,9 @@ const getLevelIncome = async (req, res) => {
         dynamicTotalLevelIncome.dynamicTotalLevelIncome;
     }
 
-    if (downloadCSV) {
-      const csvData = await LevelIncome.find(queryFilter);
-      return res.status(200).json({ csv: csvData, data: incomes });
-    }
-
     return res.status(200).json({ data: incomes });
   } catch (error) {
+    console.log(error);
     return res.status(400).json({ message: "Something went wrong" });
   }
 };
@@ -86,6 +72,7 @@ const getRoiIncome = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
+    const downloadCSV = req.query.csv || "";
 
     const histories = await PackageRoi.aggregate([
       {
@@ -132,7 +119,27 @@ const getRoiIncome = async (req, res) => {
       nextPage: nextPage,
       data: histories,
     };
-
+    // Download CSV
+    if (downloadCSV === "csv") {
+      const result = await PackageRoi.aggregate([
+        {
+          $match: {
+            userId: req.auth.id,
+          },
+        },
+        {
+          $project: {
+            __v: 0,
+            _id: 0,
+            incomeDateInt: 0,
+            transactionId: 0,
+            createdAt: 0,
+            updatedAt: 0,
+          },
+        },
+      ]);
+      return res.status(200).json({ csv: result, data: response });
+    }
     if (totalHistories.length > 0) {
       return res.status(200).json({
         message: "Retrieved the ROI income history",
