@@ -7,7 +7,7 @@ const { getIstTimeWithInternet } = require("../../config/internetTime");
 
 // create contact us mesasge
 const createContactUs = async (req, res) => {
-  const ISTTime = await getIstTimeWithInternet();
+  const ISTTime = await getIstTime();
   const error = validationResult(req).formatWith(ValidationErrorMsg);
   if (!error.isEmpty()) {
     let msg;
@@ -50,7 +50,7 @@ const createContactUs = async (req, res) => {
 
     // find user
     const user = await User.findOne({ userId: user_id });
-    console.log({ user });
+    // console.log({ user });
     if (user && user_id === userId) {
       // already have Contact collection or not
       const existingContact = await Contact.findOne({ userId: user_id });
