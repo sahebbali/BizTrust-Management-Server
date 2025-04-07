@@ -164,101 +164,101 @@ const registerController = async (req, res) => {
     const otp = await Otp.findOne({ email: email });
 
     if (!userExists) {
-      if (otpCode && parseInt(otp?.code) === parseInt(otpCode)) {
-        let generatedUserId;
-        let isUserIdUnique = false;
-        while (!isUserIdUnique) {
-          generatedUserId = generateUniqueUserID();
-          const isUserExists = await User.findOne({ userId: generatedUserId });
-          if (!isUserExists) {
-            isUserIdUnique = true;
-          }
+      // if (otpCode && parseInt(otp?.code) === parseInt(otpCode)) {
+      let generatedUserId;
+      let isUserIdUnique = false;
+      while (!isUserIdUnique) {
+        generatedUserId = generateUniqueUserID();
+        const isUserExists = await User.findOne({ userId: generatedUserId });
+        if (!isUserExists) {
+          isUserIdUnique = true;
         }
-
-        const user = await User.create({
-          fullName: fullName,
-          userId: generatedUserId,
-          email: email,
-          password: password,
-          passwords: password,
-          mobile: mobile,
-          sponsorId: sponsorId,
-          sponsorName: sponsorName,
-          token: generateToken(generatedUserId),
-          userStatus: true,
-          isActive: false,
-          joiningDate: new Date(
-            ISTTime?.date ? ISTTime?.date : getIstTime().date
-          ).toDateString(),
-          rankIncomeCurrentDate: new Date(
-            ISTTime?.date ? ISTTime?.date : getIstTime().date
-          ).getTime(),
-          rankIncomeCurrentDateString: new Date(
-            ISTTime?.date ? ISTTime?.date : getIstTime().date
-          ).toDateString(),
-        });
-        if (user) {
-          // delete Otp
-          if (otpCode) {
-            await Otp.deleteOne({ email: user.email });
-          }
-
-          // create wallet
-          await Wallet.create({
-            userId: user.userId,
-            fullName: user.fullName,
-            sponsorId: user.sponsorId,
-            sponsorName: user.sponsorName,
-            roiIncome: 0,
-            rewardIncome: 0,
-            rankIncome: 0,
-            levelIncome: 0,
-            directIncome: 0,
-            indirectIncome: 0,
-            depositBalance: 0,
-            totalIncome: 0,
-
-            investmentAmount: 0,
-            activeIncome: 0,
-          });
-
-          // create level new for user
-          await Level.create({
-            fullName: user.fullName,
-            userId: user.userId,
-            email: user.email,
-            sponsorId: user.sponsorId,
-            level: [],
-          });
-
-          let currentSponsor = user;
-          for (let i = 1; i <= 5; i++) {
-            const levelUser = await Level.findOne({
-              userId: currentSponsor.sponsorId,
-            });
-
-            if (levelUser) {
-              await updateLevel(levelUser, user, i);
-              currentSponsor = levelUser;
-            } else {
-              break;
-            }
-          }
-          // send successfull email
-          sendConfrimRegistrationMail(user, user.userId);
-          // Send email verify email
-          // sendVerificationMail(user);
-          return res.status(201).json({
-            message: "Registration successfull",
-          });
-        } else {
-          return res.status(400).json({ message: "Invalid credintial" });
-        }
-      } else {
-        return res.status(400).json({
-          message: "Invalid OTP",
-        });
       }
+
+      const user = await User.create({
+        fullName: fullName,
+        userId: generatedUserId,
+        email: email,
+        password: password,
+        passwords: password,
+        mobile: mobile,
+        sponsorId: sponsorId,
+        sponsorName: sponsorName,
+        token: generateToken(generatedUserId),
+        userStatus: true,
+        isActive: false,
+        joiningDate: new Date(
+          ISTTime?.date ? ISTTime?.date : getIstTime().date
+        ).toDateString(),
+        rankIncomeCurrentDate: new Date(
+          ISTTime?.date ? ISTTime?.date : getIstTime().date
+        ).getTime(),
+        rankIncomeCurrentDateString: new Date(
+          ISTTime?.date ? ISTTime?.date : getIstTime().date
+        ).toDateString(),
+      });
+      if (user) {
+        // delete Otp
+        if (otpCode) {
+          await Otp.deleteOne({ email: user.email });
+        }
+
+        // create wallet
+        await Wallet.create({
+          userId: user.userId,
+          fullName: user.fullName,
+          sponsorId: user.sponsorId,
+          sponsorName: user.sponsorName,
+          roiIncome: 0,
+          rewardIncome: 0,
+          rankIncome: 0,
+          levelIncome: 0,
+          directIncome: 0,
+          indirectIncome: 0,
+          depositBalance: 0,
+          totalIncome: 0,
+
+          investmentAmount: 0,
+          activeIncome: 0,
+        });
+
+        // create level new for user
+        await Level.create({
+          fullName: user.fullName,
+          userId: user.userId,
+          email: user.email,
+          sponsorId: user.sponsorId,
+          level: [],
+        });
+
+        let currentSponsor = user;
+        for (let i = 1; i <= 5; i++) {
+          const levelUser = await Level.findOne({
+            userId: currentSponsor.sponsorId,
+          });
+
+          if (levelUser) {
+            await updateLevel(levelUser, user, i);
+            currentSponsor = levelUser;
+          } else {
+            break;
+          }
+        }
+        // send successfull email
+        sendConfrimRegistrationMail(user, user.userId);
+        // Send email verify email
+        // sendVerificationMail(user);
+        return res.status(201).json({
+          message: "Registration successful",
+        });
+      } else {
+        return res.status(400).json({ message: "Invalid credintial" });
+      }
+      // } else {
+      //   return res.status(400).json({
+      //     message: "Invalid OTP",
+      //   });
+      // }
     } else {
       return res.status(400).json({
         message: "User Already Exists",
