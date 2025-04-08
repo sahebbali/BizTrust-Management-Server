@@ -174,7 +174,7 @@ const registerController = async (req, res) => {
           isUserIdUnique = true;
         }
       }
-
+      const token = generateToken(generatedUserId);
       const user = await User.create({
         fullName: fullName,
         userId: generatedUserId,
@@ -184,7 +184,7 @@ const registerController = async (req, res) => {
         mobile: mobile,
         sponsorId: sponsorId,
         sponsorName: sponsorName,
-        token: generateToken(generatedUserId),
+        token,
         userStatus: true,
         isActive: false,
         joiningDate: new Date(
@@ -198,10 +198,10 @@ const registerController = async (req, res) => {
         ).toDateString(),
       });
       if (user) {
-        // delete Otp
-        if (otpCode) {
-          await Otp.deleteOne({ email: user.email });
-        }
+        // // delete Otp
+        // if (otpCode) {
+        //   await Otp.deleteOne({ email: user.email });
+        // }
 
         // create wallet
         await Wallet.create({
@@ -217,7 +217,6 @@ const registerController = async (req, res) => {
           indirectIncome: 0,
           depositBalance: 0,
           totalIncome: 0,
-
           investmentAmount: 0,
           activeIncome: 0,
         });
@@ -244,13 +243,19 @@ const registerController = async (req, res) => {
             break;
           }
         }
-        // send successfull email
-        sendConfrimRegistrationMail(user, user.userId);
+
+        // sendConfrimRegistrationMail(user, user.userId);
         // Send email verify email
-        // sendVerificationMail(user);
-        return res.status(201).json({
-          message: "Registration successful",
-        });
+
+        // return res.status(201).json({
+        //   message: "Registration successful",
+        // });
+
+        // Send email
+        await sendVerificationMail(user);
+        res
+          .status(201)
+          .json({ message: "User registered. Please verify your email." });
       } else {
         return res.status(400).json({ message: "Invalid credintial" });
       }
