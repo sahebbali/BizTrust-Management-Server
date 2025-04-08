@@ -55,6 +55,7 @@ const userSchema = new mongoose.Schema(
     activationDate: String,
     joiningDate: String,
     userStatus: Boolean,
+    isVerified: { type: Boolean, default: false },
     team: [
       {
         userId: String,
