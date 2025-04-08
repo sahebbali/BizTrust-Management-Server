@@ -66,8 +66,7 @@ const verifyEmail = async (req, res) => {
   const { token } = req.params;
 
   const user = await User.findOne({
-    verificationToken: token,
-    verificationTokenExpiry: { $gt: Date.now() },
+    token,
   });
 
   if (!user) {
@@ -75,8 +74,7 @@ const verifyEmail = async (req, res) => {
   }
 
   user.isVerified = true;
-  user.verificationToken = undefined;
-  user.verificationTokenExpiry = undefined;
+
   await user.save();
   sendConfirmRegistrationMail(user, user.userId);
   res.status(200).json({ message: "Email verified successfully!" });
