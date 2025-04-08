@@ -23,6 +23,7 @@ const ImageData = require("../../models/image.model");
 const VedioData = require("../../models/vedio.model");
 const { distributeRankIncome } = require("../../utils/rankIncome");
 const { PackageBuyInfo } = require("../../models/topup.model");
+const sendVerificationMail = require("../../config/sendVerificationMail");
 
 const testRankIncome = async (req, res) => {
   // await distributeRankIncome();

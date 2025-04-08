@@ -1,5 +1,6 @@
 const nodemailer = require("nodemailer");
 const sendVerificationMail = async (user) => {
+  const link = `${process.env.BASE_URL}/api/v1/common/verify_email/${user?.token}`;
   let transporter = nodemailer.createTransport({
     service: "Gmail",
     port: 587,
@@ -21,7 +22,7 @@ const sendVerificationMail = async (user) => {
         </p>
         <p style="width: 100%; text-align: center; margin-top: 30px">
           <a
-            href="https://biztrustmanagement.com/login/${user?.token}"
+            href="${link}"
             style="
               padding: 12px 8px;
               background-color: #348edb;
