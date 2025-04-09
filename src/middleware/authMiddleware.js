@@ -4,7 +4,7 @@ const User = require("../models/auth.model");
 
 const verifyJWT = async (req, res, next) => {
   if (typeof req.headers["authorization"] === "undefined") {
-  return res.status(401).send({
+    return res.status(401).send({
       error: {
         message: "Not authorized, cannot find token",
       },
@@ -16,7 +16,7 @@ const verifyJWT = async (req, res, next) => {
       req.auth = decoded.data;
       next();
     } else {
-    return res.status(401).send({
+      return res.status(401).send({
         error: {
           message: "Unauthorized access",
         },
@@ -34,14 +34,14 @@ const verifyAdmin = async (req, res, next) => {
     if (requesterAccount?.role === "admin") {
       next();
     } else {
-    return res.status(401).send({
+      return res.status(401).send({
         error: {
           message: "Not authorized, token failed",
         },
       });
     }
   } catch (e) {
-  return res.status(401).send({
+    return res.status(401).send({
       error: {
         message: e.message,
       },
@@ -55,18 +55,19 @@ const verifyUser = async (req, res, next) => {
 
     const requesterAccount = await User.findOne({
       $or: [{ userId: requester }, { email: requester }],
+      isVerified: true,
     });
     if (requesterAccount?.role === "user") {
       next();
     } else {
-    return res.status(401).send({
+      return res.status(401).send({
         error: {
           message: "Not authorized, token failed",
         },
       });
     }
   } catch (e) {
-  return res.status(401).send({
+    return res.status(401).send({
       error: {
         message: e.message,
       },
