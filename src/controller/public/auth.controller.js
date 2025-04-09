@@ -797,6 +797,7 @@ const verifyUser = async (req, res) => {
           {
             $set: {
               userStatus: true,
+              isVerified: true,
             },
           },
           { new: true }
