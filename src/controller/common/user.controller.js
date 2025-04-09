@@ -64,7 +64,9 @@ const getPdfLink = async (_req, res) => {
 
 const verifyEmail = async (req, res) => {
   const { token } = req.params;
-
+  if (!token) {
+    return res.status(400).json({ message: "Token Missing" });
+  }
   const user = await User.findOne({
     token,
   });
@@ -74,10 +76,13 @@ const verifyEmail = async (req, res) => {
   }
 
   user.isVerified = true;
+  user.userStatus = true;
 
-  await user.save();
-  sendConfirmRegistrationMail(user, user.userId);
-  res.status(200).json({ message: "Email verified successfully!" });
+  const updateUser = await user.save();
+  if (updateUser) {
+    sendConfirmRegistrationMail(user, user.userId);
+    res.status(200).json({ message: "Email verified successfully!" });
+  }
 };
 
 module.exports = {
