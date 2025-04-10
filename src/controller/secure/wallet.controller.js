@@ -134,10 +134,11 @@ const getMyWallet = async (req, res) => {
     if (wallet) {
       return res.status(200).json({
         data: wallet,
-        totalPackageAmount: result[0].totalPackageAmount,
+        totalPackageAmount: result[0]?.totalPackageAmount || 0,
       });
     }
   } catch (error) {
+    console.log({ error });
     return res.status(400).json({ message: "Something went wrong" });
   }
 };
