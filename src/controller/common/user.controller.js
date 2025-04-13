@@ -81,7 +81,7 @@ const verifyEmail = async (req, res) => {
 
   const updateUser = await user.save();
   if (updateUser) {
-    console.log("hello");
+    // console.log("hello");
     sendConfirmRegistrationMail(user, user.userId);
     res.status(200).json({ message: "Email verified successfully!" });
   }

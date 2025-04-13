@@ -87,11 +87,11 @@ const rewardIncome = async (userId) => {
 
     allLine.sort((a, b) => b.totalInvestmentAmount - a.totalInvestmentAmount);
     console.log("Calculated Line Packages (Sorted):", allLine);
-    const line1 = allLine[0].totalInvestmentAmount;
-    const line2 = allLine[1].totalInvestmentAmount;
-    const line3 = allLine[2].totalInvestmentAmount;
-    const line4 = allLine[3].totalInvestmentAmount;
-    const line5 = allLine[4].totalInvestmentAmount;
+    const line1 = allLine[0]?.totalInvestmentAmount || 0;
+    const line2 = allLine[1]?.totalInvestmentAmount || 0;
+    const line3 = allLine[2]?.totalInvestmentAmount || 0;
+    const line4 = allLine[3]?.totalInvestmentAmount || 0;
+    const line5 = allLine[4]?.totalInvestmentAmount || 0;
     console.log({ line1, line2, line3, line4, line5 });
     // await CreateRewardHistory(
     //   userId,

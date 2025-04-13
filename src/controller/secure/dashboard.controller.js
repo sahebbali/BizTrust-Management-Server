@@ -6,20 +6,25 @@ const getPSTime = require("../../config/getPSTime");
 const RewardIncomeModel = require("../../models/rewardIncome.model");
 const getDashboardStatsController = async (req, res) => {
   try {
+    const userId = req.auth.id;
     const { date } = getPSTime();
 
     const today = new Date(date).toDateString();
     console.log({ today });
     // Total Team and Direct Team count
-    const team = await Level.findOne({ userId: req.auth.id });
+    const team = await Level.findOne({ userId });
+    const packageInfo = await PackageBuyInfo.find({
+      userId,
+      status: "success",
+    });
     const totalTeam = team?.level?.length;
     const totalDirectTeam = team?.level?.filter((l) => l.level === "1").length;
-    const walletFind = await Wallet.findOne({ userId: req.auth.id });
+    const walletFind = await Wallet.findOne({ userId });
 
     const todayLevelIncome = await LevelIncome.aggregate([
       {
         $match: {
-          userId: req.auth.id,
+          userId,
           type: "level-income",
           date: today,
         },
@@ -41,7 +46,7 @@ const getDashboardStatsController = async (req, res) => {
     const todayROiIncome = await PackageRoi.aggregate([
       {
         $match: {
-          userId: req.auth.id,
+          userId,
           incomeDate: today,
         },
       },
@@ -62,7 +67,7 @@ const getDashboardStatsController = async (req, res) => {
     const todayProfitSharingIncome = await LevelIncome.aggregate([
       {
         $match: {
-          userId: req.auth.id,
+          userId,
           type: "profit-sharing",
           date: today,
         },
@@ -84,7 +89,7 @@ const getDashboardStatsController = async (req, res) => {
     const todayRewardIncome = await RewardIncomeModel.aggregate([
       {
         $match: {
-          userId: req.auth.id,
+          userId,
           date: today,
         },
       },
@@ -126,7 +131,7 @@ const getDashboardStatsController = async (req, res) => {
       : 0;
     // Ensure default values if no data is found
 
-    console.log({ todayLevelIncome });
+    console.log({ walletFind });
     const data = {
       totalTeam,
       totalDirectTeam,
@@ -145,6 +150,7 @@ const getDashboardStatsController = async (req, res) => {
       rewardIncomePercentage,
       roiIncomePercentage,
       levelIncomePercentage,
+      packageInfo,
     };
     // console.log({ data });
     if (data) {
