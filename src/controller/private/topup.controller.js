@@ -6,10 +6,6 @@ const { PackageBuyInfo } = require("../../models/topup.model");
 const Wallet = require("../../models/wallet.model");
 const levelIncome = require("../../utils/levelIncome");
 const rewardIncome = require("../../utils/rewardIncome");
-const {
-  processPackageAction,
-  processAdminPackageAction,
-} = require("../../utils/topupPackage");
 const { updatePackageAmount } = require("../../utils/updatePackageAmount");
 
 const getTopupHistory = async (req, res) => {
@@ -209,8 +205,6 @@ const createTopupController = async (req, res) => {
     if (createPackage) {
       return res.status(201).json({ message: "Package Create Successfully" });
     }
-    // Process package activation
-    // await processAdminPackageAction(userId, packageAmount, startDate, true);
 
     return res.status(201).json({ message: "Package Activated Successfully" });
   } catch (error) {

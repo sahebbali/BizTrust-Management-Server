@@ -75,6 +75,7 @@ const userSchema = new mongoose.Schema(
     rankIncomeCurrentDate: Number,
     rankIncomeCurrentDateString: String,
     packageAmount: { type: Number, default: 0 },
+    packageLimit: { type: Number, default: 0 },
     openLevel: Number,
   },
   { timestamps: true }

@@ -2,10 +2,7 @@ const { topUpPackageAmount } = require("../../constants/topup.constants");
 const User = require("../../models/auth.model");
 const { PackageBuyInfo, PackageRoi } = require("../../models/topup.model");
 const Wallet = require("../../models/wallet.model");
-const {
-  processPackageAction,
-  topupWalletUpdate,
-} = require("../../utils/topupPackage");
+const { topupWalletUpdate } = require("../../utils/topupPackage");
 const { getIstTimeWithInternet } = require("../../config/internetTime");
 const getIstTime = require("../../config/getTime");
 

@@ -13,10 +13,11 @@ const updatePackageAmount = async (userId, amount) => {
 
     const totalPackageAmount = (existUser.packageAmount || 0) + amount;
     const openLevel = totalPackageAmount >= 1000000 ? 5 : 2;
+    const packageLimit = totalPackageAmount * 2;
 
     const updatedUser = await User.findOneAndUpdate(
       { userId },
-      { $set: { packageAmount: totalPackageAmount, openLevel } },
+      { $set: { packageAmount: totalPackageAmount, openLevel, packageLimit } },
       { new: true }
     );
     await Wallet.findOneAndUpdate(
