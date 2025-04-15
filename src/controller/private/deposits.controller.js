@@ -245,6 +245,10 @@ const updateDepositStatus = async (req, res) => {
           }
         );
 
+        await User.findOneAndUpdate(
+          { userId: existingDeposit?.userId },
+          { $set: { isActive: true } }
+        );
         // sendEmailNotification(
         //   currentUser?.userId,
         //   currentUser?.fullName,

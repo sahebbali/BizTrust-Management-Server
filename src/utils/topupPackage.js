@@ -62,7 +62,7 @@ const topupWalletUpdate = async (
         {
           $inc: {
             depositBalance: -packageAmount,
-            investmentAmount: +packageAmount,
+            // investmentAmount: +packageAmount,
           },
         }
       )

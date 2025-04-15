@@ -58,7 +58,7 @@ const CreateRewardHistory = async (
   });
   await User.findOneAndUpdate(
     { userId: currentUser.userId },
-    { $set: { openLevel: 5 } },
+    { $set: { openLevel: 5, rank: designation } },
     { new: true }
   );
   if (typeof amount === "number") {

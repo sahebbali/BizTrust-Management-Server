@@ -1,3 +1,4 @@
+const User = require("../models/auth.model");
 const { PackageBuyInfo } = require("../models/topup.model");
 const Wallet = require("../models/wallet.model");
 const CreateExtraEarning = require("./createExtraEarning");
@@ -46,9 +47,12 @@ const UpdateWallet = async (userId, CommissionAmount, type) => {
       };
     }
 
-    const updatedWallet = await Wallet.findOneAndUpdate(
+    await Wallet.findOneAndUpdate({ userId: userId }, updateFields, {
+      new: true,
+    });
+    await User.findOneAndUpdate(
       { userId: userId },
-      updateFields,
+      { $inc: { returnAmount: +CommissionAmount } },
       { new: true }
     );
   } catch (error) {
