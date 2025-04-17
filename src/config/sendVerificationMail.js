@@ -1,6 +1,7 @@
 const nodemailer = require("nodemailer");
 const sendVerificationMail = async (user) => {
-  const link = `${process.env.BASE_URL}/login/${user?.token}`;
+  // const link = `${process.env.BASE_URL}/login/${user?.token}`;
+  const link = `https://biztrustmanagement.netlify.app/login/${user?.token}`;
   let transporter = nodemailer.createTransport({
     service: "Gmail",
     port: 587,
