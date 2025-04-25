@@ -55,7 +55,7 @@ const verifyUser = async (req, res, next) => {
 
     const requesterAccount = await User.findOne({
       $or: [{ userId: requester }, { email: requester }],
-      isVerified: true,
+      // isVerified: true,
     });
     if (requesterAccount?.role === "user") {
       next();
