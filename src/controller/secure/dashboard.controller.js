@@ -10,7 +10,7 @@ const getDashboardStatsController = async (req, res) => {
     const { date } = getPSTime();
 
     const today = new Date(date).toDateString();
-    console.log({ today });
+    // console.log({ today });
     // Total Team and Direct Team count
     const team = await Level.findOne({ userId });
     const packageInfo = await PackageBuyInfo.find({
