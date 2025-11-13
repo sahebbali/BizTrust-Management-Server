@@ -18,6 +18,8 @@ const {
   getAllKYCController,
   updateKycController,
   updateUserWalletInfo,
+  makePinAccount,
+  updateUserOpenLevel,
 } = require("../../controller/private/members.controller");
 const {
   uploadRewardImage,
@@ -55,5 +57,7 @@ router.get("/user/get_all_pin", getAllPin);
 router.get("/getAllKYCAdmin", getAllKYCController);
 router.patch("/updateKycAdmin", updateKycController);
 router.put("/updateUserWalletInfo", updateUserWalletInfo);
+router.put("/makePinAccount", makePinAccount);
+router.put("/updateUserOpenLevel", updateUserOpenLevel);
 
 module.exports = router;

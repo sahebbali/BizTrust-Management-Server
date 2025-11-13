@@ -77,7 +77,7 @@ const userSchema = new mongoose.Schema(
     packageAmount: { type: Number, default: 0 },
     packageLimit: { type: Number, default: 0 },
     returnAmount: { type: Number, default: 0 },
-    openLevel: Number,
+    openLevel: { type: Number, default: 0 },
     isSecureAccount: { type: Boolean, default: false },
     isPinAccount: { type: Boolean, default: false },
   },

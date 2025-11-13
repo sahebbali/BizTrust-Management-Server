@@ -1500,6 +1500,75 @@ const updateUserWalletInfo = async (req, res) => {
   }
 };
 
+const makePinAccount = async (req, res) => {
+  try {
+    const { userId, isPinAccount } = req.body;
+    console.log(req.body);
+
+    // Basic validation
+    if (!userId || typeof isPinAccount === "undefined") {
+      return res.status(400).json({ message: "userId and isPin are required" });
+    }
+
+    // Find and update the user
+    const updatedUser = await User.findOneAndUpdate(
+      { userId },
+      { $set: { isPinAccount: isPinAccount } },
+      { new: true } // return the updated document
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Success response
+    return res.status(200).json({
+      message: `Account ${
+        isPinAccount
+          ? "converted to Pin Account"
+          : "converted to Normal Account"
+      } successfully`,
+      user: updatedUser,
+    });
+  } catch (error) {
+    console.error("Error in makePinAccount:", error);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+const updateUserOpenLevel = async (req, res) => {
+  try {
+    const { userId, openLevel } = req.body;
+    console.log(req.body);
+
+    // Basic validation
+    if (!userId || typeof openLevel === "undefined") {
+      return res
+        .status(400)
+        .json({ message: "userId and openLevel are required" });
+    }
+
+    // Find and update the user
+    const updatedUser = await User.findOneAndUpdate(
+      { userId },
+      { $set: { openLevel: openLevel } },
+      { new: true } // return the updated document
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Success response
+    return res.status(200).json({
+      message: `Level Update successfully`,
+      user: updatedUser,
+    });
+  } catch (error) {
+    console.error("Error in makePinAccount:", error);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
 module.exports = {
   findThisMonthTotalTeamBusiness,
   createOtpForEditUserByAdminController,
@@ -1517,4 +1586,6 @@ module.exports = {
   getAllKYCController,
   updateKycController,
   updateUserWalletInfo,
+  makePinAccount,
+  updateUserOpenLevel,
 };
