@@ -110,7 +110,7 @@ const getRoiIncome = async (req, res) => {
 
     const response = {
       totalDocs: totalItems,
-      totalAmount: totalHistories[0].totalAmount || 0,
+      totalAmount: totalHistories[0]?.totalAmount || 0,
       limit: limit,
       totalPages: totalPages,
       page: page,

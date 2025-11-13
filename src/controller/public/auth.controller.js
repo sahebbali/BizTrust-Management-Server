@@ -154,6 +154,7 @@ const registerController = async (req, res) => {
       sponsorName,
       otpCode,
       role,
+      securityType,
     } = req.body;
     if (!fullName || !email || !password || !role || !confirmPassword) {
       return res.status(400).json({ message: "Please Enter all the Feilds" });
@@ -161,6 +162,7 @@ const registerController = async (req, res) => {
       return res.status(400).json({ message: "Password dosen't match" });
     }
 
+    console.log({ securityType });
     const userExists = await User.findOne({ email: email });
     const otp = await Otp.findOne({ email: email });
 
@@ -197,6 +199,7 @@ const registerController = async (req, res) => {
         rankIncomeCurrentDateString: new Date(
           ISTTime?.date ? ISTTime?.date : getIstTime().date
         ).toDateString(),
+        isSecureAccount: securityType === "secure" ? true : false,
       });
       if (user) {
         // // delete Otp

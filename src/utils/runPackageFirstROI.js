@@ -3,6 +3,7 @@ const handleFirstROI = require("./handleFirstROI");
 
 const runPackageFirstROI = () => {
   cron.schedule(
+    // "*/5 * * * *", // Every 05 mins
     "*/5 * * * *", // Every 05 mins
     async () => {
       try {

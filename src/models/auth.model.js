@@ -78,6 +78,8 @@ const userSchema = new mongoose.Schema(
     packageLimit: { type: Number, default: 0 },
     returnAmount: { type: Number, default: 0 },
     openLevel: Number,
+    isSecureAccount: { type: Boolean, default: false },
+    isPinAccount: { type: Boolean, default: false },
   },
   { timestamps: true }
 );
