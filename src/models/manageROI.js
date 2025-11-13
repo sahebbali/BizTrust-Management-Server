@@ -3,8 +3,9 @@ const mongoosePlugin = require("mongoose-paginate-v2");
 
 const ManageROIHistorySchema = new mongoose.Schema(
   {
-    date: { type: String, require: true, unique: true },
+    date: { type: String, require: true },
     percentage: { type: Number, require: true },
+    securityType: { type: String, require: true },
   },
   { timestamps: true }
 );

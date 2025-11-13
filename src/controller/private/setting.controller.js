@@ -511,9 +511,12 @@ const editManageLevelIncome = async (req, res) => {
 
 const createManageROI = async (req, res) => {
   try {
-    const { date, percentage } = req.body;
+    const { date, percentage, securityType } = req.body;
     const today = new Date(date).toDateString();
-    const existROIHistory = await ManageROIHistory.findOne({ date: today });
+    const existROIHistory = await ManageROIHistory.findOne({
+      date: today,
+      securityType,
+    });
     if (existROIHistory) {
       return res.status(400).json({ message: "Already Exist Manage ROI Date" });
     }
@@ -521,6 +524,7 @@ const createManageROI = async (req, res) => {
     const manageROI = await ManageROIHistory.create({
       date: today,
       percentage,
+      securityType,
     });
     // Respond with the saved document
     return res.status(201).json({ message: "Successful", manageROI });
