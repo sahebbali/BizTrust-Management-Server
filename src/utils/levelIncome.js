@@ -3,8 +3,9 @@ const { PackageBuyInfo } = require("../models/topup.model");
 const { checkPackageLimit } = require("./checkPackageLimit");
 const Level = require("../models/level.model");
 const ManageLevelIncome = require("../models/manageLevelIncome");
+const { CheckUserEarningLimit } = require("./CheckUserEarningLimit");
 
-const levelIncome = async (userId, roiPerDayCommissionAmount) => {
+const levelIncome = async (userId, fullName, packageAmount) => {
   console.log("Level Income Calculation Started");
 
   try {
@@ -44,35 +45,36 @@ const levelIncome = async (userId, roiPerDayCommissionAmount) => {
       }
 
       // Find the upline's active package info
-      const selfPackageInfo = await PackageBuyInfo.findOne({
-        userId: uplineUser.userId,
-        isActive: true,
-      }).sort({ createdAt: -1 });
+      // const selfPackageInfo = await PackageBuyInfo.findOne({
+      //   userId: uplineUser.userId,
+      //   isActive: true,
+      // }).sort({ createdAt: -1 });
 
-      if (!selfPackageInfo) {
-        console.log(`No active package found for ${uplineUser.userId}`);
-        continue;
-      }
+      // if (!selfPackageInfo) {
+      //   console.log(`No active package found for ${uplineUser.userId}`);
+      //   continue;
+      // }
 
       // Calculate commission
-      const commissionAmount = (roiPerDayCommissionAmount * percentage) / 100;
+      const commissionAmount = (packageAmount * percentage) / 100;
       console.log("Commission:", commissionAmount, "User:", uplineUser.userId);
 
       // Fetch distributor's active package
-      const distributorPackage = await PackageBuyInfo.findOne({
-        userId: distributorLevelData.userId,
-        isActive: true,
-      }).sort({ createdAt: -1 });
-
-      // Check package limits and process level income
-      // await checkPackageLimit(
-      //   selfPackageInfo,
-      //   commissionAmount,
-      //   distributorPackage,
-      //   level,
-      //   "level-income",
-      //   percentage
-      // );
+      // const distributorPackage = await PackageBuyInfo.findOne({
+      //   userId: distributorLevelData.userId,
+      //   isActive: true,
+      // }).sort({ createdAt: -1 });
+      await CheckUserEarningLimit(
+        levelData.userId,
+        levelData.fullName,
+        userId, //income from userid
+        fullName, //income from full name
+        packageAmount,
+        commissionAmount,
+        level,
+        "level-income",
+        percentage
+      );
     }
   } catch (error) {
     console.error("Error in levelIncome:", error);

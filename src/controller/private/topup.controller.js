@@ -275,7 +275,11 @@ const updateTopUpStatus = async (req, res) => {
         extPackageBuyInfo?.userId,
         extPackageBuyInfo?.packageAmount
       );
-      await levelIncome(updatePackage.userId, updatePackage.packageAmount);
+      await levelIncome(
+        updatePackage.userId,
+        updatePackage.userFullName,
+        updatePackage.packageAmount
+      );
       await rewardIncome(updatePackage?.sponsorId);
 
       return res
