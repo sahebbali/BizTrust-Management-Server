@@ -5,6 +5,7 @@ const User = require("../../models/auth.model");
 const { PackageBuyInfo } = require("../../models/topup.model");
 const Wallet = require("../../models/wallet.model");
 const levelIncome = require("../../utils/levelIncome");
+const ProvideExtraEarning = require("../../utils/ProvideExtraEarning");
 const rewardIncome = require("../../utils/rewardIncome");
 const { updatePackageAmount } = require("../../utils/updatePackageAmount");
 
@@ -269,6 +270,7 @@ const updateTopUpStatus = async (req, res) => {
           endDateInt: endDateObj.getTime(), // Use timestamp for endDateInt
         }
       );
+      await ProvideExtraEarning(updatePackage?.userId);
       await updatePackageAmount(
         extPackageBuyInfo?.userId,
         extPackageBuyInfo?.packageAmount

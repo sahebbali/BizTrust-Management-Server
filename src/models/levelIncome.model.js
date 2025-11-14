@@ -41,7 +41,7 @@ const levelIncomeSchema = new mongoose.Schema(
     },
     levelUserPackageInfoAmount: {
       type: Number,
-      required: true,
+      // required: true,
     },
     selfPackageInfoAmount: {
       type: Number,
