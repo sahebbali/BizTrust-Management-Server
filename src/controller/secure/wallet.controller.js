@@ -46,7 +46,7 @@ const depositeAmount = async (req, res) => {
       avatarPublicUrl: image.public_id,
     };
     if (user) {
-      if (parseInt(amount) >= 25) {
+      if (parseInt(amount) >= 25000) {
         await Deposit.create({
           userId: user.userId,
           name: user.fullName,
@@ -66,7 +66,7 @@ const depositeAmount = async (req, res) => {
         });
       } else {
         return res.status(400).json({
-          message: "Minimum deposit amount is 30",
+          message: "Minimum deposit amount is 25000",
         });
       }
     } else {

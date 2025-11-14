@@ -81,10 +81,10 @@ const withdrawAmount = async (req, res) => {
     }
 
     // Validate minimum withdrawal amount
-    if (amount < 10) {
+    if (amount < 50) {
       return res
         .status(400)
-        .json({ message: "Minimum withdrawal amount is Rs10" });
+        .json({ message: "Minimum withdrawal amount is Rs 50" });
     }
 
     // Check wallet balance based on withdrawal type

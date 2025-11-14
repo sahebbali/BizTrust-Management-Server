@@ -20,10 +20,10 @@ const createTopupController = async (req, res) => {
     console.log({ packageAmount, type });
     console.log(req.body);
 
-    if (!packageAmount || packageAmount < 100000) {
+    if (!packageAmount || packageAmount < 25000) {
       return res
         .status(400)
-        .json({ message: "Minimum package amount is Rs 100000" });
+        .json({ message: "Minimum package amount is Rs 25000" });
     }
 
     // Fetch the latest package buy info for the user
