@@ -4,6 +4,15 @@ const ExtraEarningSchema = new mongoose.Schema(
   {
     userId: { type: String, required: true },
     fullName: { type: String, required: true },
+    incomeFrom: {
+      type: String,
+    },
+    incomeFromFullName: {
+      type: String,
+    },
+    level: {
+      type: String,
+    },
     amount: { type: Number, required: true },
     type: { type: String, required: true },
     expiresAt: { type: Date, required: true }, // Field to store expiration time

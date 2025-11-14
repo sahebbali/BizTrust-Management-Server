@@ -163,7 +163,7 @@ const rewardIncome = async (userId) => {
       );
     }
 
-    console.log("level income");
+    console.log("Reward income");
   } catch (error) {
     console.error("Error in rewardIncome:", error);
     throw error;

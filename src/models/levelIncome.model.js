@@ -45,7 +45,7 @@ const levelIncomeSchema = new mongoose.Schema(
     },
     selfPackageInfoAmount: {
       type: Number,
-      required: true,
+      // required: true,
     },
     transactionID: {
       type: String,

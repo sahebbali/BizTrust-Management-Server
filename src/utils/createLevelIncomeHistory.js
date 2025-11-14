@@ -5,7 +5,6 @@ const LevelIncome = require("../models/levelIncome.model");
 const CreateLevelIncomeHistory = async (
   userId,
   fullName,
-  selfPackageInfoAmount,
   incomeFrom,
   incomeFromFullName,
   levelUserPackageInfoAmount,
@@ -26,9 +25,8 @@ const CreateLevelIncomeHistory = async (
       time: getIstTime().time,
       type,
       levelUserPackageInfoAmount,
-      selfPackageInfoAmount,
       transactionID: generateString(15),
-      percentage
+      percentage,
     });
   } catch (error) {
     console.log({ error });

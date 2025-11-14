@@ -24,6 +24,8 @@ const rewardIncome = require("./src/utils/rewardIncome");
 const handleFristROI = require("./src/utils/handleFirstROI");
 const runPackageFirstROI = require("./src/utils/runPackageFirstROI");
 const handleROI = require("./src/utils/handleROI");
+const { CheckUserEarningLimit } = require("./src/utils/CheckUserEarningLimit");
+const ProvideExtraEarning = require("./src/utils/ProvideExtraEarning");
 
 const corsOptions = {
   origin: [
@@ -60,9 +62,21 @@ app.get("/", (req, res) => {
 app.get("/run", (req, res) => {
   // const datas = levelIncome("108569", 100000);
   // const data = profitSharingIncome("108569", 4000);
-  const data = rewardIncome("745904");
+  // const data = rewardIncome("745904");
   // const data = handleFristROI("745904");
   // const data = handleROI();
+  const data = ProvideExtraEarning("373056");
+  // const data = CheckUserEarningLimit(
+  //   "373056",
+  //   "kadu",
+  //   "531286",
+  //   "jakir",
+  //   25000,
+  //   200,
+  //   2,
+  //   "level-income",
+  //   5
+  // );
   return res.send("Hello Run !");
 });
 

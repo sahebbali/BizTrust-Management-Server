@@ -65,14 +65,14 @@ const levelIncome = async (userId, roiPerDayCommissionAmount) => {
       }).sort({ createdAt: -1 });
 
       // Check package limits and process level income
-      await checkPackageLimit(
-        selfPackageInfo,
-        commissionAmount,
-        distributorPackage,
-        level,
-        "level-income",
-        percentage
-      );
+      // await checkPackageLimit(
+      //   selfPackageInfo,
+      //   commissionAmount,
+      //   distributorPackage,
+      //   level,
+      //   "level-income",
+      //   percentage
+      // );
     }
   } catch (error) {
     console.error("Error in levelIncome:", error);
