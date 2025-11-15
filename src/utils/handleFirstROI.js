@@ -4,6 +4,7 @@ const { PackageRoi, PackageBuyInfo } = require("../models/topup.model");
 const profitSharingIncome = require("./profitSharingIncome");
 const ManageROIHistory = require("../models/manageROI");
 const { UpdateWallet } = require("./checkPackageLimit");
+const { CheckUserPackageLimit } = require("./CheckUserPackageLimit");
 
 const handleFirstROI = async () => {
   try {
@@ -15,13 +16,23 @@ const handleFirstROI = async () => {
 
     // console.log({ dateInt });
 
-    const manageROi = await ManageROIHistory.findOne({ date: today });
+    const manageROi = await ManageROIHistory.find({ date: today });
+    console.log({ manageROi });
 
     if (!manageROi || manageROi.percentage <= 0) {
       console.log("No valid commission percentage found, exiting.");
       return;
     }
+    const secureROI = manageROi.find((item) => item.securityType === "secure");
+    const insecureROI = manageROi.find(
+      (item) => item.securityType === "insecure"
+    );
 
+    const securePercentage = secureROI ? secureROI.percentage : 0;
+    const insecurePercentage = insecureROI ? insecureROI.percentage : 0;
+
+    console.log("Secure Percentage:", securePercentage);
+    console.log("Insecure Percentage:", insecurePercentage);
     const commissionPercentage = manageROi.percentage;
     console.log({ commissionPercentage });
 
@@ -46,7 +57,7 @@ const handleFirstROI = async () => {
           (pkg.packageAmount * commissionPercentage) / 100;
         console.log({ packageId: pkg._id, commissionAmount });
 
-        await checkPackageLimit(pkg, commissionAmount, commissionPercentage);
+        await CheckUserPackageLimit(pkg, securePercentage, insecurePercentage);
       })
     );
 
@@ -56,94 +67,6 @@ const handleFirstROI = async () => {
   }
 };
 
-const checkPackageLimit = async (
-  package,
-  CommissionAmount,
-  commissionPercentage
-) => {
-  const type = "roi-income";
-  if (package.totalReturnedAmount + CommissionAmount > package.packageLimit) {
-    console.log("limit up");
-    const totalAmount = package.totalReturnedAmount + CommissionAmount;
-    const extraAmount = totalAmount - package.packageLimit;
-    const pendingAmount = package.packageLimit - package.totalReturnedAmount;
-    await UpdateWallet(package.userId, pendingAmount, type);
-    await profitSharingIncome(
-      package.userId,
-      package.userFullName,
-      pendingAmount
-    );
-    await createROIHistory(
-      package.userId,
-      package.userFullName,
-      package.packageAmount,
-      commissionPercentage,
-      pendingAmount,
-      updatePackage.incomeDay
-    );
-    await CreateExtraEarning(
-      package.userId,
-      package.userFullName,
-      extraAmount,
-      type
-    );
-    await PackageBuyInfo.findOneAndUpdate(
-      { packageId: package.packageId },
-      {
-        $set: {
-          isComplect: true,
-          isActive: false,
-        },
-        $inc: {
-          incomeDay: +1,
-          totalReturnedAmount: +pendingAmount,
-        },
-      }
-    );
-  } else {
-    const updatePackage = await PackageBuyInfo.findOneAndUpdate(
-      { packageId: package.packageId },
-      {
-        $inc: {
-          incomeDay: +1,
-          totalReturnedAmount: +CommissionAmount,
-        },
-        $set: {
-          isFirstROI: false,
-        },
-      }
-    );
-
-    // console.log({ updatePackage });
-
-    await UpdateWallet(package.userId, CommissionAmount, type);
-    await createROIHistory(
-      package.userId,
-      package.userFullName,
-      package.packageAmount,
-      commissionPercentage,
-      CommissionAmount,
-      updatePackage.incomeDay
-    );
-
-    await profitSharingIncome(
-      package.userId,
-      package.userFullName,
-      CommissionAmount
-    );
-    if (updatePackage.totalReturnedAmount >= package.packageLimit) {
-      await PackageBuyInfo.findOneAndUpdate(
-        { packageId: package.packageId },
-        {
-          $set: {
-            isComplect: true,
-            isActive: false,
-          },
-        }
-      );
-    }
-  }
-};
 const createROIHistory = async (
   userId,
   fullName,

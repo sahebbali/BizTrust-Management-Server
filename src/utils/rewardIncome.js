@@ -104,7 +104,7 @@ const rewardIncome = async (userId) => {
     if (allLine.length >= 2 && line1 >= 3000000 && line2 >= 1500000) {
       await CreateRewardHistory(
         userId,
-        "Relationship Manager",
+        " Sales Manager",
         150000,
         1,
         line1,
@@ -118,7 +118,7 @@ const rewardIncome = async (userId) => {
     ) {
       await CreateRewardHistory(
         userId,
-        "Branch Manager",
+        "Team Manager",
         300000,
         2,
         line1,
@@ -134,7 +134,7 @@ const rewardIncome = async (userId) => {
     ) {
       await CreateRewardHistory(
         userId,
-        "Area Manager",
+        "Area Sales Manager",
         "1300CC CAR",
         3,
         line1,
@@ -152,7 +152,7 @@ const rewardIncome = async (userId) => {
     ) {
       await CreateRewardHistory(
         userId,
-        "Regional Manager",
+        "Sales Director",
         "1800CC CAR",
         4,
         line1,

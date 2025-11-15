@@ -62,18 +62,6 @@ const profitSharingIncome = async (
       const commissionAmount = (roiPerDayCommissionAmount * percentage) / 100;
       console.log("Commission:", commissionAmount, "User:", uplineUser.userId);
 
-      // Fetch distributor's active package
-
-      // Check package limits and process level income
-      // await checkPackageLimit(
-      //   selfPackageInfo,
-      //   commissionAmount,
-      //   distributorPackage,
-      //   level,
-      //   "profit-sharing",
-      //   percentage
-      // );
-
       await CheckUserEarningLimit(
         levelData.userId,
         levelData.fullName,
