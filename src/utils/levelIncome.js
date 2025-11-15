@@ -1,6 +1,6 @@
 const User = require("../models/auth.model");
-const { PackageBuyInfo } = require("../models/topup.model");
-const { checkPackageLimit } = require("./checkPackageLimit");
+// const { PackageBuyInfo } = require("../models/topup.model");
+// const { checkPackageLimit } = require("./checkPackageLimit");
 const Level = require("../models/level.model");
 const ManageLevelIncome = require("../models/manageLevelIncome");
 const { CheckUserEarningLimit } = require("./CheckUserEarningLimit");
@@ -59,11 +59,6 @@ const levelIncome = async (userId, fullName, packageAmount) => {
       const commissionAmount = (packageAmount * percentage) / 100;
       console.log("Commission:", commissionAmount, "User:", uplineUser.userId);
 
-      // Fetch distributor's active package
-      // const distributorPackage = await PackageBuyInfo.findOne({
-      //   userId: distributorLevelData.userId,
-      //   isActive: true,
-      // }).sort({ createdAt: -1 });
       await CheckUserEarningLimit(
         levelData.userId,
         levelData.fullName,

@@ -1,15 +1,14 @@
 const User = require("../models/auth.model");
 const { PackageBuyInfo } = require("../models/topup.model");
-const getIstTime = require("../config/getTime");
-const generateString = require("../config/generateRandomString");
 const Level = require("../models/level.model");
-const {
-  ProfitSharingCommissionPerCentage,
-} = require("../constants/topup.constants");
-const { checkPackageLimit } = require("./checkPackageLimit");
 const ManageLevelIncome = require("../models/manageLevelIncome");
+const { CheckUserEarningLimit } = require("./CheckUserEarningLimit");
 
-const profitSharingIncome = async (userId, roiPerDayCommissionAmount) => {
+const profitSharingIncome = async (
+  userId,
+  fullName,
+  roiPerDayCommissionAmount
+) => {
   console.log("Profit Sharing Income Calculation Started");
 
   try {
@@ -64,16 +63,24 @@ const profitSharingIncome = async (userId, roiPerDayCommissionAmount) => {
       console.log("Commission:", commissionAmount, "User:", uplineUser.userId);
 
       // Fetch distributor's active package
-      const distributorPackage = await PackageBuyInfo.findOne({
-        userId: distributorLevelData.userId,
-        isActive: true,
-      }).sort({ createdAt: -1 });
 
       // Check package limits and process level income
-      await checkPackageLimit(
-        selfPackageInfo,
+      // await checkPackageLimit(
+      //   selfPackageInfo,
+      //   commissionAmount,
+      //   distributorPackage,
+      //   level,
+      //   "profit-sharing",
+      //   percentage
+      // );
+
+      await CheckUserEarningLimit(
+        levelData.userId,
+        levelData.fullName,
+        userId, //income from userid
+        fullName, //income from full name
+        roiPerDayCommissionAmount,
         commissionAmount,
-        distributorPackage,
         level,
         "profit-sharing",
         percentage

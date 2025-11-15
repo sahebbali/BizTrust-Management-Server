@@ -68,7 +68,11 @@ const checkPackageLimit = async (
     const extraAmount = totalAmount - package.packageLimit;
     const pendingAmount = package.packageLimit - package.totalReturnedAmount;
     await UpdateWallet(package.userId, pendingAmount, type);
-    await profitSharingIncome(package.userId, pendingAmount);
+    await profitSharingIncome(
+      package.userId,
+      package.userFullName,
+      pendingAmount
+    );
     await createROIHistory(
       package.userId,
       package.userFullName,
@@ -122,7 +126,11 @@ const checkPackageLimit = async (
       updatePackage.incomeDay
     );
 
-    await profitSharingIncome(package.userId, CommissionAmount);
+    await profitSharingIncome(
+      package.userId,
+      package.userFullName,
+      CommissionAmount
+    );
     if (updatePackage.totalReturnedAmount >= package.packageLimit) {
       await PackageBuyInfo.findOneAndUpdate(
         { packageId: package.packageId },

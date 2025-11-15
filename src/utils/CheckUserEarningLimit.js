@@ -85,6 +85,15 @@ const CheckUserEarningLimit = async (
 
     if (user.returnAmount >= user.packageLimit) {
       console.log(`User ${userId} has reached their package limit`);
+      await CreateExtraEarning(
+        userId,
+        userName,
+        incomeFrom,
+        incomeFromFullName,
+        level,
+        amount,
+        type
+      );
       return;
     }
     2400;
