@@ -16,10 +16,13 @@ const CheckUserPackageLimit = async (
       console.log(`User not found: ${package.userId}`);
       return;
     }
-    const percentage = user.isSecure ? securePercentage : insecurePercentage;
+    const percentage = user.isSecureAccount
+      ? securePercentage
+      : insecurePercentage;
     const amount = (package.packageAmount * percentage) / 100;
-    // const userId = user.userId;
-    // const userName = user.userName;
+    const userId = user.userId;
+    const type = "roi-income";
+    const fullName = user.fullName;
     // const incomeFrom = package.packageId;
     // const incomeFromFullName = package.packageName;
     // const IncomeFromPackageAmount = package.packageAmount;
@@ -28,21 +31,19 @@ const CheckUserPackageLimit = async (
 
     if (user.returnAmount >= user.packageLimit) {
       console.log(`User ${userId} has reached their package limit`);
-      await CreateExtraEarning(user.userId, user.userName, amount, type);
+      await CreateExtraEarning(userId, fullName, amount, type);
 
       return;
     }
-    2400;
+
     const totalIncome = user.returnAmount + amount;
 
     if (totalIncome > user.packageLimit) {
       const finalAmount = user.packageLimit - user.returnAmount;
       const extraAmount = totalIncome - user.packageLimit;
-      console.log(
-        `Adjusting amount for user ${userId} to ${finalAmount} due to package limit`
-      );
-      await CreateExtraEarning(userId, userName, extraAmount, type);
-      await PackageBuyInfo.findOneAndUpdate(
+
+      await CreateExtraEarning(userId, fullName, extraAmount, type);
+      const updatePackage = await PackageBuyInfo.findOneAndUpdate(
         { packageId: package.packageId },
         {
           $set: {
@@ -51,11 +52,25 @@ const CheckUserPackageLimit = async (
           },
           $inc: {
             totalReturnedAmount: +finalAmount,
+            incomeDay: +1,
           },
-        }
+        },
+        { new: true }
       );
-
+      await CreateROIHistory(
+        package.userId,
+        package.userFullName,
+        package.packageAmount,
+        percentage,
+        amount,
+        updatePackage.incomeDay
+      );
       await UpdateWallet(userId, finalAmount, type);
+      await profitSharingIncome(
+        package.userId,
+        package.userFullName,
+        finalAmount
+      );
     } else {
       console.log(`User ${userId} income within limit: ${amount}`);
       const updatePackage = await PackageBuyInfo.findOneAndUpdate(
@@ -68,7 +83,8 @@ const CheckUserPackageLimit = async (
           $set: {
             isFirstROI: false,
           },
-        }
+        },
+        { new: true }
       );
 
       // console.log({ updatePackage });

@@ -33,8 +33,6 @@ const handleFirstROI = async () => {
 
     console.log("Secure Percentage:", securePercentage);
     console.log("Insecure Percentage:", insecurePercentage);
-    const commissionPercentage = manageROi.percentage;
-    console.log({ commissionPercentage });
 
     const activePackages = await PackageBuyInfo.find({
       isActive: true,
@@ -53,10 +51,6 @@ const handleFirstROI = async () => {
 
     await Promise.all(
       activePackages.map(async (pkg) => {
-        const commissionAmount =
-          (pkg.packageAmount * commissionPercentage) / 100;
-        console.log({ packageId: pkg._id, commissionAmount });
-
         await CheckUserPackageLimit(pkg, securePercentage, insecurePercentage);
       })
     );
