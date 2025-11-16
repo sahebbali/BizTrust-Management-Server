@@ -1,6 +1,7 @@
 const LevelIncome = require("../models/levelIncome.model");
 const { PackageBuyInfo } = require("../models/topup.model");
-const { UpdateWallet } = require("./checkPackageLimit");
+const { UpdateWallet } = require("./CheckUserEarningLimit");
+
 const CreateLevelIncomeHistory = require("./createLevelIncomeHistory");
 
 const DistributionExtraEarning = async (userId, packageId, amount, type) => {

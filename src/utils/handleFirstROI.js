@@ -1,9 +1,9 @@
 const generateRandomString = require("../config/generateRandomId");
 const getIstTime = require("../config/getTime");
 const { PackageRoi, PackageBuyInfo } = require("../models/topup.model");
-const profitSharingIncome = require("./profitSharingIncome");
+
 const ManageROIHistory = require("../models/manageROI");
-const { UpdateWallet } = require("./checkPackageLimit");
+
 const { CheckUserPackageLimit } = require("./CheckUserPackageLimit");
 
 const handleFirstROI = async () => {

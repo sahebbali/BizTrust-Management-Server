@@ -1,8 +1,9 @@
 const RewardIncomeModel = require("../models/rewardIncome.model");
 const User = require("../models/auth.model");
 const getPSTime = require("../config/getPSTime");
-const { UpdateWallet } = require("./checkPackageLimit");
+
 const generateRandomString = require("../config/generateRandomId");
+const { UpdateWallet } = require("./CheckUserEarningLimit");
 
 const CreateRewardHistory = async (
   userId,
