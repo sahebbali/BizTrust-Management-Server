@@ -11,6 +11,8 @@ const profitSharingIncome = async (
 ) => {
   console.log("Profit Sharing Income Calculation Started");
 
+  console.log({ roiPerDayCommissionAmount });
+
   try {
     // Fetch user levels
     const userLevels = await Level.find({ "level.userId": userId });

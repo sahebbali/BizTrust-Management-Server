@@ -4,6 +4,7 @@ const { PackageBuyInfo } = require("../models/topup.model");
 const { UpdateWallet } = require("./CheckUserEarningLimit");
 const CreateExtraEarning = require("./createExtraEarning");
 const CreateROIHistory = require("./CreateROIHistory");
+const profitSharingIncome = require("./profitSharingIncome");
 
 const CheckUserPackageLimit = async (
   package,
@@ -14,6 +15,10 @@ const CheckUserPackageLimit = async (
     const user = await User.findOne({ userId: package.userId });
     if (!user) {
       console.log(`User not found: ${package.userId}`);
+      return;
+    }
+    if (user.isPinAccount) {
+      console.log(`User is Pin Account: ${package.userId}`);
       return;
     }
     const percentage = user.isSecureAccount
