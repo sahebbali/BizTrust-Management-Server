@@ -50,11 +50,12 @@ const withdrawAmount = async (req, res) => {
     if (!userPIN) return res.status(404).json({ message: "PIN not found" });
     if (!userKYC) return res.status(404).json({ message: "Please Set Kyc!" });
     if (!existingKycFirst)
-      return res.status(404).json({ message: "Please Set Address Proof Kyc!" });
-    if (!existingKycAddress)
       return res
         .status(404)
         .json({ message: "Please Set Driving License Or Voter ID  Kyc!" });
+
+    if (!existingKycAddress)
+      return res.status(404).json({ message: "Please Set Address Proof Kyc!" });
 
     if (userPIN?.new_pin != pin) {
       return res.status(404).json({ message: "PIN not Match" });
@@ -96,12 +97,12 @@ const withdrawAmount = async (req, res) => {
     if (withdrawType === "E-wallet") {
       sufficientBalance = amount <= wallet.eWallet;
     } else if (withdrawType === "Profit Wallet") {
-      if (!isLastDayOfMonth) {
-        return res.status(400).json({
-          message:
-            "Profit Wallet withdrawals are allowed only on the last day of the month",
-        });
-      }
+      // if (!isLastDayOfMonth) {
+      //   return res.status(400).json({
+      //     message:
+      //       "Profit Wallet withdrawals are allowed only on the last day of the month",
+      //   });
+      // }
       sufficientBalance = amount <= wallet.profitWallet;
     } else if (withdrawType === "Both") {
       if (!isLastDayOfMonth) {

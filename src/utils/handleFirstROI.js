@@ -17,7 +17,7 @@ const handleFirstROI = async () => {
     // console.log({ dateInt });
 
     const manageROi = await ManageROIHistory.find({ date: today });
-    console.log({ manageROi });
+    // console.log({ manageROi });
 
     if (!manageROi || manageROi.percentage <= 0) {
       console.log("No valid commission percentage found, exiting.");

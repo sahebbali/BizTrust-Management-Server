@@ -32,6 +32,7 @@ const corsOptions = {
     "http://localhost:3000", // localhost
     "http://localhost:3001", // localhost
     "https://biztrustmanagement.netlify.app",
+    "https://grow-boo.com",
   ],
   optionsSuccessStatus: 200,
 };
