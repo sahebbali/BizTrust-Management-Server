@@ -87,13 +87,33 @@ const rewardIncome = async (userId) => {
     );
 
     allLine.sort((a, b) => b.totalInvestmentAmount - a.totalInvestmentAmount);
-    console.log("Calculated Line Packages (Sorted):", allLine);
+    // console.log("Calculated Line Packages (Sorted):", allLine);
     const line1 = allLine[0]?.totalInvestmentAmount || 0;
     const line2 = allLine[1]?.totalInvestmentAmount || 0;
     const line3 = allLine[2]?.totalInvestmentAmount || 0;
     const line4 = allLine[3]?.totalInvestmentAmount || 0;
     const line5 = allLine[4]?.totalInvestmentAmount || 0;
+
+    const line1SalesDirector = allLine[0]?.SalesDirector || 0;
+    const line2SalesDirector = allLine[1]?.SalesDirector || 0;
+    const line3AreaSalesManager = allLine[2]?.AreaSalesManager || 0;
+    const line4AreaSalesManager = allLine[3]?.AreaSalesManager || 0;
+    const line5TeamManager = allLine[4]?.TeamManager || 0;
+
+    // const line1SalesDirector = 1 || 0;
+    // const line2SalesDirector = 1 || 0;
+    // const line3AreaSalesManager = 1 || 0;
+    // const line4AreaSalesManager = 1 || 0;
+    // const line5TeamManager = 2 || 0;
+
     console.log({ line1, line2, line3, line4, line5 });
+    console.log({
+      line1SalesDirector,
+      line2SalesDirector,
+      line3AreaSalesManager,
+      line4AreaSalesManager,
+      line5TeamManager,
+    });
     // await CreateRewardHistory(
     //   userId,
     //   "Relationship Manager",
@@ -105,7 +125,7 @@ const rewardIncome = async (userId) => {
     if (allLine.length >= 2 && line1 >= 3000000 && line2 >= 1500000) {
       await CreateRewardHistory(
         userId,
-        " Sales Manager",
+        "Sales Manager",
         150000,
         1,
         line1,
@@ -156,6 +176,24 @@ const rewardIncome = async (userId) => {
         "Sales Director",
         "1800CC CAR",
         4,
+        line1,
+        line2,
+        line3,
+        line4,
+        line5
+      );
+    } else if (
+      line1SalesDirector >= 1 &&
+      line2SalesDirector >= 1 &&
+      line3AreaSalesManager >= 1 &&
+      line4AreaSalesManager >= 1 &&
+      line5TeamManager >= 2
+    ) {
+      await CreateRewardHistory(
+        userId,
+        "Executive Sales Director",
+        "Villa",
+        5,
         line1,
         line2,
         line3,

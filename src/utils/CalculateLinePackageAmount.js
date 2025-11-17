@@ -1,49 +1,85 @@
+const User = require("../models/auth.model");
 const Level = require("../models/level.model");
 const Wallet = require("../models/wallet.model");
 
 const CalculateLinePackageAmount = async (userId) => {
-  console.log("CalculateLinePackageAmount");
+  console.log("▶ CalculateLinePackageAmount Called for:", userId);
+
   try {
-    // Find the document for the specified userId
-    const levels = await Level.findOne({ userId }); // Assuming one document per userId
-    // console.log({ levels });
+    // Find the level document for the user
+    const levels = await Level.findOne({ userId }).lean();
 
-    // Check if levels exist and filter level 1 users
-    const distributorLvl = levels?.level?.filter((d) => d?.userId);
-    // console.log("User Id: ", distributorLvl);
+    // Get all level user IDs + self userId
+    const distributorLevels = levels?.level || [];
+    const userIds = distributorLevels
+      .filter((item) => item?.userId)
+      .map((item) => item.userId);
 
-    // Extract userId values dynamically
-    const userIds = distributorLvl?.map((d) => d.userId) || [];
-    userIds.push(userId);
-    console.log("User Id Array: ", userIds);
+    userIds.push(userId); // Include the main user
+    // console.log("User IDs in line:", userIds);
 
-    // Fetch investment amount and user count
+    // --- Fetch Investment Sum & Total Users in Line ---
     const [investmentData] = await Wallet.aggregate([
-      {
-        $match: {
-          userId: { $in: userIds }, // Filter by userIds
-        },
-      },
+      { $match: { userId: { $in: userIds } } },
       {
         $group: {
           _id: null,
-          totalInvestmentAmount: { $sum: "$investmentAmount" }, // Sum of investment amounts
-          userCount: { $sum: 1 }, // Count the number of users
+          totalInvestmentAmount: { $sum: "$investmentAmount" },
+          totalUsers: { $sum: 1 },
         },
       },
     ]);
 
-    // Prepare result
-    const result = {
-      totalInvestmentAmount: investmentData?.totalInvestmentAmount || 0,
-      userCount: investmentData?.userCount || 0,
+    // --- Fetch Rank Counts in a Single Query ---
+    const rankCounts = await User.aggregate([
+      {
+        $match: {
+          userId: { $in: userIds },
+          rank: {
+            $in: [
+              "Sales Manager",
+              "Team Manager",
+              "Area Sales Manager",
+              "Sales Director",
+            ],
+          },
+        },
+      },
+      {
+        $group: {
+          _id: "$rank",
+          count: { $sum: 1 },
+        },
+      },
+    ]);
+
+    // Convert aggregated ranks to readable format
+    const ranks = {
+      SalesManager: 0,
+      TeamManager: 0,
+      AreaSalesManager: 0,
+      SalesDirector: 0,
     };
 
-    console.log("Result: ", result);
-    return result; // Return the result
+    rankCounts.forEach((item) => {
+      if (item._id === "Sales Manager") ranks.SalesManager = item.count;
+      if (item._id === "Team Manager") ranks.TeamManager = item.count;
+      if (item._id === "Area Sales Manager")
+        ranks.AreaSalesManager = item.count;
+      if (item._id === "Sales Director") ranks.SalesDirector = item.count;
+    });
+
+    const result = {
+      totalInvestmentAmount: investmentData?.totalInvestmentAmount || 0,
+      userCount: investmentData?.totalUsers || 0,
+      ...ranks,
+    };
+
+    // console.log("✔ Result:", result);
+    return result;
   } catch (error) {
-    console.log("Level Error", error);
-    throw error; // Re-throw the error to handle it at a higher level
+    console.error("❌ CalculateLinePackageAmount Error:", error.message);
+    throw error;
   }
 };
 
