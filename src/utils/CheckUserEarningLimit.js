@@ -1,18 +1,21 @@
 const User = require("../models/auth.model");
-const { PackageBuyInfo } = require("../models/topup.model");
 const Wallet = require("../models/wallet.model");
 const CreateExtraEarning = require("./createExtraEarning");
 const CreateLevelIncomeHistory = require("./createLevelIncomeHistory");
-const UpdateWallet = async (userId, CommissionAmount, type) => {
+const UpdateWallet = async (userId, CommissionAmount, type, level) => {
   try {
-    // update wallet
+    console.log({ userId, CommissionAmount, type, level });
+    const isDirectLevel = level === 1;
+    console.log({ isDirectLevel });
     let updateFields = {};
     console.log({ type });
     if (type === "level-income") {
       console.log("level-income");
       updateFields = {
         $inc: {
-          levelIncome: +CommissionAmount,
+          // [isDirectLevel ? "directIncome" : "levelIncome"]: +CommissionAmount,
+          directIncome: level === 1 ? CommissionAmount : 0,
+          levelIncome: level === 1 ? 0 : CommissionAmount,
           totalIncome: +CommissionAmount,
           activeIncome: +CommissionAmount,
           eWallet: +CommissionAmount,
@@ -83,7 +86,7 @@ const CheckUserEarningLimit = async (
       return;
     }
 
-    if (user.returnAmount >= user.packageLimit) {
+    if (user.returnAmount >= user.packageLimit && user.packageAmount !== 0) {
       console.log(`User ${userId} has reached their package limit`);
       await CreateExtraEarning(
         userId,
@@ -96,10 +99,10 @@ const CheckUserEarningLimit = async (
       );
       return;
     }
-    2400;
+
     const totalIncome = user.returnAmount + amount;
 
-    if (totalIncome > user.packageLimit) {
+    if (totalIncome > user.packageLimit && user.packageLimit > 0) {
       const finalAmount = user.packageLimit - user.returnAmount;
       const extraAmount = totalIncome - user.packageLimit;
       console.log(
@@ -125,7 +128,7 @@ const CheckUserEarningLimit = async (
         type,
         percentage
       );
-      await UpdateWallet(userId, finalAmount, type);
+      await UpdateWallet(userId, finalAmount, type, level);
     } else {
       console.log(`User ${userId} income within limit: ${amount}`);
       await CreateLevelIncomeHistory(
@@ -139,7 +142,7 @@ const CheckUserEarningLimit = async (
         type,
         percentage
       );
-      await UpdateWallet(userId, amount, type);
+      await UpdateWallet(userId, amount, type, level);
     }
   } catch (error) {
     console.log(error);

@@ -57,6 +57,7 @@ const levelIncome = async (userId, fullName, packageAmount) => {
       // Calculate commission
       const commissionAmount = (packageAmount * percentage) / 100;
       console.log("Commission:", commissionAmount, "User:", uplineUser.userId);
+      Math.abs(Number(commissionAmount.toFixed(2)));
 
       await CheckUserEarningLimit(
         levelData.userId,

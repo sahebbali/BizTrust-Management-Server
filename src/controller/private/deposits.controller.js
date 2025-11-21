@@ -9,6 +9,11 @@ const ManageDepositAuth = require("../../models/mangeDepositeAuth.model");
 const Wallet = require("../../models/wallet.model");
 const bcrypt = require("bcryptjs");
 const getDatesInRange = require("../../config/getDatesInRange");
+const levelIncome = require("../../utils/levelIncome");
+const { updatePackageAmount } = require("../../utils/updatePackageAmount");
+const ProvideExtraEarning = require("../../utils/ProvideExtraEarning");
+const { PackageBuyInfo } = require("../../models/topup.model");
+const rewardIncome = require("../../utils/rewardIncome");
 
 const updateRemark = async (req, res) => {
   try {
@@ -236,14 +241,14 @@ const updateDepositStatus = async (req, res) => {
       );
 
       if (status === "success") {
-        await Wallet.findOneAndUpdate(
-          { userId: existingDeposit.userId },
-          {
-            $inc: {
-              depositBalance: +existingDeposit.amount,
-            },
-          }
-        );
+        // await Wallet.findOneAndUpdate(
+        //   { userId: existingDeposit.userId },
+        //   {
+        //     $inc: {
+        //       depositBalance: +existingDeposit.amount,
+        //     },
+        //   }
+        // );
 
         await User.findOneAndUpdate(
           { userId: existingDeposit?.userId },
@@ -258,7 +263,44 @@ const updateDepositStatus = async (req, res) => {
         //   "Your deposit request has been successfully processed, and the funds have been added to your wallet",
         //   "deposit"
         // );
-        message = "Deposit succeeded";
+        const startDate = new Date(
+          new Date().toLocaleString("en-US", { timeZone: "Asia/Karachi" })
+        );
+
+        // Add 48 hours to the start date
+        startDate.setTime(startDate.getTime() + 48 * 60 * 60 * 1000); // 48 hours in milliseconds
+        const startDateObj = new Date(startDate);
+        const endDateObj = new Date(startDateObj);
+        endDateObj.setFullYear(endDateObj.getFullYear() + 2); // Add 2 years to the start date
+
+        const updatePackage = await PackageBuyInfo.create({
+          userId: existingDeposit?.userId,
+          userFullName: currentUser?.fullName,
+          sponsorId: currentUser?.sponsorId,
+          sponsorName: currentUser?.sponsorName,
+          packageAmount: existingDeposit?.amount,
+          packageLimit: existingDeposit?.amount * 2,
+          packageId:
+            Date.now().toString(36) + Math.random().toString(36).substring(2),
+          isActive: true,
+          status: "success",
+          startDate: startDateObj.toDateString(), // Use the formatted start date
+          startDateInt: startDateObj.getTime(), // Use timestamp for startDateInt
+          endDate: endDateObj.toDateString(), // Use the formatted end date
+          endDateInt: endDateObj.getTime(), // Use timestamp for endDateInt
+        });
+        await ProvideExtraEarning(updatePackage?.userId);
+        await updatePackageAmount(
+          existingDeposit?.userId,
+          existingDeposit?.amount
+        );
+        await levelIncome(
+          updatePackage.userId,
+          updatePackage.userFullName,
+          updatePackage.packageAmount
+        );
+        await rewardIncome(updatePackage?.sponsorId);
+        message = "Deposit succeeded & Package activated";
       } else {
         // Send mail notifiction to user email with request status
         // sendEmailNotification(

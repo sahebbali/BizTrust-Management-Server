@@ -10,6 +10,7 @@ const walletSchema = new mongoose.Schema(
     roiIncome: { type: Number, default: 0 },
     rewardIncome: { type: Number, default: 0 },
     levelIncome: { type: Number, default: 0 },
+    directIncome: { type: Number, default: 0 },
     profitSharingIncome: { type: Number, default: 0 },
     depositBalance: { type: Number, default: 0 },
     totalIncome: { type: Number, default: 0 },

@@ -17,7 +17,7 @@ const sendForgotPasswordMail = (email, token) => {
   });
 
   let mailOption = {
-    from: "BizTrust Management",
+    from: "Growboo",
     to: email,
     subject: "Forgot Password",
     html: `<div style="width: 100%; padding: 20px 10px; font-weight: 600">
@@ -40,15 +40,15 @@ const sendForgotPasswordMail = (email, token) => {
       </p>
     </div>
     <p>Regards,</p>
-    <a>BizTrust Management</a>
+    <a>Growboo</a>
   </div>`,
   };
 
   transporter.sendMail(mailOption, async (error, info) => {
     if (error) {
-      //console.log(error);
+      console.log(error);
     } else {
-      //console.log("Email sent: " + info.response);
+      console.log("Email sent: " + info.response);
     }
   });
 };
