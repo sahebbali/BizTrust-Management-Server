@@ -10,20 +10,13 @@ const Wallet = require("../../models/wallet.model");
 const ValidationErrorMsg = require("../../helpers/ValidationErrorMsg");
 const updateLevel = require("../../utils/updateLavel");
 const getIstTime = require("../../config/getTime");
-const generateRandomString = require("../../config/generateRandomId");
 const bcrypt = require("bcryptjs");
 const PDFData = require("../../models/setting.model");
 const sendForgotPasswordMail = require("../../config/sendForgotPasswordMail");
-const {
-  getIstTimeWithInternet,
-  getIstInternetTime,
-} = require("../../config/internetTime");
-const getDatesInRange = require("../../config/getDatesInRange");
-const ImageData = require("../../models/image.model");
+const { getIstTimeWithInternet } = require("../../config/internetTime");
 const VedioData = require("../../models/vedio.model");
 const { distributeRankIncome } = require("../../utils/rankIncome");
-const { PackageBuyInfo } = require("../../models/topup.model");
-const sendVerificationMail = require("../../config/sendVerificationMail");
+const Inquire = require("../../models/Inquire.model");
 
 const testRankIncome = async (req, res) => {
   // await distributeRankIncome();
@@ -859,6 +852,51 @@ const getAllVedio = async (req, res) => {
     return res.status(500).json({ message: "Something went wrong" });
   }
 };
+
+const createInquiry = async (req, res) => {
+  try {
+    const { name, phone, email, country, city, investmentType, message } =
+      req.body;
+    console.log("my body", req.body);
+
+    if (!name || !phone || !email || !investmentType || !message) {
+      return res.status(400).json({
+        success: false,
+        message: "Required fields missing",
+      });
+    }
+    const existInquiry = await Inquire.findOne({ email: email });
+    if (existInquiry) {
+      return res.status(400).json({
+        success: false,
+        message: "Inquiry already exist",
+      });
+    }
+
+    const newInquiry = await Inquire.create({
+      name,
+      phone,
+      email,
+      country,
+      city,
+      investmentType,
+      message,
+    });
+
+    return res.status(201).json({
+      success: true,
+      message: "Inquiry submitted successfully!",
+      data: newInquiry,
+    });
+  } catch (error) {
+    console.error("Inquiry Error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error while creating inquiry",
+    });
+  }
+};
+
 module.exports = {
   createAdminLoginOtpController,
   adminLoginController,
@@ -875,4 +913,5 @@ module.exports = {
   getPdfLink,
   getAllImage,
   getAllVedio,
+  createInquiry,
 };

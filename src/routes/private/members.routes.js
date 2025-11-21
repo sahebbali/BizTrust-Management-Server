@@ -64,6 +64,6 @@ router.put("/updateUserWalletInfo", updateUserWalletInfo);
 router.put("/makePinAccount", makePinAccount);
 router.put("/updateUserOpenLevel", updateUserOpenLevel);
 
-router.post("/register", registerValidator, registerController);
+// router.post("/register", registerValidator, registerController);
 
 module.exports = router;

@@ -14,6 +14,7 @@ const {
   testRankIncome,
   createAdminLoginOtpController,
   adminLoginController,
+  createInquiry,
 } = require("../../controller/public/auth.controller");
 const {
   registerValidator,
@@ -37,5 +38,6 @@ router.get("/check_email/:email", checkEmailController);
 router.get("/get_pdf_link", getPdfLink);
 router.get("/get_all_image", getAllImage);
 router.get("/get_all_vedio", getAllVedio);
+router.post("/create_inquiry", createInquiry);
 
 module.exports = router;

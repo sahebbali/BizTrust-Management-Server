@@ -4,7 +4,7 @@ const mongoosePaginate = require("mongoose-paginate-v2");
 
 const inquireSchema = new mongoose.Schema(
   {
-    userName: { type: String, required: true, trim: true },
+    name: { type: String, required: true, trim: true },
     phone: {
       type: String,
       required: true,
@@ -45,9 +45,6 @@ const inquireSchema = new mongoose.Schema(
 
 inquireSchema.plugin(mongoosePaginate);
 
-// Optional: a small virtual
-inquireSchema.virtual("id").get(function () {
-  return this._id.toHexString();
-});
+const Inquire = mongoose.model("Inquire", inquireSchema);
 
-module.exports = mongoose.model("Inquire", inquireSchema);
+module.exports = Inquire;
