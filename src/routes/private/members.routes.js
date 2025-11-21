@@ -26,6 +26,10 @@ const {
   deleteRewardImage,
   getAllRewards,
 } = require("../../controller/private/rewardImage.controller");
+const registerValidator = require("../../validation/auth.validator");
+const {
+  registerController,
+} = require("../../controller/public/auth.controller");
 
 router.get(
   "/user/find_this_month_total_team_business",
@@ -59,5 +63,7 @@ router.patch("/updateKycAdmin", updateKycController);
 router.put("/updateUserWalletInfo", updateUserWalletInfo);
 router.put("/makePinAccount", makePinAccount);
 router.put("/updateUserOpenLevel", updateUserOpenLevel);
+
+router.post("/register", registerValidator, registerController);
 
 module.exports = router;
