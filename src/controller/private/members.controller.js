@@ -1708,8 +1708,16 @@ const addUser = async (req, res) => {
   }
 
   try {
-    const { fullName, email, password, mobile, sponsorId, securityType } =
-      req.body;
+    const {
+      fullName,
+      email,
+      password,
+      mobile,
+      sponsorId,
+      country,
+      city,
+      securityType,
+    } = req.body;
     if (!fullName || !email || !password || !mobile || !sponsorId) {
       return res.status(400).json({ message: "Please Enter all the Feilds" });
     }
@@ -1743,6 +1751,8 @@ const addUser = async (req, res) => {
         sponsorId: sponsorId,
         sponsorName: userSponsor.fullName,
         token,
+        country: country,
+        city: city,
         userStatus: true,
         isActive: false,
         joiningDate: new Date(
@@ -1757,6 +1767,10 @@ const addUser = async (req, res) => {
         isSecureAccount: securityType === "Assets Fund" ? true : false,
       });
       if (user) {
+        await Inquire.findOneAndUpdate(
+          { email: email },
+          { $set: { handled: true } }
+        );
         await Wallet.create({
           userId: user.userId,
           fullName: user.fullName,
@@ -1820,6 +1834,7 @@ const addUser = async (req, res) => {
 const getInquiryByEmail = async (req, res) => {
   try {
     const { email } = req.query;
+    console.log({ email });
     const user = await Inquire.findOne({ email: email });
     if (user) {
       return res.status(200).json({

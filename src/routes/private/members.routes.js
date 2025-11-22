@@ -69,6 +69,6 @@ router.put("/makePinAccount", makePinAccount);
 router.put("/updateUserOpenLevel", updateUserOpenLevel);
 
 router.post("/add-user", addUser);
-router.get("/get-inquiry-by-email/:email", getInquiryByEmail);
+router.get("/get-inquiry-by-email", getInquiryByEmail);
 
 module.exports = router;

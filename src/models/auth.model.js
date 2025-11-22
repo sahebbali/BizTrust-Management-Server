@@ -63,6 +63,7 @@ const userSchema = new mongoose.Schema(
       },
     ],
     country: String,
+    city: String,
     gender: String,
     avatar: String,
     deleteStatus: { type: Boolean, default: false },
