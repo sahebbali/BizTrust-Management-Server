@@ -22,6 +22,7 @@ const {
   updateUserOpenLevel,
   inquiredUsersController,
   addUser,
+  getInquiryByEmail,
 } = require("../../controller/private/members.controller");
 const {
   uploadRewardImage,
@@ -68,5 +69,6 @@ router.put("/makePinAccount", makePinAccount);
 router.put("/updateUserOpenLevel", updateUserOpenLevel);
 
 router.post("/add-user", addUser);
+router.get("/get-inquiry-by-email/:email", getInquiryByEmail);
 
 module.exports = router;

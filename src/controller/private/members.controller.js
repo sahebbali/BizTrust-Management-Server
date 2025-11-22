@@ -16,6 +16,11 @@ const Kyc = require("../../models/KYCSchema");
 const CalculateLinePackageAmount = require("../../utils/CalculateLinePackageAmount");
 const Inquire = require("../../models/Inquire.model");
 const updateLevel = require("../../utils/updateLavel");
+const { validationResult } = require("express-validator");
+const ValidationErrorMsg = require("../../helpers/ValidationErrorMsg");
+const generateUniqueUserID = require("../../config/generateUniqueUserID");
+const { generateToken } = require("../../config/generateToken");
+const sendVerificationMail = require("../../config/sendVerificationMail");
 
 const findThisMonthTotalTeamBusiness = async (req, res) => {
   try {
@@ -1749,7 +1754,7 @@ const addUser = async (req, res) => {
         rankIncomeCurrentDateString: new Date(
           ISTTime?.date ? ISTTime?.date : getIstTime().date
         ).toDateString(),
-        isSecureAccount: securityType === "secure" ? true : false,
+        isSecureAccount: securityType === "Assets Fund" ? true : false,
       });
       if (user) {
         await Wallet.create({
@@ -1812,6 +1817,28 @@ const addUser = async (req, res) => {
   }
 };
 
+const getInquiryByEmail = async (req, res) => {
+  try {
+    const { email } = req.query;
+    const user = await Inquire.findOne({ email: email });
+    if (user) {
+      return res.status(200).json({
+        message: "User found",
+        user,
+      });
+    } else {
+      return res.status(400).json({
+        message: "User not found",
+      });
+    }
+  } catch (error) {
+    console.log(error);
+    return res.status(400).json({
+      message: error.toString(),
+    });
+  }
+};
+
 module.exports = {
   findThisMonthTotalTeamBusiness,
   createOtpForEditUserByAdminController,
@@ -1834,4 +1861,5 @@ module.exports = {
 
   inquiredUsersController,
   addUser,
+  getInquiryByEmail,
 };
