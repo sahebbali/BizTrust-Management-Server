@@ -1716,13 +1716,13 @@ const addUser = async (req, res) => {
       sponsorId,
       country,
       city,
-      securityType,
+      investmentType,
     } = req.body;
     if (!fullName || !email || !password || !mobile || !sponsorId) {
       return res.status(400).json({ message: "Please Enter all the Feilds" });
     }
 
-    console.log({ securityType });
+    console.log({ investmentType });
     const userExists = await User.findOne({ email: email });
     const userSponsor = await User.findOne({ userId: sponsorId });
 
@@ -1764,7 +1764,7 @@ const addUser = async (req, res) => {
         rankIncomeCurrentDateString: new Date(
           ISTTime?.date ? ISTTime?.date : getIstTime().date
         ).toDateString(),
-        isSecureAccount: securityType === "Assets Fund" ? true : false,
+        isSecureAccount: investmentType === "Assets Fund" ? true : false,
       });
       if (user) {
         await Inquire.findOneAndUpdate(

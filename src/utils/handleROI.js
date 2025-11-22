@@ -10,14 +10,19 @@ const handleROI = async () => {
     console.log("Starting ROI Distribution");
 
     const currentISTTime = new Date(getIstTime().date);
-    const today = currentISTTime.toDateString();
+    const todays = currentISTTime.toDateString();
     const dateInt = currentISTTime.getTime();
+    const today = new Date(getIstTime().date).toDateString().split(" ")[0];
 
     // console.log({ dateInt });
 
-    const manageROi = await ManageROIHistory.find({ date: today });
+    const manageROi = await ManageROIHistory.find({ date: todays });
 
-    if (!manageROi || manageROi.percentage <= 0) {
+    if (today === "Sat" || today === "Sun") {
+      console.log("ROI isn't distributed on Saturday and Sunday");
+      return;
+    }
+    if (!manageROi) {
       console.log("No valid commission percentage found, exiting.");
       return;
     }
@@ -26,8 +31,8 @@ const handleROI = async () => {
       (item) => item.securityType === "insecure"
     );
 
-    const securePercentage = secureROI ? secureROI.percentage : 0;
-    const insecurePercentage = insecureROI ? insecureROI.percentage : 0;
+    const securePercentage = secureROI ? secureROI.percentage : 0.13;
+    const insecurePercentage = insecureROI ? insecureROI.percentage : 0.36;
 
     console.log("Secure Percentage:", securePercentage);
     console.log("Insecure Percentage:", insecurePercentage);
