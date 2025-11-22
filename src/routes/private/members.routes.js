@@ -20,6 +20,8 @@ const {
   updateUserWalletInfo,
   makePinAccount,
   updateUserOpenLevel,
+  inquiredUsersController,
+  addUser,
 } = require("../../controller/private/members.controller");
 const {
   uploadRewardImage,
@@ -43,6 +45,7 @@ router.get("/user/get_address_history_by_admin", getAddressHistoryByAdmin);
 router.get("/user/get_all_users", allMembersController);
 router.get("/user/get_active_users", activeUsersController);
 router.get("/user/get_blocked_users", blockedUsersController);
+router.get("/user/get_inquired_users", inquiredUsersController);
 router.put("/user/edit_users", editUser);
 router.put("/user/change_user_status", changeUserStatus);
 router.put("/user/delete_user", deleteUser);
@@ -64,6 +67,6 @@ router.put("/updateUserWalletInfo", updateUserWalletInfo);
 router.put("/makePinAccount", makePinAccount);
 router.put("/updateUserOpenLevel", updateUserOpenLevel);
 
-// router.post("/register", registerValidator, registerController);
+router.post("/add-user", addUser);
 
 module.exports = router;

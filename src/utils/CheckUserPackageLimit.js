@@ -21,6 +21,10 @@ const CheckUserPackageLimit = async (
       console.log(`User is Pin Account: ${package.userId}`);
       return;
     }
+    if (package.isROIFree) {
+      console.log(`Package is ROI Free: ${package.packageId}`);
+      return;
+    }
     const percentage = user.isSecureAccount
       ? securePercentage
       : insecurePercentage;

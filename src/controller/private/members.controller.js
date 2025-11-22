@@ -14,6 +14,8 @@ const getIstTime = require("../../config/getTime");
 const { checkDate } = require("../../utils/rankIncome");
 const Kyc = require("../../models/KYCSchema");
 const CalculateLinePackageAmount = require("../../utils/CalculateLinePackageAmount");
+const Inquire = require("../../models/Inquire.model");
+const updateLevel = require("../../utils/updateLavel");
 
 const findThisMonthTotalTeamBusiness = async (req, res) => {
   try {
@@ -523,6 +525,120 @@ const blockedUsersController = async (req, res) => {
     // Download CSV
     if (downloadCSV === "csv") {
       const result = await User.aggregate([
+        {
+          $addFields: {
+            "joinDate.miliSec": { $toLong: { $toDate: "$joiningDate" } },
+          },
+        },
+        { $match: matchStage },
+        {
+          $project: {
+            _id: 0,
+            team: 0,
+            password: 0,
+            token: 0,
+            role: 0,
+            deleteStatus: 0,
+          },
+        },
+      ]);
+      return res.status(200).json({ csv: result, data: response });
+    }
+
+    if (dataResult.length > 0) {
+      return res.status(200).json({ data: response });
+    } else {
+      return res.status(400).json({ message: "There is no user" });
+    }
+  } catch (error) {
+    return res.status(400).json({
+      message: "Something went wrong",
+    });
+  }
+};
+const inquiredUsersController = async (req, res) => {
+  try {
+    const page = parseInt(req?.query?.page) || 1;
+    const pageSize = parseInt(req?.query?.limit) || 10;
+    const searchById = req.query.searchById || "";
+    const searchByStartDate = new Date(req.query.startDate).getTime() || "";
+    const searchByEndDate = new Date(req.query.endDate).getTime() || "";
+    const downloadCSV = req.query.csv || "";
+
+    const matchStage = {
+      $and: [
+        { handled: false },
+        searchById ? { name: { $eq: searchById } } : { name: { $ne: "admin" } },
+        searchByStartDate && searchByEndDate
+          ? {
+              $or: [
+                {
+                  "joinDate.miliSec": {
+                    $gte: searchByStartDate,
+                    $lte: searchByEndDate,
+                  },
+                },
+                {
+                  joiningDate: new Date(searchByStartDate).toDateString(),
+                },
+              ],
+            }
+          : {},
+      ],
+    };
+
+    const countPipeline = [
+      {
+        $addFields: {
+          "joinDate.miliSec": { $toLong: { $toDate: "$joiningDate" } },
+        },
+      },
+      { $match: matchStage },
+      { $count: "totalDocs" },
+    ];
+
+    const dataPipeline = [
+      {
+        $addFields: {
+          "joinDate.miliSec": { $toLong: { $toDate: "$joiningDate" } },
+        },
+      },
+      { $match: matchStage },
+      { $sort: { "joinDate.miliSec": -1 } },
+      { $skip: (page - 1) * pageSize },
+      { $limit: pageSize },
+      { $project: { team: 0, password: 0, token: 0, role: 0 } },
+    ];
+
+    const [countResult, dataResult] = await Promise.all([
+      Inquire.aggregate(countPipeline),
+      Inquire.aggregate(dataPipeline),
+    ]);
+
+    const totalItems = countResult.length > 0 ? countResult[0].totalDocs : 0;
+    const totalPages = Math.ceil(totalItems / pageSize);
+    const hasNextPage = page < totalPages;
+    const nextPage = hasNextPage ? page + 1 : null;
+    const hasPrevPage = page > 1;
+    const prevPage = hasPrevPage ? page - 1 : null;
+    const pagingCounter = (page - 1) * pageSize + 1;
+
+    const response = {
+      totalDocs: totalItems,
+      limit: pageSize,
+      totalPages: totalPages,
+      page: page,
+      pagingCounter: pagingCounter,
+      hasPrevPage: hasPrevPage,
+      hasNextPage: hasNextPage,
+      prevPage: prevPage,
+      nextPage: nextPage,
+      docs: dataResult,
+    };
+
+    // Download CSV
+    if (downloadCSV === "csv") {
+      const result = await Inquire.aggregate([
         {
           $addFields: {
             "joinDate.miliSec": { $toLong: { $toDate: "$joiningDate" } },
@@ -1569,6 +1685,133 @@ const updateUserOpenLevel = async (req, res) => {
   }
 };
 
+const addUser = async (req, res) => {
+  const ISTTime = await getIstTimeWithInternet();
+  const error = validationResult(req).formatWith(ValidationErrorMsg);
+  if (!error.isEmpty()) {
+    let msg;
+    Object.keys(req.body).map((d) => {
+      if (error.mapped()[d] !== undefined) {
+        msg = error.mapped()[d];
+      }
+    });
+    if (msg !== undefined) {
+      return res.status(400).json({
+        message: msg,
+      });
+    }
+  }
+
+  try {
+    const { fullName, email, password, mobile, sponsorId, securityType } =
+      req.body;
+    if (!fullName || !email || !password || !mobile || !sponsorId) {
+      return res.status(400).json({ message: "Please Enter all the Feilds" });
+    }
+
+    console.log({ securityType });
+    const userExists = await User.findOne({ email: email });
+    const userSponsor = await User.findOne({ userId: sponsorId });
+
+    if (!userSponsor) {
+      return res.status(400).json({ message: "Invalid Sponsor ID" });
+    }
+    if (!userExists) {
+      // if (otpCode && parseInt(otp?.code) === parseInt(otpCode)) {
+      let generatedUserId;
+      let isUserIdUnique = false;
+      while (!isUserIdUnique) {
+        generatedUserId = generateUniqueUserID();
+        const isUserExists = await User.findOne({ userId: generatedUserId });
+        if (!isUserExists) {
+          isUserIdUnique = true;
+        }
+      }
+      const token = generateToken(generatedUserId);
+      const user = await User.create({
+        fullName: fullName,
+        userId: generatedUserId,
+        email: email,
+        password: password,
+        passwords: password,
+        mobile: mobile,
+        sponsorId: sponsorId,
+        sponsorName: userSponsor.fullName,
+        token,
+        userStatus: true,
+        isActive: false,
+        joiningDate: new Date(
+          ISTTime?.date ? ISTTime?.date : getIstTime().date
+        ).toDateString(),
+        rankIncomeCurrentDate: new Date(
+          ISTTime?.date ? ISTTime?.date : getIstTime().date
+        ).getTime(),
+        rankIncomeCurrentDateString: new Date(
+          ISTTime?.date ? ISTTime?.date : getIstTime().date
+        ).toDateString(),
+        isSecureAccount: securityType === "secure" ? true : false,
+      });
+      if (user) {
+        await Wallet.create({
+          userId: user.userId,
+          fullName: user.fullName,
+          sponsorId: user.sponsorId,
+          sponsorName: user.sponsorName,
+          roiIncome: 0,
+          rewardIncome: 0,
+          rankIncome: 0,
+          levelIncome: 0,
+          directIncome: 0,
+          indirectIncome: 0,
+          depositBalance: 0,
+          totalIncome: 0,
+          investmentAmount: 0,
+          activeIncome: 0,
+        });
+
+        // create level new for user
+        await Level.create({
+          fullName: user.fullName,
+          userId: user.userId,
+          email: user.email,
+          sponsorId: user.sponsorId,
+          level: [],
+        });
+
+        let currentSponsor = user;
+        for (let i = 1; i <= 5; i++) {
+          const levelUser = await Level.findOne({
+            userId: currentSponsor.sponsorId,
+          });
+
+          if (levelUser) {
+            await updateLevel(levelUser, user, i);
+            currentSponsor = levelUser;
+          } else {
+            break;
+          }
+        }
+
+        await sendVerificationMail(user);
+        res
+          .status(201)
+          .json({ message: "User registered. Please verify your email." });
+      } else {
+        return res.status(400).json({ message: "Invalid credintial" });
+      }
+    } else {
+      return res.status(400).json({
+        message: "User Already Exists",
+      });
+    }
+  } catch (error) {
+    console.log(error);
+    return res.status(400).json({
+      message: error.toString(),
+    });
+  }
+};
+
 module.exports = {
   findThisMonthTotalTeamBusiness,
   createOtpForEditUserByAdminController,
@@ -1588,4 +1831,7 @@ module.exports = {
   updateUserWalletInfo,
   makePinAccount,
   updateUserOpenLevel,
+
+  inquiredUsersController,
+  addUser,
 };
