@@ -1008,6 +1008,7 @@ const getTeamStatistics = async (req, res) => {
       totalIncome: walletInfo.totalIncome,
       roiIncome: walletInfo.roiIncome,
       levelIncome: walletInfo.levelIncome,
+      directIncome: walletInfo.directIncome,
       rankIncome: walletInfo.rankIncome,
       rewardIncome: walletInfo.rewardIncome,
       depositBalance: walletInfo.depositBalance,

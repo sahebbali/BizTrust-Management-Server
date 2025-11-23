@@ -136,6 +136,7 @@ const getDashboardStatsController = async (req, res) => {
       totalTeam,
       totalDirectTeam,
       levelIncome: walletFind?.levelIncome,
+      directIncome: walletFind?.directIncome,
       roiIncome: walletFind?.roiIncome,
       rewardIncome: walletFind?.rewardIncome,
       profitSharingIncome: walletFind?.profitSharingIncome,
