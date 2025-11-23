@@ -1,7 +1,7 @@
 const nodemailer = require("nodemailer");
 
 const sendForgotPasswordMail = (email, token) => {
-  const reset_password_url = `https://safeandsecuretrade.com/resetpassword/${token}`;
+  const reset_password_url = `https://grow-boo.com/resetpassword/${token}`;
   let transporter = nodemailer.createTransport({
     service: "Gmail",
     port: 587,

@@ -18,107 +18,6 @@ const VedioData = require("../../models/vedio.model");
 const { distributeRankIncome } = require("../../utils/rankIncome");
 const Inquire = require("../../models/Inquire.model");
 
-const testRankIncome = async (req, res) => {
-  // await distributeRankIncome();
-  // await Wallet.updateMany({}, {$set: {depositBalance: 10000000}})
-  // await User.updateMany({}, {$set: {password: '$2a$10$uoXUraHTYZQZy9lN.WIylu2S8/4/gEJ7w/Ihp2ROnLn5pDzVQlh8K'}})
-  // const generateRandomName = () => {
-  //   const names = [
-  //     "Alice",
-  //     "Bob",
-  //     "Charlie",
-  //     "David",
-  //     "Eva",
-  //     "Frank",
-  //     "Grace",
-  //     "Henry",
-  //     "Ivy",
-  //     "Jack",
-  //   ];
-  //   return names[Math.floor(Math.random() * names.length)];
-  // };
-  // const sponsorUser = await User.findOne({ userId: "LNA39245257" });
-  // for (let i = 0; i <= 25; i++) {
-  //   let generatedUserId;
-  //   let isUserIdUnique = false;
-  //   while (!isUserIdUnique) {
-  //     generatedUserId = generateUniqueUserID();
-  //     const isUserExists = await User.findOne({ userId: generatedUserId });
-  //     if (!isUserExists) {
-  //       isUserIdUnique = true;
-  //     }
-  //   }
-  //   const ISTTime = await getIstTimeWithInternet();
-  //   const user = await User.create({
-  //     fullName: generateRandomName(),
-  //     userId: generatedUserId,
-  //     email: `sas${generatedUserId}@gmail.com`,
-  //     password: '$2a$10$uoXUraHTYZQZy9lN.WIylu2S8/4/gEJ7w/Ihp2ROnLn5pDzVQlh8K',
-  //     mobile: `+91${generatedUserId}`,
-  //     sponsorId: "379978",
-  //     sponsorName: "Ruman Islam",
-  //     token: generateToken(generatedUserId),
-  //     userStatus: true,
-  //     isActive: false,
-  //     joiningDate: new Date(
-  //       ISTTime?.date ? ISTTime?.date : getIstTime().date
-  //     ).toDateString(),
-  //     rankIncomeCurrentDate: new Date(
-  //       ISTTime?.date ? ISTTime?.date : getIstTime().date
-  //     ).getTime(),
-  //   });
-  //   await Wallet.create({
-  //     userId: user.userId,
-  //     fullName: user.fullName,
-  //     sponsorId: user.sponsorId,
-  //     sponsorName: user.sponsorName,
-  //     roiIncome: 0,
-  //     rewardIncome: 0,
-  //     rankIncome: 0,
-  //     levelIncome: 0,
-  //     directIncome: 0,
-  //     indirectIncome: 0,
-  //     depositBalance: 0,
-  //     totalIncome: 0,
-  //     joiningBonus: 0,
-  //     investmentAmount: 0,
-  //     activeIncome: 0,
-  //   });
-  //   await Level.create({
-  //     fullName: user.fullName,
-  //     userId: user.userId,
-  //     email: user.email,
-  //     sponsorId: user.sponsorId,
-  //     level: [],
-  //   });
-  //   let currentSponsor = user;
-  //   for (let i = 1; i <= 7; i++) {
-  //     const levelUser = await Level.findOne({
-  //       userId: currentSponsor.sponsorId,
-  //     });
-  //     if (levelUser) {
-  //       await updateLevel(levelUser, user, i);
-  //       currentSponsor = levelUser;
-  //     } else {
-  //       break;
-  //     }
-  //   }
-  // }
-  // const users = await User.find({ rankIncomeCurrentDate: { $exists: true } });
-  // for (const user of users) {
-  //   await User.findOneAndUpdate(
-  //     { userId: user.userId },
-  //     {
-  //       $set: {
-  //         rankIncomeCurrentDateString: new Date(
-  //           user.rankIncomeCurrentDate
-  //         ).toDateString(),
-  //       },
-  //     }
-  //   );
-  // }
-};
-
 const registerController = async (req, res) => {
   const ISTTime = await getIstTimeWithInternet();
   const error = validationResult(req).formatWith(ValidationErrorMsg);
@@ -641,6 +540,7 @@ const getSponsorNameController = async (req, res) => {
 const ForgotPasswordController = async (req, res) => {
   try {
     const { email } = req.body;
+    // console.log({ email });
     if (!email) {
       return res.status(400).json({
         message: "Please Put email",
@@ -649,6 +549,7 @@ const ForgotPasswordController = async (req, res) => {
       const user = await User.findOne({ email: email });
       if (user) {
         let newToken = generateToken(user.userId);
+        // console.log({ newToken });
         const updateUser = await User.findByIdAndUpdate(
           { _id: user._id },
           {
@@ -900,7 +801,6 @@ const createInquiry = async (req, res) => {
 module.exports = {
   createAdminLoginOtpController,
   adminLoginController,
-  testRankIncome,
   registerController,
   loginController,
   createOtpController,

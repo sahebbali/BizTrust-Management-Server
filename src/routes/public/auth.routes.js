@@ -11,7 +11,7 @@ const {
   getPdfLink,
   getAllImage,
   getAllVedio,
-  testRankIncome,
+
   createAdminLoginOtpController,
   adminLoginController,
   createInquiry,
@@ -23,7 +23,6 @@ const {
 
 const router = require("express").Router();
 
-router.post("/test_rank_income", testRankIncome);
 router.post("/register", registerValidator, registerController);
 router.post("/admin_login", adminLoginController);
 router.post("/login", loginValidator, loginController);
