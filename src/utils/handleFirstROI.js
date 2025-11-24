@@ -31,9 +31,12 @@ const handleFirstROI = async () => {
       console.log("No valid commission percentage found, exiting.");
       return;
     }
-    const secureROI = manageROi.find((item) => item.securityType === "secure");
+
+    const secureROI = manageROi.find(
+      (item) => item.securityType === "Assets Fund"
+    );
     const insecureROI = manageROi.find(
-      (item) => item.securityType === "insecure"
+      (item) => item.securityType === "Equity Fund"
     );
 
     const securePercentage = secureROI ? secureROI.percentage : 0.13;
