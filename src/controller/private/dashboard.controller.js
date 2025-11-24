@@ -17,11 +17,11 @@ const getAdminDashboardStatsController = async (_req, res) => {
     // Fetch user counts concurrently
     const [allUsers, activeUsers, inactiveUsers, blockedUsers, allKyc] =
       await Promise.all([
-        User.countDocuments(),
-        User.countDocuments({ isActive: true }),
-        User.countDocuments({ isActive: false }),
-        User.countDocuments({ userStatus: false }),
-        Kyc.countDocuments({}),
+        User.countDocuments({ role: { $ne: "admin" } }), // all users except admin
+        User.countDocuments({ isActive: true, role: { $ne: "admin" } }), // active users except admin
+        User.countDocuments({ isActive: false, role: { $ne: "admin" } }), // inactive users except admin
+        User.countDocuments({ userStatus: false, role: { $ne: "admin" } }), // blocked users except admin
+        Kyc.countDocuments({}), // KYC count (no role needed)
       ]);
 
     // Fetch aggregated values concurrently
