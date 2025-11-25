@@ -45,7 +45,7 @@ const handleROI = async () => {
       isROIFree: false,
       status: "success",
     });
-    console.log({ activePackages });
+    // console.log({ activePackages });
     console.log(`Total active packages: ${activePackages.length}`);
 
     if (activePackages.length === 0) {

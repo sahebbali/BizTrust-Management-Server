@@ -288,6 +288,8 @@ const updateDepositStatus = async (req, res) => {
           startDateInt: startDateObj.getTime(), // Use timestamp for startDateInt
           endDate: endDateObj.toDateString(), // Use the formatted end date
           endDateInt: endDateObj.getTime(), // Use timestamp for endDateInt
+          packageType: existingDeposit?.securityType,
+          date: new Date().toDateString(),
         });
         await ProvideExtraEarning(updatePackage?.userId);
         await updatePackageAmount(

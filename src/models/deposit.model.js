@@ -6,6 +6,8 @@ const depositSchema = new mongoose.Schema(
     userId: String,
     name: String,
     amount: Number,
+    bankName: String,
+    securityType: String,
     status: String,
     date: String,
     time: String,

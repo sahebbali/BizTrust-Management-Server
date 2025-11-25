@@ -25,9 +25,10 @@ const CheckUserPackageLimit = async (
       console.log(`Package is ROI Free: ${package.packageId}`);
       return;
     }
-    const percentage = user.isSecureAccount
-      ? securePercentage
-      : insecurePercentage;
+    const percentage =
+      package.packageType === "Assets Fund"
+        ? securePercentage
+        : insecurePercentage;
     const amount = (package.packageAmount * percentage) / 100;
     const userId = user.userId;
     const type = "roi-income";

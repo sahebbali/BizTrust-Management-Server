@@ -48,11 +48,11 @@ const handleFirstROI = async () => {
     const activePackages = await PackageBuyInfo.find({
       isActive: true,
       isFirstROI: true,
-      startDateInt: { $lte: dateInt },
+      // startDateInt: { $lte: dateInt },
       isROIFree: false,
       status: "success",
     });
-    console.log({ activePackages });
+    // console.log({ activePackages });
     console.log(`Total active packages: ${activePackages.length}`);
 
     if (activePackages.length === 0) {

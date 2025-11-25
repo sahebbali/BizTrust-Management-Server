@@ -12,7 +12,8 @@ const { PackageBuyInfo } = require("../../models/topup.model");
 const depositeAmount = async (req, res) => {
   const ISTTime = await getIstTimeWithInternet();
   try {
-    const { user_id, amount, hash } = req.body;
+    const { user_id, amount, hash, bankName, securityType } = req.body;
+    // console.log({ body: req.body, file: req.file });
     if (!req.body)
       return res.status(400).json({
         message: "Please provide data",
@@ -28,6 +29,14 @@ const depositeAmount = async (req, res) => {
     if (!amount)
       return res.status(400).json({
         message: "Amount is missing",
+      });
+    if (!bankName)
+      return res.status(400).json({
+        message: "Bank Name is missing",
+      });
+    if (!securityType)
+      return res.status(400).json({
+        message: "Security Type is missing",
       });
     const existHash = await Deposit.findOne({
       hash,
@@ -46,11 +55,13 @@ const depositeAmount = async (req, res) => {
       avatarPublicUrl: image.public_id,
     };
     if (user) {
-      if (parseInt(amount) >= 25000) {
+      if (parseInt(amount) >= 15000) {
         await Deposit.create({
           userId: user.userId,
           name: user.fullName,
           amount: parseInt(amount),
+          bankName: bankName,
+          securityType: securityType,
           status: "pending",
           date: new Date(
             ISTTime?.date ? ISTTime?.date : getIstTime().date
@@ -66,7 +77,7 @@ const depositeAmount = async (req, res) => {
         });
       } else {
         return res.status(400).json({
-          message: "Minimum deposit amount is 25000",
+          message: "Minimum deposit amount is 15000",
         });
       }
     } else {

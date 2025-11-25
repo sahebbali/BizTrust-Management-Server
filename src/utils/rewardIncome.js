@@ -78,7 +78,7 @@ const rewardIncome = async (userId) => {
     }
 
     const distributorLvl = levels.level?.filter((d) => d.level === "1") || [];
-    console.log("Filtered Level 1 Users:", distributorLvl);
+    // console.log("Filtered Level 1 Users:", distributorLvl);
 
     let allLine = await Promise.all(
       distributorLvl.map(async (user) =>
