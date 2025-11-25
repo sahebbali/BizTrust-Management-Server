@@ -30,7 +30,7 @@ const inquireSchema = new mongoose.Schema(
     },
     country: { type: String, trim: true },
     city: { type: String, trim: true },
-    investmentType: { type: String, required: true, trim: true },
+    // investmentType: { type: String, required: true, trim: true },
     message: { type: String, required: true, trim: true },
     contactDate: { type: Date, default: Date.now }, // store as Date (better)
     handled: { type: Boolean, default: false }, // example extra field

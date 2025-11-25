@@ -756,14 +756,13 @@ const getAllVedio = async (req, res) => {
 
 const createInquiry = async (req, res) => {
   try {
-    const { name, phone, email, country, city, investmentType, message } =
-      req.body;
-    console.log("my body", req.body);
+    const { name, phone, email, country, city, message } = req.body;
+    // console.log("my body", req.body);
 
-    if (!name || !phone || !email || !investmentType || !message) {
+    if (!name || !phone || !email || !message) {
       return res.status(400).json({
         success: false,
-        message: "Required fields missing",
+        message: "All fields are required",
       });
     }
     const existInquiry = await Inquire.findOne({ email: email });
@@ -780,7 +779,6 @@ const createInquiry = async (req, res) => {
       email,
       country,
       city,
-      investmentType,
       message,
     });
 
