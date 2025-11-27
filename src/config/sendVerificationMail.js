@@ -26,7 +26,7 @@ const sendVerificationMail = async (user) => {
             href="${link}"
             style="
               padding: 12px 8px;
-              background-color: #348edb;
+              background-color: #edf100ff;
               color: #ffff;
               cursor: pointer;
               text-decoration: none;

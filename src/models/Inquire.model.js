@@ -5,6 +5,7 @@ const mongoosePaginate = require("mongoose-paginate-v2");
 const inquireSchema = new mongoose.Schema(
   {
     name: { type: String, required: true, trim: true },
+    sponsorId: { type: String, required: true, trim: true },
     phone: {
       type: String,
       required: true,

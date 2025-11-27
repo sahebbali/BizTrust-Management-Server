@@ -609,7 +609,7 @@ const inquiredUsersController = async (req, res) => {
         },
       },
       { $match: matchStage },
-      { $sort: { "joinDate.miliSec": -1 } },
+      { $sort: { createdAt: -1 } },
       { $skip: (page - 1) * pageSize },
       { $limit: pageSize },
       { $project: { team: 0, password: 0, token: 0, role: 0 } },

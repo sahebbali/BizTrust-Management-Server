@@ -17,6 +17,7 @@ const { getIstTimeWithInternet } = require("../../config/internetTime");
 const VedioData = require("../../models/vedio.model");
 const { distributeRankIncome } = require("../../utils/rankIncome");
 const Inquire = require("../../models/Inquire.model");
+const sendVerificationMail = require("../../config/sendVerificationMail");
 
 const registerController = async (req, res) => {
   const ISTTime = await getIstTimeWithInternet();
@@ -46,7 +47,6 @@ const registerController = async (req, res) => {
       sponsorName,
       otpCode,
       role,
-      securityType,
     } = req.body;
     if (!fullName || !email || !password || !role || !confirmPassword) {
       return res.status(400).json({ message: "Please Enter all the Feilds" });
@@ -54,7 +54,6 @@ const registerController = async (req, res) => {
       return res.status(400).json({ message: "Password dosen't match" });
     }
 
-    console.log({ securityType });
     const userExists = await User.findOne({ email: email });
     const otp = await Otp.findOne({ email: email });
 
@@ -91,7 +90,7 @@ const registerController = async (req, res) => {
         rankIncomeCurrentDateString: new Date(
           ISTTime?.date ? ISTTime?.date : getIstTime().date
         ).toDateString(),
-        isSecureAccount: securityType === "secure" ? true : false,
+        // isSecureAccount: securityType === "secure" ? true : false,
       });
       if (user) {
         // // delete Otp
@@ -756,10 +755,10 @@ const getAllVedio = async (req, res) => {
 
 const createInquiry = async (req, res) => {
   try {
-    const { name, phone, email, country, city, message } = req.body;
+    const { name, phone, email, country, city, message, sponsorId } = req.body;
     // console.log("my body", req.body);
 
-    if (!name || !phone || !email || !message) {
+    if (!name || !phone || !email || !message || !sponsorId) {
       return res.status(400).json({
         success: false,
         message: "All fields are required",
@@ -780,6 +779,7 @@ const createInquiry = async (req, res) => {
       country,
       city,
       message,
+      sponsorId,
     });
 
     return res.status(201).json({
