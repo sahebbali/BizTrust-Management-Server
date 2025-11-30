@@ -27,7 +27,7 @@ const inquireSchema = new mongoose.Schema(
           ),
         message: (props) => `${props.value} is not a valid email!`,
       },
-      index: true,
+      // index: true,
     },
     country: { type: String, trim: true },
     city: { type: String, trim: true },
