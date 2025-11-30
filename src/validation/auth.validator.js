@@ -7,12 +7,12 @@ const registerValidator = [
     .not()
     .isEmpty()
     .withMessage("Email is required")
-    .custom(async (email) => {
-      const emailMatch = await User.findOne({ email });
-      if (emailMatch) {
-        return Promise.reject("Email already in use");
-      }
-    })
+    // .custom(async (email) => {
+    //   const emailMatch = await User.findOne({ email });
+    //   if (emailMatch) {
+    //     return Promise.reject("Email already in use");
+    //   }
+    // })
     .isEmail()
     .withMessage("Please provide a valid email"),
   body("password")
@@ -35,9 +35,9 @@ const registerValidator = [
     .withMessage("Mobile number is not valid")
     .custom(async (mobile) => {
       const mobileMatch = await User.findOne({ mobile });
-      if (mobileMatch) {
-        return Promise.reject("Mobile number already in use");
-      }
+      // if (mobileMatch) {
+      //   return Promise.reject("Mobile number already in use");
+      // }
     })
     .trim(),
   body("sponsorId")
