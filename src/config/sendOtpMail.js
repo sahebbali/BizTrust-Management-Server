@@ -12,14 +12,14 @@ const sendOtpMail = (email, otp) => {
   });
   console.log(otp);
   let mailOption = {
-    from: "BizTrust Management",
+    from: "Grow-boo",
     to: email,
     subject: "OTP Code",
     html: `<div>
         <p>Here is your OTP code: ${otp}</p>
         <br />
         <p>Regards,</p>
-        <p>BizTrust Management</p>
+        <p>Grow-boo</p>
     </div>`,
   };
 

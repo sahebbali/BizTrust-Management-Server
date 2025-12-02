@@ -12,7 +12,7 @@ const sendConfirmRegistrationMail = (user, userId) => {
   });
 
   let mailOption = {
-    from: "BizTrust Management",
+    from: "Grow-boo",
     to: user.email,
     subject: "Successfully registered",
     text: `Hello! ${user.fullName}
@@ -23,7 +23,7 @@ const sendConfirmRegistrationMail = (user, userId) => {
             Mobile: ${user.mobile}
             Email: ${user.email}`,
     html: `<div>
-    <h1 style="text-align: center;">Welcome to <a href="https://biztrustmanagement.com">BizTrust Management</a></h1>
+    <h1 style="text-align: center;">Welcome to <a href="https://grow-boo.com">Grow-boo</a></h1>
     <div  style="padding: 0 60px; width: 100%;">
             <h2>Hello! ${user.fullName},</h2>
             <p style="text-align: left;">Here is you ID information - </p>
