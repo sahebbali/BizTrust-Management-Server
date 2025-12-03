@@ -254,15 +254,15 @@ const updateDepositStatus = async (req, res) => {
           { userId: existingDeposit?.userId },
           { $set: { isActive: true } }
         );
-        // sendEmailNotification(
-        //   currentUser?.userId,
-        //   currentUser?.fullName,
-        //   currentUser?.email,
-        //   "Deposit Request Status Update",
-        //   existingDeposit.amount,
-        //   "Your deposit request has been successfully processed, and the funds have been added to your wallet",
-        //   "deposit"
-        // );
+        sendEmailNotification(
+          currentUser?.userId,
+          currentUser?.fullName,
+          currentUser?.email,
+          "Deposit Successful – Grow-Boo International",
+          existingDeposit.amount,
+          "Your deposit request has been successfully processed, and the funds have been added to your wallet",
+          "deposit"
+        );
         const startDate = new Date(
           new Date().toLocaleString("en-US", { timeZone: "Asia/Karachi" })
         );
@@ -305,15 +305,15 @@ const updateDepositStatus = async (req, res) => {
         message = "Deposit succeeded & Package activated";
       } else {
         // Send mail notifiction to user email with request status
-        // sendEmailNotification(
-        //   currentUser?.userId,
-        //   currentUser?.fullName,
-        //   currentUser?.email,
-        //   "Deposit Request Status Update",
-        //   existingDeposit?.amount,
-        //   `Unfortunately, Your deposit request for $${existingDeposit?.amount} amount has been rejected.`,
-        //   "deposit"
-        // );
+        sendEmailNotification(
+          currentUser?.userId,
+          currentUser?.fullName,
+          currentUser?.email,
+          "Deposit Request Rejected – Grow-Boo International",
+          existingDeposit?.amount,
+          `Unfortunately, Your deposit request for $${existingDeposit?.amount} amount has been rejected.`,
+          "deposit"
+        );
         message = "Deposit Rejected";
       }
       return res.status(200).json({
