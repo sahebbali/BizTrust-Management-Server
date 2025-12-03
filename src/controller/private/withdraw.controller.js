@@ -1,5 +1,6 @@
 const getIstTime = require("../../config/getTime");
 const sendEmailNotification = require("../../config/mailNotification");
+const sendWithdrawalMail = require("../../config/sendWithdrawalMail ");
 const User = require("../../models/auth.model");
 const { PackageRoi, PackageBuyInfo } = require("../../models/topup.model");
 const Wallet = require("../../models/wallet.model");
@@ -409,14 +410,21 @@ const updateWithdrawStatus = async (req, res) => {
           });
         }
         // Send mail notifiction to user email with request status
-        sendEmailNotification(
-          currentUser?.userId,
-          currentUser?.fullName,
-          currentUser?.email,
-          "Withdrawal Request Status Update",
+        // sendEmailNotification(
+        //   currentUser?.userId,
+        //   currentUser?.fullName,
+        //   currentUser?.email,
+        //   "Withdrawal Request Status Update",
+        //   existingWithdraw?.requestAmount,
+        //   "Your withdrawal request has been successfully processed, and the funds have been transferred to your designated account.",
+        //   "withdrawal"
+        // );
+        sendWithdrawalMail(
+          currentUser,
           existingWithdraw?.requestAmount,
-          "Your withdrawal request has been successfully processed, and the funds have been transferred to your designated account.",
-          "withdrawal"
+          existingWithdraw?.withdrawType,
+          existingWithdraw?.date,
+          "success"
         );
         message = "Withdraw Successfully";
         return res.status(200).json({ message });
@@ -463,14 +471,21 @@ const updateWithdrawStatus = async (req, res) => {
           );
         }
         // Send mail notifiction to user email with request status
-        sendEmailNotification(
-          currentUser?.userId,
-          currentUser?.fullName,
-          currentUser?.email,
-          "Withdrawal Request Status Update",
+        // sendEmailNotification(
+        //   currentUser?.userId,
+        //   currentUser?.fullName,
+        //   currentUser?.email,
+        //   "Withdrawal Request Status Update",
+        //   existingWithdraw?.requestAmount,
+        //   `Unfortunately, your withdrawal request for $${existingWithdraw?.requestAmount} amount has been rejected.`,
+        //   "withdrawal"
+        // );
+        sendWithdrawalMail(
+          currentUser,
           existingWithdraw?.requestAmount,
-          `Unfortunately, your withdrawal request for $${existingWithdraw?.requestAmount} amount has been rejected.`,
-          "withdrawal"
+          existingWithdraw?.withdrawType,
+          existingWithdraw?.date,
+          "reject"
         );
         message = "Withdraw Rejected";
       }

@@ -12,8 +12,8 @@ const sendWithdrawalMail = (user, amount, method, date, status) => {
     : "Withdrawal Rejected – Grow-Boo International";
 
   const message = isSuccess
-    ? `Your withdrawal request of <strong style="color:#edf100;">${amount}</strong> has been successfully processed and sent to your designated account.`
-    : `Unfortunately, your withdrawal request of <strong style="color:#edf100;">${amount}</strong> has been rejected. Please review your account details or contact support for assistance.`;
+    ? `Your withdrawal request of <strong style="color:#edf100;"> Rs ${amount}</strong> has been successfully processed and sent to your designated account.`
+    : `Unfortunately, your withdrawal request of <strong style="color:#edf100;"> Rs${amount}</strong> has been rejected. Please review your account details or contact support for assistance.`;
 
   const statusColor = isSuccess ? "#00ff00" : "#ff4444"; // green or red
   const statusText = isSuccess ? "Successful" : "Rejected";
@@ -62,7 +62,7 @@ const sendWithdrawalMail = (user, amount, method, date, status) => {
             border-left:4px solid ${statusColor};
             border-radius:8px;
           ">
-            <p style="margin:5px 0; font-size:15px;"><strong>Amount:</strong> ${amount}</p>
+            <p style="margin:5px 0; font-size:15px;"><strong>Amount:</strong> Rs ${amount}</p>
             <p style="margin:5px 0; font-size:15px;"><strong>Method:</strong> ${method}</p>
             <p style="margin:5px 0; font-size:15px;"><strong>Date:</strong> ${date}</p>
             <p style="margin:5px 0; font-size:15px;">

@@ -165,9 +165,10 @@ const withdrawAmount = async (req, res) => {
 
     const createdData = await Withdraw.create(newData);
     if (createdData) {
-      return res
-        .status(201)
-        .json({ message: "Withdrawal request created successfully" });
+      return res.status(201).json({
+        message:
+          "Withdrawal request submitted! Our team is reviewing it shortly.",
+      });
     }
 
     return res

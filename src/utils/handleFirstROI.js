@@ -48,7 +48,7 @@ const handleFirstROI = async () => {
     const activePackages = await PackageBuyInfo.find({
       isActive: true,
       isFirstROI: true,
-      // startDateInt: { $lte: dateInt },
+      startDateInt: { $lte: dateInt },
       isROIFree: false,
       status: "success",
     });
