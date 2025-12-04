@@ -12,9 +12,9 @@ const sendOtpMail = (email, otp) => {
   });
 
   const mailOption = {
-    from: '"Grow-Boo" <info@grow-boo.com>',
+    from: '"Grow-Boo International" <info@grow-boo.com>',
     to: email,
-    subject: "🔐 Your Grow-Boo OTP Code",
+    subject: "🔐 Your Grow-Boo International OTP Code",
     html: `
       <div style="width: 100%; background:#000; padding: 30px; font-family: Arial, sans-serif; color: #fff;">
         <div style="

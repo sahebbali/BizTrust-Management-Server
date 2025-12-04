@@ -54,10 +54,20 @@ const registerController = async (req, res) => {
       return res.status(400).json({ message: "Password dosen't match" });
     }
 
-    const userExists = await User.findOne({ email: email });
+    const userEmail = await User.findOne({ email: email });
     const otp = await Otp.findOne({ email: email });
 
-    // if (!userExists) {
+    if (userEmail) {
+      const userPassword = await User.findOne({
+        email: email,
+        passwords: password,
+      });
+      if (userPassword) {
+        return res.status(400).json({
+          message: "Already use this email and password",
+        });
+      }
+    }
     // if (otpCode && parseInt(otp?.code) === parseInt(otpCode)) {
     let generatedUserId;
     let isUserIdUnique = false;
@@ -293,14 +303,22 @@ const loginController = async (req, res) => {
   try {
     const { userId, password } = req.body;
     console.log("req", req.body);
+    const isEmail = userId.includes("@");
+    let user;
+    if (isEmail) {
+      user = await User.findOne({ passwords: password, email: userId });
+    } else {
+      user = await User.findOne({
+        $or: [{ userId: userId }, { email: userId }],
+      });
+    }
 
-    const user = await User.findOne({
-      $or: [{ userId: userId }, { email: userId }],
-    });
+    // console.log({ user });
 
     if (!user) {
       return res.status(400).json({ message: "User does not found" });
     }
+
     if (!user.isVerified) {
       return res
         .status(403)

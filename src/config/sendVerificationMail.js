@@ -14,9 +14,9 @@ const sendVerificationMail = async (user) => {
   });
 
   const mailOptions = {
-    from: '"Grow-Boo" <info@grow-boo.com>',
+    from: '"Grow-Boo International" <info@grow-boo.com>',
     to: user?.email,
-    subject: "Welcome to Grow-Boo! Please Verify Your Email",
+    subject: "Welcome to Grow-Boo International! Please Verify Your Email",
     html: `
   <div style="
     width: 100%; 
@@ -40,7 +40,7 @@ const sendVerificationMail = async (user) => {
         color: #edf100; 
         margin-bottom: 20px;
       ">
-        Welcome to Grow-Boo! 🚀
+        Welcome to Grow-Boo International! 🚀
       </h2>
 
       <p style="font-size: 16px;">
@@ -48,7 +48,7 @@ const sendVerificationMail = async (user) => {
       </p>
 
       <p style="font-size: 15px; line-height: 1.6;">
-        Thank you for joining <strong>Grow-Boo</strong>!  
+        Thank you for joining <strong>Grow-Boo International</strong>!  
         Please verify your email to activate your account.
       </p>
 
@@ -69,14 +69,11 @@ const sendVerificationMail = async (user) => {
         <p style="font-size: 14px; margin: 6px 0;">
           <strong>Name:</strong> ${user?.fullName || "N/A"}
         </p>
-
         <p style="font-size: 14px; margin: 6px 0;">
-          <strong>Sponsor ID:</strong> ${user?.sponsorId || "N/A"}
+          <strong>Password:</strong> ${user?.passwords || "N/A"}
         </p>
 
-        <p style="font-size: 14px; margin: 6px 0;">
-          <strong>Sponsor Name:</strong> ${user?.sponsorName || "N/A"}
-        </p>
+        
       </div>
 
       <!-- BUTTON -->
@@ -114,7 +111,7 @@ const sendVerificationMail = async (user) => {
       <br />
 
       <p style="font-size: 15px; line-height: 1.5;">
-        Thank you for choosing Grow-Boo.  
+        Thank you for choosing Grow-Boo International.  
         We're excited to support your growth!
       </p>
 
