@@ -18,96 +18,119 @@ const sendVerificationMail = async (user) => {
     to: user?.email,
     subject: "Welcome to Grow-Boo! Please Verify Your Email",
     html: `
-      <div style="
-        width: 100%; 
-        background-color: #000; 
-        padding: 30px; 
-        font-family: Arial, sans-serif; 
-        color: #fff;
+  <div style="
+    width: 100%; 
+    background-color: #000; 
+    padding: 30px; 
+    font-family: Arial, sans-serif; 
+    color: #fff;
+  ">
+
+    <div style="
+      max-width: 600px; 
+      margin: auto; 
+      background-color: #111; 
+      padding: 30px; 
+      border-radius: 10px;
+      border: 1px solid #edf100;
+    ">
+
+      <h2 style="
+        text-align:center; 
+        color: #edf100; 
+        margin-bottom: 20px;
       ">
-        
-        <div style="
-          max-width: 600px; 
-          margin: auto; 
-          background-color: #111; 
-          padding: 30px; 
-          border-radius: 10px;
-          border: 1px solid #edf100;
-        ">
-          
-          <h2 style="
-            text-align:center; 
-            color: #edf100; 
-            margin-bottom: 20px;
-          ">
-            Welcome to Grow-Boo! 🚀
-          </h2>
+        Welcome to Grow-Boo! 🚀
+      </h2>
 
-          <p style="font-size: 16px;">
-            Hi <strong style="color:#edf100;">${
-              user?.full_name || "User"
-            }</strong>,
-          </p>
+      <p style="font-size: 16px;">
+        Hi <strong style="color:#edf100;">${user?.fullName || "User"}</strong>,
+      </p>
 
-          <p style="font-size: 15px; line-height: 1.6;">
-            We're excited to have you join Grow-Boo!  
-            To activate your account, please verify your email address by clicking the button below:
-          </p>
+      <p style="font-size: 15px; line-height: 1.6;">
+        Thank you for joining <strong>Grow-Boo</strong>!  
+        Please verify your email to activate your account.
+      </p>
 
-          <!-- BUTTON -->
-          <div style="text-align:center; margin: 35px 0;">
-            <a 
-              href="${link}"
-              style="
-                padding: 14px 28px; 
-                background-color: #edf100; 
-                color: #000; 
-                font-weight: bold;
-                text-decoration: none; 
-                border-radius: 6px;
-                font-size: 16px;
-                display: inline-block;
-              "
-            >
-              Verify My Email
-            </a>
-          </div>
+      <!-- USER DETAILS CARD -->
+      <div style="
+        margin: 25px 0; 
+        padding: 20px; 
+        background-color:#000; 
+        border:1px solid #333; 
+        border-radius:8px;
+      ">
+        <h3 style="color:#edf100; margin-bottom:10px;">Your Account Details</h3>
 
-        
+        <p style="font-size: 14px; margin: 6px 0;">
+          <strong>User ID:</strong> ${user?.userId || "N/A"}
+        </p>
 
-          <p style="margin-top: 25px; font-size: 15px;">Once verified, you’ll be able to:</p>
+        <p style="font-size: 14px; margin: 6px 0;">
+          <strong>Name:</strong> ${user?.fullName || "N/A"}
+        </p>
 
-          <ul style="line-height: 1.8; padding-left: 20px;">
-            <li>Access your dashboard</li>
-            <li>Explore all Grow-Boo tools</li>
-            <li>Receive updates, tips and support</li>
-            <li>Start growing with us</li>
-          </ul>
+        <p style="font-size: 14px; margin: 6px 0;">
+          <strong>Sponsor ID:</strong> ${user?.sponsorId || "N/A"}
+        </p>
 
-          <p style="margin-top: 25px; font-size: 14px;">
-            If you didn’t create an account with Grow-Boo, you may safely ignore this email.
-          </p>
-
-          <br />
-
-          <p style="font-size: 15px; line-height: 1.5;">
-            Thanks for joining the Grow-Boo community!  
-            We're here to support your growth every step of the way.
-          </p>
-
-          <br />
-
-          <p>Best Regards,</p>
-          <p style="color:#edf100; font-weight:bold;">Grow-Boo Team</p>
-
-          <a href="https://grow-boo.com" target="_blank" style="color:#fff;">
-            www.grow-boo.com
-          </a>
-
-        </div>
-
+        <p style="font-size: 14px; margin: 6px 0;">
+          <strong>Sponsor Name:</strong> ${user?.sponsorName || "N/A"}
+        </p>
       </div>
-    `,
+
+      <!-- BUTTON -->
+      <div style="text-align:center; margin: 35px 0;">
+        <a 
+          href="${link}"
+          style="
+            padding: 14px 28px; 
+            background-color: #edf100; 
+            color: #000; 
+            font-weight: bold;
+            text-decoration: none; 
+            border-radius: 6px;
+            font-size: 16px;
+            display: inline-block;
+          "
+        >
+          Verify My Email
+        </a>
+      </div>
+
+      <p style="margin-top: 25px; font-size: 15px;">Once verified, you’ll be able to:</p>
+
+      <ul style="line-height: 1.8; padding-left: 20px;">
+        <li>Access your dashboard</li>
+        <li>Explore Grow-Boo tools & features</li>
+        <li>Receive updates and rewards</li>
+        <li>Start your journey with us</li>
+      </ul>
+
+      <p style="margin-top: 25px; font-size: 14px;">
+        If you didn't create an account, you can safely ignore this email.
+      </p>
+
+      <br />
+
+      <p style="font-size: 15px; line-height: 1.5;">
+        Thank you for choosing Grow-Boo.  
+        We're excited to support your growth!
+      </p>
+
+      <br />
+
+      <p>Best Regards,</p>
+      <p style="color:#edf100; font-weight:bold;">Grow-Boo Team</p>
+
+      <a href="https://grow-boo.com" target="_blank" style="color:#fff;">
+        www.grow-boo.com
+      </a>
+
+    </div>
+
+  </div>
+`,
   };
 
   transporter.sendMail(mailOptions, async (error, info) => {
