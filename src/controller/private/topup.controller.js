@@ -122,11 +122,8 @@ const createTopupController = async (req, res) => {
   try {
     // Get the current Pakistan Standard Time (PST)
     const ISTTime = await getIstTimeWithInternet();
-    const dateStringToCheck = new Date(
-      ISTTime?.date || getIstTime().date
-    ).toDateString();
 
-    const { userId, amount, type } = req.body;
+    const { userId, amount, type, securityType } = req.body;
     const packageAmount = amount;
     console.log({ packageAmount, type });
     console.log(req.body);
@@ -145,10 +142,10 @@ const createTopupController = async (req, res) => {
       });
     }
 
-    if (packageAmount < 100000) {
+    if (packageAmount < 15000) {
       return res
         .status(400)
-        .json({ message: "Minimum package amount is Rs 100000" });
+        .json({ message: "Minimum package amount is Rs 15000" });
     }
 
     // Fetch the latest package buy info for the user
@@ -156,23 +153,29 @@ const createTopupController = async (req, res) => {
       userId,
     }).sort({ createdAt: -1 });
 
-    if (extPackageBuyInfo && packageAmount <= extPackageBuyInfo.packageAmount) {
-      return res.status(400).json({
-        message: `You can only buy a package larger than Rs ${extPackageBuyInfo.packageAmount}`,
-      });
-    }
+    // if (extPackageBuyInfo && packageAmount <= extPackageBuyInfo.packageAmount) {
+    //   return res.status(400).json({
+    //     message: `You can only buy a package larger than Rs ${extPackageBuyInfo.packageAmount}`,
+    //   });
+    // }
 
-    // Calculate the start date in PST
+    // Calculate start date (after 48 hours)
     const startDate = new Date(
       new Date().toLocaleString("en-US", { timeZone: "Asia/Karachi" })
     );
-
-    console.log(startDate);
-    // Add 48 hours to the start date
-    startDate.setTime(startDate.getTime() + 48 * 60 * 60 * 1000); // 48 hours in milliseconds
+    startDate.setTime(startDate.getTime() + 48 * 60 * 60 * 1000);
     const startDateObj = new Date(startDate);
-    const endDateObj = new Date(startDateObj);
-    endDateObj.setFullYear(endDateObj.getFullYear() + 2); // Add 2 years to the start date
+
+    // Check security type for end date calculation
+    let endDateObj = new Date(startDateObj);
+
+    if (securityType === "Equity Fund") {
+      // 30 months = 2.5 years
+      endDateObj.setMonth(endDateObj.getMonth() + 30);
+    } else {
+      // Default: 24 months = 2 years
+      endDateObj.setMonth(endDateObj.getMonth() + 24);
+    }
 
     const createPackage = await PackageBuyInfo.create({
       userId: currentUser.userId,
@@ -182,7 +185,8 @@ const createTopupController = async (req, res) => {
       packageId:
         Date.now().toString(36) + Math.random().toString(36).substring(2),
       packageAmount: packageAmount,
-      packageLimit: packageAmount * 2,
+      packageLimit:
+        securityType === "Equity Fund" ? packageAmount * 3 : packageAmount * 2,
       date: new Date(getIstTime().date).toDateString(),
       time: getIstTime().time,
       packageType: "Gift",
@@ -199,7 +203,8 @@ const createTopupController = async (req, res) => {
 
     await updatePackageAmount(
       createPackage?.userId,
-      createPackage?.packageAmount
+      createPackage?.packageAmount,
+      securityType
     );
     await levelIncome(createPackage.userId, createPackage.packageAmount);
     await rewardIncome(createPackage?.sponsorId);

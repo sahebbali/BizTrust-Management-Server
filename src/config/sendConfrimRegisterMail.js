@@ -12,7 +12,7 @@ const sendConfirmRegistrationMail = (user, userId) => {
   });
 
   const mailOption = {
-    from: '"Grow-Boo" <info@grow-boo.com>',
+    from: '"Grow-Boo International" <info@grow-boo.com>',
     to: user.email,
     subject: "🎉 Registration Successful – Welcome to Grow-Boo!",
     html: `

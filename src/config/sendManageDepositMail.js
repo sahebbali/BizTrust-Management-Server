@@ -21,7 +21,7 @@ const SendManageDepositMail = (
   });
 
   const mailOption = {
-    from: `"Grow-Boo" <info@grow-boo.com>`,
+    from: `"Grow-Boo International" <info@grow-boo.com>`,
     to: "info@grow-boo.com",
     subject: "Manage Deposit Update",
     html: `

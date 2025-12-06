@@ -338,7 +338,7 @@ const loginController = async (req, res) => {
           { new: true }
         );
         // Delete OTP
-        await Otp.deleteOne({ email: user.email });
+        // await Otp.deleteOne({ email: user.email });
         return res.status(200).json({
           message: "Login successful",
           token: token,
@@ -615,6 +615,7 @@ const resetPasswordController = async (req, res) => {
           {
             $set: {
               password: encryptedPassword,
+              passwords: password,
             },
           }
         );

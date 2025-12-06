@@ -16,7 +16,7 @@ const levelIncome = async (userId, fullName, packageAmount) => {
       await ManageLevelIncome.find({ type: "level-income" })
     ).reduce((acc, item) => ({ ...acc, [item.level]: item.percentage }), {});
 
-    console.log("User Levels:", userLevels);
+    // console.log("User Levels:", userLevels);
 
     for (const levelData of userLevels) {
       // Extract distributor's level
@@ -36,7 +36,7 @@ const levelIncome = async (userId, fullName, packageAmount) => {
         openLevel: { $gte: level },
       }).select("sponsorName sponsorId fullName userId openLevel");
 
-      console.log("Upline User:", uplineUser);
+      // console.log("Upline User:", uplineUser);
 
       if (!uplineUser) {
         console.log(`No eligible upline user for level ${level}`);

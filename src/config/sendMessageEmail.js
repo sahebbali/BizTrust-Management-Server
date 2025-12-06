@@ -32,7 +32,7 @@ const sendMessageEmail = (name, user_id, email, message, subject, mobile) => {
   `;
 
   const mailOption = {
-    from: `"Grow-Boo Message" <info@grow-boo.com>`,
+    from: `"Grow-Boo International Message" <info@grow-boo.com>`,
     to: "info@grow-boo.com",
     subject: subject,
     html: messageBody,

@@ -263,15 +263,24 @@ const updateDepositStatus = async (req, res) => {
           "Your deposit request has been successfully processed, and the funds have been added to your wallet",
           "deposit"
         );
+
+        // Calculate start date (after 48 hours)
         const startDate = new Date(
           new Date().toLocaleString("en-US", { timeZone: "Asia/Karachi" })
         );
-
-        // Add 48 hours to the start date
-        startDate.setTime(startDate.getTime() + 48 * 60 * 60 * 1000); // 48 hours in milliseconds
+        startDate.setTime(startDate.getTime() + 48 * 60 * 60 * 1000);
         const startDateObj = new Date(startDate);
-        const endDateObj = new Date(startDateObj);
-        endDateObj.setFullYear(endDateObj.getFullYear() + 2); // Add 2 years to the start date
+
+        // Check security type for end date calculation
+        let endDateObj = new Date(startDateObj);
+
+        if (existingDeposit?.securityType === "Equity Fund") {
+          // 30 months = 2.5 years
+          endDateObj.setMonth(endDateObj.getMonth() + 30);
+        } else {
+          // Default: 24 months = 2 years
+          endDateObj.setMonth(endDateObj.getMonth() + 24);
+        }
 
         const updatePackage = await PackageBuyInfo.create({
           userId: existingDeposit?.userId,
@@ -279,7 +288,10 @@ const updateDepositStatus = async (req, res) => {
           sponsorId: currentUser?.sponsorId,
           sponsorName: currentUser?.sponsorName,
           packageAmount: existingDeposit?.amount,
-          packageLimit: existingDeposit?.amount * 2,
+          packageLimit:
+            existingDeposit?.securityType === "Equity Fund"
+              ? existingDeposit?.amount * 3
+              : existingDeposit?.amount * 2,
           packageId:
             Date.now().toString(36) + Math.random().toString(36).substring(2),
           isActive: true,
@@ -294,7 +306,8 @@ const updateDepositStatus = async (req, res) => {
         await ProvideExtraEarning(updatePackage?.userId);
         await updatePackageAmount(
           existingDeposit?.userId,
-          existingDeposit?.amount
+          existingDeposit?.amount,
+          existingDeposit?.securityType
         );
         await levelIncome(
           updatePackage.userId,
