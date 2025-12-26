@@ -26,6 +26,7 @@ const runPackageFirstROI = require("./src/utils/runPackageFirstROI");
 const handleROI = require("./src/utils/handleROI");
 const { CheckUserEarningLimit } = require("./src/utils/CheckUserEarningLimit");
 const ProvideExtraEarning = require("./src/utils/ProvideExtraEarning");
+const sendDMEmail = require("./src/config/sendDMEmail");
 
 const corsOptions = {
   origin: [
@@ -80,7 +81,10 @@ app.get("/run", (req, res) => {
   // );
   return res.send("Hello Run !");
 });
-
+app.get("/send-email", (req, res) => {
+  const data = sendDMEmail("sahebbali253@gmail.com");
+  return res.send("Hello Send Email !");
+});
 app.use(notFound);
 app.use(errorHandler);
 

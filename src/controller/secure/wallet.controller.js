@@ -11,82 +11,92 @@ const { PackageBuyInfo } = require("../../models/topup.model");
 // deposite
 const depositeAmount = async (req, res) => {
   const ISTTime = await getIstTimeWithInternet();
+
   try {
     const { user_id, amount, hash, bankName, securityType } = req.body;
-    // console.log({ body: req.body, file: req.file });
-    if (!req.body)
+
+    if (!req.body) {
+      return res.status(400).json({ message: "Please provide data" });
+    }
+
+    if (!req.file?.path) {
+      return res.status(400).json({ message: "Proof image is missing" });
+    }
+
+    if (!user_id) {
+      return res.status(400).json({ message: "User Id is missing" });
+    }
+
+    if (!amount) {
+      return res.status(400).json({ message: "Amount is missing" });
+    }
+
+    if (!bankName) {
+      return res.status(400).json({ message: "Bank Name is missing" });
+    }
+
+    if (!securityType) {
+      return res.status(400).json({ message: "Security Type is missing" });
+    }
+
+    const numericAmount = parseFloat(amount);
+
+    // ✅ Security-type-based validation
+    if (securityType === "Equity Fund" && numericAmount < 15000) {
       return res.status(400).json({
-        message: "Please provide data",
+        message: "Amount must be at least 15000 for Equity Fund",
       });
-    if (!req.file?.path)
+    }
+
+    if (securityType === "Assets Fund" && numericAmount < 1000000) {
       return res.status(400).json({
-        message: "Proof image is missing",
+        message: "Amount must be at least 1000000 for Assets Fund",
       });
-    if (!user_id)
-      return res.status(400).json({
-        message: "User Id is missing",
-      });
-    if (!amount)
-      return res.status(400).json({
-        message: "Amount is missing",
-      });
-    if (!bankName)
-      return res.status(400).json({
-        message: "Bank Name is missing",
-      });
-    if (!securityType)
-      return res.status(400).json({
-        message: "Security Type is missing",
-      });
+    }
+
     const existHash = await Deposit.findOne({
       hash,
       $or: [{ status: "success" }, { status: "pending" }],
     });
-    // console.log({ existHash });
+
     if (existHash) {
       return res.status(400).json({ message: "Hash already used" });
     }
-    // find user
+
     const user = await User.findOne({ userId: user_id });
 
-    const image = await cloudinary.uploader.upload(req.file?.path);
+    if (!user) {
+      return res.status(400).json({ message: "Invalid User ID" });
+    }
+
+    const image = await cloudinary.uploader.upload(req.file.path);
     const avatar = {
       avatar: image.secure_url,
       avatarPublicUrl: image.public_id,
     };
-    if (user) {
-      if (parseInt(amount) >= 15000) {
-        await Deposit.create({
-          userId: user.userId,
-          name: user.fullName,
-          amount: parseInt(amount),
-          bankName: bankName,
-          securityType: securityType,
-          status: "pending",
-          date: new Date(
-            ISTTime?.date ? ISTTime?.date : getIstTime().date
-          ).toDateString(),
-          time: ISTTime?.time ? ISTTime?.time : getIstTime().time,
-          transactionId: generateRandomString(),
-          hash: hash,
-          proofPic: avatar,
-          remark: "",
-        });
-        return res.status(200).json({
-          message: "Deposit request successful",
-        });
-      } else {
-        return res.status(400).json({
-          message: "Minimum deposit amount is 15000",
-        });
-      }
-    } else {
-      return res.status(400).json({
-        message: "Invalid User ID",
-      });
-    }
+
+    await Deposit.create({
+      userId: user.userId,
+      name: user.fullName,
+      amount: numericAmount,
+      bankName,
+      securityType,
+      status: "pending",
+      date: new Date(
+        ISTTime?.date ? ISTTime.date : getIstTime().date
+      ).toDateString(),
+      time: ISTTime?.time ? ISTTime.time : getIstTime().time,
+      transactionId: generateRandomString(),
+      hash,
+      proofPic: avatar,
+      remark: "",
+    });
+
+    return res.status(200).json({
+      message: "Deposit request successful",
+    });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     return res.status(400).json({
       message: "Something went wrong",
     });

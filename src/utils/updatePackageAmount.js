@@ -13,7 +13,7 @@ const updatePackageAmount = async (userId, amount, type) => {
     }
 
     const totalPackageAmount = (existUser.packageAmount || 0) + amount;
-    const openLevel = totalPackageAmount >= 1000000 ? 5 : 2;
+    const openLevel = totalPackageAmount >= 1000000 ? 5 : 5;
     const packageLimit = amount * percentage;
     console.log({ totalPackageAmount, openLevel, packageLimit });
 
