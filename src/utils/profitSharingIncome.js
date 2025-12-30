@@ -41,6 +41,10 @@ const profitSharingIncome = async (
         userId: levelData.userId,
         openLevel: { $gte: level },
       }).select("sponsorName sponsorId fullName userId openLevel");
+      const isPINAccount = await User.findOne({
+        userId: levelData.userId,
+        isPinAccount: true,
+      });
 
       console.log("Upline User:", uplineUser);
 
@@ -48,17 +52,22 @@ const profitSharingIncome = async (
         console.log(`No eligible upline user for level ${level}`);
         continue;
       }
-
-      // Find the upline's active package info
-      const selfPackageInfo = await PackageBuyInfo.findOne({
-        userId: uplineUser.userId,
-        isActive: true,
-      }).sort({ createdAt: -1 });
-
-      if (!selfPackageInfo) {
-        console.log(`No active package found for ${uplineUser.userId}`);
+      if (isPINAccount) {
+        console.log(
+          `Upline user ${uplineUser.userId} is a PIN account. Skipping.`
+        );
         continue;
       }
+      // Find the upline's active package info
+      // const selfPackageInfo = await PackageBuyInfo.findOne({
+      //   userId: uplineUser.userId,
+      //   isActive: true,
+      // }).sort({ createdAt: -1 });
+
+      // if (!selfPackageInfo) {
+      //   console.log(`No active package found for ${uplineUser.userId}`);
+      //   continue;
+      // }
 
       // Calculate commission
       const commissionAmount = (roiPerDayCommissionAmount * percentage) / 100;
