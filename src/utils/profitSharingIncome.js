@@ -52,12 +52,12 @@ const profitSharingIncome = async (
         console.log(`No eligible upline user for level ${level}`);
         continue;
       }
-      if (isPINAccount) {
-        console.log(
-          `Upline user ${uplineUser.userId} is a PIN account. Skipping.`
-        );
-        continue;
-      }
+      // if (isPINAccount) {
+      //   console.log(
+      //     `Upline user ${uplineUser.userId} is a PIN account. Skipping.`
+      //   );
+      //   continue;
+      // }
       // Find the upline's active package info
       // const selfPackageInfo = await PackageBuyInfo.findOne({
       //   userId: uplineUser.userId,
