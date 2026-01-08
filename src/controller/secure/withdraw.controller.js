@@ -39,20 +39,20 @@ const withdrawAmount = async (req, res) => {
       status: { $in: ["succeed"] },
       kyc_method: "Address Proof",
     });
-    const existingKycFirst = await Kyc.findOne({
-      userId: req.auth.id,
-      status: { $in: ["succeed"] },
-      kyc_method: { $in: ["Driving License", "Voter ID"] },
-    });
+    // const existingKycFirst = await Kyc.findOne({
+    //   userId: req.auth.id,
+    //   status: { $in: ["succeed"] },
+    //   kyc_method: { $in: ["Driving License", "Voter ID"] },
+    // });
     // console.log({ userWallet });
     const otp = await Otp.findOne({ email: user.email });
     if (!wallet) return res.status(404).json({ message: "Wallet not found" });
     if (!userPIN) return res.status(404).json({ message: "PIN not found" });
     if (!userKYC) return res.status(404).json({ message: "Please Set Kyc!" });
-    if (!existingKycFirst)
-      return res
-        .status(404)
-        .json({ message: "Please Set Driving License Or Voter ID  Kyc!" });
+    // if (!existingKycFirst)
+    //   return res
+    //     .status(404)
+    //     .json({ message: "Please Set Driving License Or Voter ID  Kyc!" });
 
     if (!existingKycAddress)
       return res.status(404).json({ message: "Please Set Address Proof Kyc!" });
