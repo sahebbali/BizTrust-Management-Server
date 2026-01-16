@@ -37,7 +37,7 @@ const withdrawAmount = async (req, res) => {
     const isPendingKYC = await Kyc.findOne({ userId, status: "pending" });
 
     // console.log({ userWallet });
-    const otp = await Otp.findOne({ email: user.email });
+    // const otp = await Otp.findOne({ email: user.email });
     if (!wallet) return res.status(404).json({ message: "Wallet not found" });
     if (!userPIN) return res.status(404).json({ message: "PIN not found" });
     if (isPendingKYC && !userKYC)
@@ -59,9 +59,9 @@ const withdrawAmount = async (req, res) => {
       ).getDate() === currentDate.getDate();
     console.log({ isLastDayOfMonth });
     // Check OTP
-    if (!otp || parseInt(otp?.code) !== parseInt(otpCode)) {
-      return res.status(400).json({ message: "Invalid OTP" });
-    }
+    // if (!otp || parseInt(otp?.code) !== parseInt(otpCode)) {
+    //   return res.status(400).json({ message: "Invalid OTP" });
+    // }
 
     // Ensure user is active
     if (!user.isActive) {
