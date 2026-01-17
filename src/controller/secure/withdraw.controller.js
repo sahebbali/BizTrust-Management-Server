@@ -55,7 +55,7 @@ const withdrawAmount = async (req, res) => {
       new Date(
         currentDate.getFullYear(),
         currentDate.getMonth() + 1,
-        0
+        0,
       ).getDate() === currentDate.getDate();
     console.log({ isLastDayOfMonth });
     // Check OTP
@@ -64,9 +64,6 @@ const withdrawAmount = async (req, res) => {
     // }
 
     // Ensure user is active
-    if (!user.isActive) {
-      return res.status(400).json({ message: "You are an inactive user" });
-    }
 
     // Validate minimum withdrawal amount
     if (amount < 50) {
@@ -84,12 +81,12 @@ const withdrawAmount = async (req, res) => {
     if (withdrawType === "E-wallet") {
       sufficientBalance = amount <= wallet.eWallet;
     } else if (withdrawType === "Profit Wallet") {
-      // if (!isLastDayOfMonth) {
-      //   return res.status(400).json({
-      //     message:
-      //       "Profit Wallet withdrawals are allowed only on the last day of the month",
-      //   });
-      // }
+      if (!isLastDayOfMonth) {
+        return res.status(400).json({
+          message:
+            "Profit Wallet withdrawals are allowed only on the last day of the month",
+        });
+      }
       sufficientBalance = amount <= wallet.profitWallet;
     } else if (withdrawType === "Both") {
       if (!isLastDayOfMonth) {
@@ -120,7 +117,7 @@ const withdrawAmount = async (req, res) => {
     const updatedWallet = await Wallet.findOneAndUpdate(
       { userId },
       { $inc: updateFields },
-      { new: true }
+      { new: true },
     );
 
     const withdrawCharge = 5;
@@ -136,8 +133,8 @@ const withdrawAmount = async (req, res) => {
         withdrawType === "E-wallet"
           ? updatedWallet?.eWallet
           : withdrawType === "Profit Wallet"
-          ? updatedWallet?.profitWallet
-          : updatedWallet?.eWallet + updatedWallet?.profitWallet,
+            ? updatedWallet?.profitWallet
+            : updatedWallet?.eWallet + updatedWallet?.profitWallet,
       bankName: userWallet?.bankName,
       accountTitle: userWallet?.accountTitle,
       accountNoIBAN: userWallet?.accountNoIBAN,
@@ -184,7 +181,7 @@ const withdrawHistory = async (req, res) => {
     const withdrawInfo = await Withdraw.paginate(queryFilter, options);
     if (downloadCSV) {
       const csvData = await Withdraw.find(queryFilter).select(
-        "-_id  -transactionID -createdAt -updatedAt -__v"
+        "-_id  -transactionID -createdAt -updatedAt -__v",
       );
       return res.status(200).json({ csv: csvData, data: withdrawInfo });
     }
