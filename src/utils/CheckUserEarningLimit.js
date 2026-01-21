@@ -56,7 +56,7 @@ const UpdateWallet = async (userId, CommissionAmount, type, level) => {
     await User.findOneAndUpdate(
       { userId: userId },
       { $inc: { returnAmount: +CommissionAmount } },
-      { new: true }
+      { new: true },
     );
   } catch (error) {
     console.log(error);
@@ -71,7 +71,7 @@ const CheckUserEarningLimit = async (
   amount,
   level,
   type,
-  percentage
+  percentage,
 ) => {
   try {
     const user = await User.findOne({ userId: userId });
@@ -86,7 +86,11 @@ const CheckUserEarningLimit = async (
       return;
     }
 
-    if (user.returnAmount >= user.packageLimit && user.packageAmount !== 0) {
+    if (
+      user.returnAmount >= user.packageLimit &&
+      user.packageAmount !== 0 &&
+      !user.isPinAccount
+    ) {
       console.log(`User ${userId} has reached their package limit`);
       await CreateExtraEarning(
         userId,
@@ -95,18 +99,22 @@ const CheckUserEarningLimit = async (
         incomeFromFullName,
         level,
         amount,
-        type
+        type,
       );
       return;
     }
 
     const totalIncome = user.returnAmount + amount;
 
-    if (totalIncome > user.packageLimit && user.packageLimit > 0) {
+    if (
+      totalIncome > user.packageLimit &&
+      user.packageLimit > 0 &&
+      !user.isPinAccount
+    ) {
       const finalAmount = user.packageLimit - user.returnAmount;
       const extraAmount = totalIncome - user.packageLimit;
       console.log(
-        `Adjusting amount for user ${userId} to ${finalAmount} due to package limit`
+        `Adjusting amount for user ${userId} to ${finalAmount} due to package limit`,
       );
       await CreateExtraEarning(
         userId,
@@ -115,7 +123,7 @@ const CheckUserEarningLimit = async (
         incomeFromFullName,
         level,
         extraAmount,
-        type
+        type,
       );
       await CreateLevelIncomeHistory(
         userId,
@@ -126,7 +134,7 @@ const CheckUserEarningLimit = async (
         level,
         finalAmount,
         type,
-        percentage
+        percentage,
       );
       await UpdateWallet(userId, finalAmount, type, level);
     } else {
@@ -140,7 +148,7 @@ const CheckUserEarningLimit = async (
         level,
         amount,
         type,
-        percentage
+        percentage,
       );
       await UpdateWallet(userId, amount, type, level);
     }
