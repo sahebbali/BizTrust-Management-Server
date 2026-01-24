@@ -66,36 +66,30 @@ const updateEmail = async (req, res) => {
         message: "Field is required!",
       });
     } else {
-      const { currentEmail, new_email, otpCode } = req.body;
+      const { currentEmail, new_email } = req.body;
       const user = await User.findOne({ userId: req.auth.id });
       // check already have anaccount with this email or not
       const existingUser = await User.findOne({ email: new_email });
       // check OTP
-      const otp = await Otp.findOne({ email: new_email });
-      if (otp?.code === otpCode) {
-        if (!existingUser && user && user.email === currentEmail) {
-          let updateEmail = await User.findOneAndUpdate(
-            { userId: req.auth.id },
-            {
-              $set: {
-                email: new_email,
-              },
+
+      if (!existingUser && user && user.email === currentEmail) {
+        let updateEmail = await User.findOneAndUpdate(
+          { userId: req.auth.id },
+          {
+            $set: {
+              email: new_email,
             },
-            { new: true },
-          );
-          if (updateEmail) {
-            return res.status(200).json({
-              message: "Email changed Successfully",
-            });
-          }
-        } else {
-          return res.status(400).json({
-            message: "Invalid user ID or email",
+          },
+          { new: true },
+        );
+        if (updateEmail) {
+          return res.status(200).json({
+            message: "Email changed Successfully",
           });
         }
       } else {
         return res.status(400).json({
-          message: "Invalid OTP",
+          message: "Invalid user ID or email",
         });
       }
     }
