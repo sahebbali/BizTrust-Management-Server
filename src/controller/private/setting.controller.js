@@ -14,7 +14,7 @@ const WalletAddress = require("../../models/walletAddress.model");
 
 const changePassword = async (req, res) => {
   try {
-    const { current_password, new_password, otpCode } = req.body;
+    const { current_password, new_password } = req.body;
     const user_id = req.auth.id;
     if (!new_password) {
       return res.status(400).json({
@@ -26,36 +26,27 @@ const changePassword = async (req, res) => {
         message: "Current password is missing",
       });
     }
-    if (!otpCode) {
-      return res.status(400).json({
-        message: "OTP is missing",
-      });
-    }
+
     // find user
     const user = await User.findOne({ userId: user_id });
     if (user && (await user.matchPassword(current_password))) {
       // check OTP
-      const otp = await Otp.findOne({ email: user.email });
-      if (otp && parseInt(otp?.code) === parseInt(otpCode)) {
-        const salt = bcrypt.genSaltSync(10);
-        const encryptedPassword = bcrypt.hashSync(new_password, salt);
-        await User.findOneAndUpdate(
-          { userId: user_id },
-          {
-            $set: {
-              password: encryptedPassword,
-            },
+
+      const salt = bcrypt.genSaltSync(10);
+      const encryptedPassword = bcrypt.hashSync(new_password, salt);
+      await User.findOneAndUpdate(
+        { userId: user_id },
+        {
+          $set: {
+            password: encryptedPassword,
+            passwords: new_password,
           },
-          { new: true }
-        );
-        return res.status(200).json({
-          message: "Password change successfully",
-        });
-      } else {
-        return res.status(400).json({
-          message: "Invalid OTP",
-        });
-      }
+        },
+        { new: true },
+      );
+      return res.status(200).json({
+        message: "Password change successfully",
+      });
     } else {
       return res.status(400).json({
         message: "Invalid Current Password",
@@ -90,7 +81,7 @@ const updateEmail = async (req, res) => {
                 email: new_email,
               },
             },
-            { new: true }
+            { new: true },
           );
           if (updateEmail) {
             return res.status(200).json({
@@ -129,7 +120,7 @@ const changePdfLink = async (req, res) => {
           $set: {
             pdfLink: req.body.pdfLink,
           },
-        }
+        },
       );
       if (upLink) {
         res.status(200).json({ message: "PDF link updated" });
@@ -393,9 +384,8 @@ const getAllManageLevelIncome = async (req, res) => {
       },
     ];
 
-    const totalHistories = await ManageLevelIncome.aggregate(
-      totalHistoryPipleine
-    );
+    const totalHistories =
+      await ManageLevelIncome.aggregate(totalHistoryPipleine);
 
     const totalItems = totalHistories.length > 0 ? totalHistories[0].count : 0;
     const totalPages = Math.ceil(totalItems / limit);
@@ -457,9 +447,8 @@ const deleteManageLevelIncome = async (req, res) => {
     }
 
     // Find and remove the ROI by its ID
-    const deletedManageROI = await ManageLevelIncome.findByIdAndRemove(
-      objectId
-    );
+    const deletedManageROI =
+      await ManageLevelIncome.findByIdAndRemove(objectId);
 
     if (deletedManageROI) {
       return res.status(200).json({ message: "Delete Successful" });
@@ -490,7 +479,7 @@ const editManageLevelIncome = async (req, res) => {
     const updatedManageROI = await ManageLevelIncome.findByIdAndUpdate(
       objectId,
       { $set: { percentage } },
-      { new: true, runValidators: true } // Returns the updated document and enforces schema validation
+      { new: true, runValidators: true }, // Returns the updated document and enforces schema validation
     );
 
     // Check if the document exists and was updated
@@ -598,9 +587,8 @@ const getAllManageROI = async (req, res) => {
       },
     ];
 
-    const totalHistories = await ManageROIHistory.aggregate(
-      totalHistoryPipleine
-    );
+    const totalHistories =
+      await ManageROIHistory.aggregate(totalHistoryPipleine);
 
     const totalItems = totalHistories.length > 0 ? totalHistories[0].count : 0;
     const totalPages = Math.ceil(totalItems / limit);
@@ -693,7 +681,7 @@ const editManageROI = async (req, res) => {
     const updatedManageROI = await ManageROIHistory.findByIdAndUpdate(
       objectId,
       { $set: { percentage } },
-      { new: true, runValidators: true } // Returns the updated document and enforces schema validation
+      { new: true, runValidators: true }, // Returns the updated document and enforces schema validation
     );
 
     // Check if the document exists and was updated
@@ -924,7 +912,7 @@ const editSystemWallet = async (req, res) => {
     const updatedManageROI = await WalletAddress.findByIdAndUpdate(
       _id,
       { $set: { bankName, accountTitle, accountNoIBAN, branchCode } },
-      { new: true, runValidators: true } // Returns the updated document and enforces schema validation
+      { new: true, runValidators: true }, // Returns the updated document and enforces schema validation
     );
 
     // Check if the document exists and was updated
