@@ -17,22 +17,22 @@ const CheckUserPackageLimit = async (
       console.log(`User not found: ${package.userId}`);
       return;
     }
-    if (user.isPinAccount) {
-      await PackageBuyInfo.findOneAndUpdate(
-        { packageId: package.packageId },
-        {
-          $inc: {
-            incomeDay: +0,
-          },
-          $set: {
-            isFirstROI: false,
-          },
-        },
-        { new: true },
-      );
-      console.log(`User is Pin Account: ${package.userId}`);
-      return;
-    }
+    // if (user.isPinAccount) {
+    //   await PackageBuyInfo.findOneAndUpdate(
+    //     { packageId: package.packageId },
+    //     {
+    //       $inc: {
+    //         incomeDay: +0,
+    //       },
+    //       $set: {
+    //         isFirstROI: false,
+    //       },
+    //     },
+    //     { new: true },
+    //   );
+    //   console.log(`User is Pin Account: ${package.userId}`);
+    //   return;
+    // }
     if (package.isROIFree) {
       console.log(`Package is ROI Free: ${package.packageId}`);
       return;
