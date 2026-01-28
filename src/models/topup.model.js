@@ -56,7 +56,7 @@ const packageBuyInfoSchema = new mongoose.Schema(
       default: "pending",
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 packageBuyInfoSchema.plugin(mongoosePlugin);
@@ -77,7 +77,7 @@ const packageRoiSchema = new mongoose.Schema(
     incomeDateInt: { type: Number, required: true },
     transactionId: { type: String, required: true },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 packageRoiSchema.plugin(mongoosePlugin);

@@ -9,7 +9,7 @@ const profitSharingIncome = require("./profitSharingIncome");
 const CheckUserPackageLimit = async (
   package,
   securePercentage,
-  insecurePercentage
+  insecurePercentage,
 ) => {
   try {
     const user = await User.findOne({ userId: package.userId });
@@ -18,6 +18,18 @@ const CheckUserPackageLimit = async (
       return;
     }
     if (user.isPinAccount) {
+      await PackageBuyInfo.findOneAndUpdate(
+        { packageId: package.packageId },
+        {
+          $inc: {
+            incomeDay: +0,
+          },
+          $set: {
+            isFirstROI: false,
+          },
+        },
+        { new: true },
+      );
       console.log(`User is Pin Account: ${package.userId}`);
       return;
     }
@@ -65,7 +77,7 @@ const CheckUserPackageLimit = async (
             incomeDay: +1,
           },
         },
-        { new: true }
+        { new: true },
       );
       await CreateROIHistory(
         package.userId,
@@ -73,13 +85,13 @@ const CheckUserPackageLimit = async (
         package.packageAmount,
         percentage,
         amount,
-        updatePackage.incomeDay
+        updatePackage.incomeDay,
       );
       await UpdateWallet(userId, finalAmount, type);
       await profitSharingIncome(
         package.userId,
         package.userFullName,
-        finalAmount
+        finalAmount,
       );
     } else {
       console.log(`User ${userId} income within limit: ${amount}`);
@@ -94,7 +106,7 @@ const CheckUserPackageLimit = async (
             isFirstROI: false,
           },
         },
-        { new: true }
+        { new: true },
       );
 
       // console.log({ updatePackage });
@@ -106,7 +118,7 @@ const CheckUserPackageLimit = async (
         package.packageAmount,
         percentage,
         amount,
-        updatePackage.incomeDay
+        updatePackage.incomeDay,
       );
 
       await profitSharingIncome(package.userId, package.userFullName, amount);
