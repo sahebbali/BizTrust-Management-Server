@@ -9,15 +9,22 @@ const { CheckUserPackageLimit } = require("./CheckUserPackageLimit");
 const handleFirstROI = async () => {
   try {
     console.log("Starting First ROI Distribution");
-
+    const date = new Date(
+      new Date().toLocaleString("en-US", { timeZone: "Asia/Karachi" }),
+    );
+    const newdateint = date.getTime();
     const currentISTTime = new Date(getIstTime().date);
     const todays = currentISTTime.toDateString();
-    const dateInt = currentISTTime.getTime();
+    // const dateInt = currentISTTime.getTime();
+    const dateInt = newdateint;
     const today = new Date(getIstTime().date).toDateString().split(" ")[0];
 
-    // console.log({ dateInt });
+    console.log({ dateInt });
     console.log({ todays });
     console.log({ today });
+    console.log({ currentISTTime });
+    console.log("my date", newdateint);
+    console.log("after date", { date: new Date(newdateint) });
 
     const manageROi = await ManageROIHistory.find({ date: todays });
     // console.log({ manageROi });
@@ -33,10 +40,10 @@ const handleFirstROI = async () => {
     }
 
     const secureROI = manageROi.find(
-      (item) => item.securityType === "Assets Fund"
+      (item) => item.securityType === "Assets Fund",
     );
     const insecureROI = manageROi.find(
-      (item) => item.securityType === "Equity Fund"
+      (item) => item.securityType === "Equity Fund",
     );
 
     const securePercentage = secureROI ? secureROI.percentage : 0.13;
@@ -44,12 +51,13 @@ const handleFirstROI = async () => {
 
     console.log("Secure Percentage:", securePercentage);
     console.log("Insecure Percentage:", insecurePercentage);
+    console.log("date int:", dateInt);
 
     const activePackages = await PackageBuyInfo.find({
       isActive: true,
       isFirstROI: true,
       startDateInt: { $lte: dateInt },
-      isROIFree: false,
+      // isROIFree: false,
       status: "success",
     });
     // console.log({ activePackages });
@@ -63,7 +71,7 @@ const handleFirstROI = async () => {
     await Promise.all(
       activePackages.map(async (pkg) => {
         await CheckUserPackageLimit(pkg, securePercentage, insecurePercentage);
-      })
+      }),
     );
 
     console.log("ROI Distribution Completed Successfully.");
