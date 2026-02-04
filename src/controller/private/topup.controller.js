@@ -4,6 +4,10 @@ const { getIstTimeWithInternet } = require("../../config/internetTime");
 const User = require("../../models/auth.model");
 const { PackageBuyInfo } = require("../../models/topup.model");
 const Wallet = require("../../models/wallet.model");
+const {
+  getStartEndDepositPKT,
+  getCurrentPKT,
+} = require("../../utils/getCurrentPKT");
 const levelIncome = require("../../utils/levelIncome");
 const ProvideExtraEarning = require("../../utils/ProvideExtraEarning");
 const rewardIncome = require("../../utils/rewardIncome");
@@ -122,6 +126,7 @@ const createTopupController = async (req, res) => {
   try {
     // Get the current Pakistan Standard Time (PST)
     const ISTTime = await getIstTimeWithInternet();
+    const { date, time } = getCurrentPKT();
 
     const { userId, amount, type, securityType } = req.body;
     const packageAmount = amount;
@@ -149,33 +154,7 @@ const createTopupController = async (req, res) => {
     }
 
     // Fetch the latest package buy info for the user
-    const extPackageBuyInfo = await PackageBuyInfo.findOne({
-      userId,
-    }).sort({ createdAt: -1 });
-
-    // if (extPackageBuyInfo && packageAmount <= extPackageBuyInfo.packageAmount) {
-    //   return res.status(400).json({
-    //     message: `You can only buy a package larger than Rs ${extPackageBuyInfo.packageAmount}`,
-    //   });
-    // }
-
-    // Calculate start date (after 48 hours)
-    const startDate = new Date(
-      new Date().toLocaleString("en-US", { timeZone: "Asia/Karachi" })
-    );
-    startDate.setTime(startDate.getTime() + 48 * 60 * 60 * 1000);
-    const startDateObj = new Date(startDate);
-
-    // Check security type for end date calculation
-    let endDateObj = new Date(startDateObj);
-
-    if (securityType === "Equity Fund") {
-      // 30 months = 2.5 years
-      endDateObj.setMonth(endDateObj.getMonth() + 30);
-    } else {
-      // Default: 24 months = 2 years
-      endDateObj.setMonth(endDateObj.getMonth() + 24);
-    }
+    const getDepositStartEnd = getStartEndDepositPKT(securityType);
 
     const createPackage = await PackageBuyInfo.create({
       userId: currentUser.userId,
@@ -187,24 +166,26 @@ const createTopupController = async (req, res) => {
       packageAmount: packageAmount,
       packageLimit:
         securityType === "Equity Fund" ? packageAmount * 3 : packageAmount * 2,
-      date: new Date(getIstTime().date).toDateString(),
-      time: getIstTime().time,
+      date: new Date(date).toDateString(),
+      time: time,
       packageType: "Gift",
       isActive: true,
       status: "success",
       isFirstROI: type === "ROIFree" ? false : true,
       isROIFree: type === "ROIFree" ? true : false,
       isAdmin: true,
-      startDate: startDateObj.toDateString(), // Use the formatted start date
-      startDateInt: startDateObj.getTime(), // Use timestamp for startDateInt
-      endDate: endDateObj.toDateString(), // Use the formatted end date
-      endDateInt: endDateObj.getTime(), // Use timestamp for endDateInt
+      startDate: new Date(getDepositStartEnd.start.date).toDateString(), // Use the formatted start date
+      startTime: getDepositStartEnd.start.time, // Use the formatted start time
+      startDateInt: getDepositStartEnd.start.pktTimestamp, // Use timestamp for startDateInt
+      endDate: new Date(getDepositStartEnd.end.date).toDateString(), // Use the formatted end date
+      endTime: getDepositStartEnd.end.time, // Use the formatted end time
+      endDateInt: getDepositStartEnd.end.pktTimestamp, // Use timestamp for endDateInt
     });
 
     await updatePackageAmount(
       createPackage?.userId,
       createPackage?.packageAmount,
-      securityType
+      securityType,
     );
     await levelIncome(createPackage.userId, createPackage.packageAmount);
     await rewardIncome(createPackage?.sponsorId);
@@ -244,7 +225,7 @@ const updateTopUpStatus = async (req, res) => {
         {
           packageId,
         },
-        { $set: { status } }
+        { $set: { status } },
       );
     } else {
       return res.status(400).json({
@@ -254,7 +235,7 @@ const updateTopUpStatus = async (req, res) => {
     // Calculate the start date in PST
     if (status === "success") {
       const startDate = new Date(
-        new Date().toLocaleString("en-US", { timeZone: "Asia/Karachi" })
+        new Date().toLocaleString("en-US", { timeZone: "Asia/Karachi" }),
       );
 
       // Add 48 hours to the start date
@@ -273,17 +254,17 @@ const updateTopUpStatus = async (req, res) => {
           startDateInt: startDateObj.getTime(), // Use timestamp for startDateInt
           endDate: endDateObj.toDateString(), // Use the formatted end date
           endDateInt: endDateObj.getTime(), // Use timestamp for endDateInt
-        }
+        },
       );
       await ProvideExtraEarning(updatePackage?.userId);
       await updatePackageAmount(
         extPackageBuyInfo?.userId,
-        extPackageBuyInfo?.packageAmount
+        extPackageBuyInfo?.packageAmount,
       );
       await levelIncome(
         updatePackage.userId,
         updatePackage.userFullName,
-        updatePackage.packageAmount
+        updatePackage.packageAmount,
       );
       await rewardIncome(updatePackage?.sponsorId);
 
@@ -294,7 +275,7 @@ const updateTopUpStatus = async (req, res) => {
       await Wallet.findOneAndUpdate(
         { userId: userId },
         { $inc: { depositBalance: +extPackageBuyInfo?.packageAmount } },
-        { new: true }
+        { new: true },
       );
       return res.status(400).json({ message: "Package Rejected" });
     }

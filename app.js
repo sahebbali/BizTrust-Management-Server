@@ -65,8 +65,8 @@ app.get("/run", (req, res) => {
   // const datas = levelIncome("709996", "mahin", 100000);
   // const data = profitSharingIncome("709996", "mahin", 4000);
   // const data = rewardIncome("582939");
-  const data = handleFristROI();
-  // const data = handleROI();
+  // const data = handleFristROI();
+  const data = handleROI();
   // const data = ProvideExtraEarning("373056");
   // const data = CheckUserEarningLimit(
   //   "373056",

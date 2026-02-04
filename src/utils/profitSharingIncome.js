@@ -7,11 +7,11 @@ const { CheckUserEarningLimit } = require("./CheckUserEarningLimit");
 const profitSharingIncome = async (
   userId,
   fullName,
-  roiPerDayCommissionAmount
+  roiPerDayCommissionAmount,
 ) => {
   console.log("Profit Sharing Income Calculation Started");
 
-  console.log({ roiPerDayCommissionAmount });
+  // console.log({ roiPerDayCommissionAmount });
 
   try {
     // Fetch user levels
@@ -22,19 +22,19 @@ const profitSharingIncome = async (
       await ManageLevelIncome.find({ type: "profit-sharing" })
     ).reduce((acc, item) => ({ ...acc, [item.level]: item.percentage }), {});
 
-    console.log("User Levels:", userLevels);
+    // console.log("User Levels:", userLevels);
 
     for (const levelData of userLevels) {
       // Extract distributor's level
       const distributorLevelData = levelData.level.find(
-        (d) => d.userId === userId
+        (d) => d.userId === userId,
       );
       if (!distributorLevelData) continue;
 
       const level = parseInt(distributorLevelData.level, 10);
       const percentage = levelCommissionMap[level] || 0;
 
-      console.log({ level, percentage });
+      // console.log({ level, percentage });
 
       // Find the upline user (who is at or above the current level)
       const uplineUser = await User.findOne({
@@ -82,7 +82,7 @@ const profitSharingIncome = async (
         commissionAmount,
         level,
         "profit-sharing",
-        percentage
+        percentage,
       );
     }
   } catch (error) {

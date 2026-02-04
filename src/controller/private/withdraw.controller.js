@@ -392,23 +392,10 @@ const updateWithdrawStatus = async (req, res) => {
             $set: {
               status: status,
             },
-          }
+          },
         );
         // withdraw type is investment create packageInfo history
-        if (existingWithdraw?.withdrawType === "investment") {
-          await PackageBuyInfo.create({
-            userId: existingWithdraw.userId,
-            userFullName: existingWithdraw.userFullName,
-            sponsorId: existingWithdraw.sponsorId,
-            sponsorName: existingWithdraw.sponsorName,
-            packageInfo: {
-              amount: existingWithdraw.requestAmount,
-              date: new Date(getIstTime().date).toDateString(),
-              time: getIstTime().time,
-            },
-            packageType: "Withdraw IA",
-          });
-        }
+
         // Send mail notifiction to user email with request status
         // sendEmailNotification(
         //   currentUser?.userId,
@@ -424,7 +411,7 @@ const updateWithdrawStatus = async (req, res) => {
           existingWithdraw?.requestAmount,
           existingWithdraw?.withdrawType,
           existingWithdraw?.date,
-          "success"
+          "success",
         );
         message = "Withdraw Successfully";
         return res.status(200).json({ message });
@@ -439,14 +426,14 @@ const updateWithdrawStatus = async (req, res) => {
             $set: {
               status: status,
             },
-          }
+          },
         );
         if (existingWithdraw?.withdrawType === "investment") {
           const extPackage = await PackageRoi.findOne({ userId: userId });
           await Wallet.findOneAndUpdate(
             { userId: userId },
             { $inc: { investmentAmount: +existingWithdraw?.requestAmount } },
-            { new: true }
+            { new: true },
           );
           await User.findOneAndUpdate(
             { userId: userId },
@@ -457,17 +444,17 @@ const updateWithdrawStatus = async (req, res) => {
                   amount: extPackage?.currentPackage,
                 },
               },
-            }
+            },
           );
           await PackageRoi.findOneAndUpdate(
             { userId: userId },
-            { $set: { isActive: true } }
+            { $set: { isActive: true } },
           );
         } else if (existingWithdraw?.withdrawType === "profit") {
           await Wallet.findOneAndUpdate(
             { userId: userId },
             { $inc: { activeIncome: +existingWithdraw?.requestAmount } },
-            { new: true }
+            { new: true },
           );
         }
         // Send mail notifiction to user email with request status
@@ -485,7 +472,7 @@ const updateWithdrawStatus = async (req, res) => {
           existingWithdraw?.requestAmount,
           existingWithdraw?.withdrawType,
           existingWithdraw?.date,
-          "reject"
+          "reject",
         );
         message = "Withdraw Rejected";
       }
@@ -522,7 +509,7 @@ const updateWithdrawAllStatus = async (req, res) => {
             $set: {
               status: "success",
             },
-          }
+          },
         );
 
         const currentUser = await User.findOne({ userId: userId });
@@ -535,7 +522,7 @@ const updateWithdrawAllStatus = async (req, res) => {
           "Withdrawal Request Status Update",
           currentWithdraw.requestAmount,
           "Your withdrawal request has been successfully processed, and the funds have been transferred to your designated account.",
-          "withdrawal"
+          "withdrawal",
         );
       }
 
@@ -571,7 +558,7 @@ const updateWithdrawAllStatusReject = async (req, res) => {
             $set: {
               status: "reject",
             },
-          }
+          },
         );
         if (currentWithdrawItems?.withdrawType === "investment") {
           const extPackage = await PackageRoi.findOne({ userId: userId });
@@ -580,7 +567,7 @@ const updateWithdrawAllStatusReject = async (req, res) => {
             {
               $inc: { investmentAmount: +currentWithdrawItems?.requestAmount },
             },
-            { new: true }
+            { new: true },
           );
           await User.findOneAndUpdate(
             { userId: userId },
@@ -591,17 +578,17 @@ const updateWithdrawAllStatusReject = async (req, res) => {
                   amount: extPackage?.currentPackage,
                 },
               },
-            }
+            },
           );
           await PackageRoi.findOneAndUpdate(
             { userId: userId },
-            { $set: { isActive: true } }
+            { $set: { isActive: true } },
           );
         } else if (currentWithdrawItems?.withdrawType === "profit") {
           await Wallet.findOneAndUpdate(
             { userId: userId },
             { $inc: { activeIncome: +currentWithdrawItems?.requestAmount } },
-            { new: true }
+            { new: true },
           );
         }
 
@@ -615,7 +602,7 @@ const updateWithdrawAllStatusReject = async (req, res) => {
           "Withdrawal Request Status Update",
           currentWithdrawItems?.requestAmount,
           `Unfortunately, your withdrawal request for $${currentWithdrawItems?.requestAmount} amount has been rejected.`,
-          "withdrawal"
+          "withdrawal",
         );
 
         // const currentUser = await User.findOne({ userId: userId });

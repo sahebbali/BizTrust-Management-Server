@@ -1,22 +1,23 @@
-const getIstTime = require("../config/getTime");
-
-const { PackageBuyInfo } = require("../models/topup.model");
 const ManageROIHistory = require("../models/manageROI");
-
+const { PackageBuyInfo } = require("../models/topup.model");
 const { CheckUserPackageLimit } = require("./CheckUserPackageLimit");
+const { getCurrentPKT } = require("./getCurrentPKT");
 
 const handleROI = async () => {
   try {
     console.log("Starting ROI Distribution");
 
-    const currentISTTime = new Date(getIstTime().date);
-    const todays = currentISTTime.toDateString();
-    const dateInt = currentISTTime.getTime();
-    const today = new Date(getIstTime().date).toDateString().split(" ")[0];
+    const { date: pktDate, time: pktTime, pktTimestamp } = getCurrentPKT();
+    console.log(
+      `Current PKT Date: ${pktDate}, Time: ${pktTime}, Timestamp: ${pktTimestamp}`,
+    );
 
-    // console.log({ dateInt });
+    const today = new Date(pktDate).toDateString().split(" ")[0];
 
-    const manageROi = await ManageROIHistory.find({ date: todays });
+    console.log({ today });
+    const manageROi = await ManageROIHistory.find({
+      date: new Date(pktDate).toDateString(),
+    });
 
     if (today === "Sat" || today === "Sun") {
       console.log("ROI isn't distributed on Saturday and Sunday");
@@ -27,10 +28,10 @@ const handleROI = async () => {
       return;
     }
     const secureROI = manageROi.find(
-      (item) => item.securityType === "Assets Fund"
+      (item) => item.securityType === "Assets Fund",
     );
     const insecureROI = manageROi.find(
-      (item) => item.securityType === "Equity Fund"
+      (item) => item.securityType === "Equity Fund",
     );
 
     const securePercentage = secureROI ? secureROI.percentage : 0.13;
@@ -43,6 +44,7 @@ const handleROI = async () => {
       isActive: true,
       isFirstROI: false,
       isROIFree: false,
+      isComplect: false,
       status: "success",
     });
     // console.log({ activePackages });
@@ -56,7 +58,7 @@ const handleROI = async () => {
     await Promise.all(
       activePackages.map(async (pkg) => {
         await CheckUserPackageLimit(pkg, securePercentage, insecurePercentage);
-      })
+      }),
     );
 
     console.log("ROI Distribution Completed Successfully.");

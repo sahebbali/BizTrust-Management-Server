@@ -1,33 +1,24 @@
-const generateRandomString = require("../config/generateRandomId");
-const getIstTime = require("../config/getTime");
-const { PackageRoi, PackageBuyInfo } = require("../models/topup.model");
-
+const { PackageBuyInfo } = require("../models/topup.model");
 const ManageROIHistory = require("../models/manageROI");
-
 const { CheckUserPackageLimit } = require("./CheckUserPackageLimit");
+const { getCurrentPKT } = require("./getCurrentPKT");
 
 const handleFirstROI = async () => {
   try {
     console.log("Starting First ROI Distribution");
-    const date = new Date(
-      new Date().toLocaleString("en-US", { timeZone: "Asia/Karachi" }),
+    const { date: pktDate, time: pktTime, pktTimestamp } = getCurrentPKT();
+    console.log(
+      `Current PKT Date: ${pktDate}, Time: ${pktTime}, Timestamp: ${pktTimestamp}`,
     );
-    const newdateint = date.getTime();
-    const currentISTTime = new Date(getIstTime().date);
-    const todays = currentISTTime.toDateString();
-    // const dateInt = currentISTTime.getTime();
-    const dateInt = newdateint;
-    const today = new Date(getIstTime().date).toDateString().split(" ")[0];
 
-    console.log({ dateInt });
-    console.log({ todays });
+    const today = new Date(pktDate).toDateString().split(" ")[0];
+
     console.log({ today });
-    console.log({ currentISTTime });
-    console.log("my date", newdateint);
-    console.log("after date", { date: new Date(newdateint) });
 
-    const manageROi = await ManageROIHistory.find({ date: todays });
-    // console.log({ manageROi });
+    const manageROi = await ManageROIHistory.find({
+      date: new Date(pktDate).toDateString(),
+    });
+    console.log({ manageROi });
 
     if (today === "Sat" || today === "Sun") {
       console.log("ROI isn't distributed on Saturday and Sunday");
@@ -51,12 +42,11 @@ const handleFirstROI = async () => {
 
     console.log("Secure Percentage:", securePercentage);
     console.log("Insecure Percentage:", insecurePercentage);
-    console.log("date int:", dateInt);
 
     const activePackages = await PackageBuyInfo.find({
       isActive: true,
       isFirstROI: true,
-      startDateInt: { $lte: dateInt },
+      startDateInt: { $lte: pktTimestamp },
       // isROIFree: false,
       status: "success",
     });

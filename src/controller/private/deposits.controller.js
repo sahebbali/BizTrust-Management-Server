@@ -14,6 +14,10 @@ const { updatePackageAmount } = require("../../utils/updatePackageAmount");
 const ProvideExtraEarning = require("../../utils/ProvideExtraEarning");
 const { PackageBuyInfo } = require("../../models/topup.model");
 const rewardIncome = require("../../utils/rewardIncome");
+const {
+  getStartEndDepositPKT,
+  getCurrentPKT,
+} = require("../../utils/getCurrentPKT");
 
 const updateRemark = async (req, res) => {
   try {
@@ -35,7 +39,7 @@ const updateRemark = async (req, res) => {
       },
       {
         $set: { remark: remark },
-      }
+      },
     );
 
     return res.status(200).json({
@@ -219,6 +223,7 @@ const showRejectedDeposits = async (req, res) => {
 const updateDepositStatus = async (req, res) => {
   try {
     const { transaction_id, status } = req.body;
+    const { date, time } = getCurrentPKT();
     let message = "";
 
     const existingDeposit = await Deposit.findOne({
@@ -237,22 +242,13 @@ const updateDepositStatus = async (req, res) => {
         },
         {
           $set: { status: status },
-        }
+        },
       );
 
       if (status === "success") {
-        // await Wallet.findOneAndUpdate(
-        //   { userId: existingDeposit.userId },
-        //   {
-        //     $inc: {
-        //       depositBalance: +existingDeposit.amount,
-        //     },
-        //   }
-        // );
-
         await User.findOneAndUpdate(
           { userId: existingDeposit?.userId },
-          { $set: { isActive: true, activationDate: new Date() } }
+          { $set: { isActive: true, activationDate: new Date() } },
         );
         sendEmailNotification(
           currentUser?.userId,
@@ -261,26 +257,17 @@ const updateDepositStatus = async (req, res) => {
           "Deposit Successful – Grow-Boo International",
           existingDeposit.amount,
           "Your deposit request has been successfully processed, and the funds have been added to your wallet",
-          "deposit"
+          "deposit",
         );
 
+        const getDepositStartEnd = getStartEndDepositPKT(
+          existingDeposit?.securityType,
+        );
+
+        console.log("Start:", getDepositStartEnd.start);
+        console.log("Start date:", getDepositStartEnd.start.date);
+        console.log("End:", getDepositStartEnd.end);
         // Calculate start date (after 48 hours)
-        const startDate = new Date(
-          new Date().toLocaleString("en-US", { timeZone: "Asia/Karachi" })
-        );
-        startDate.setTime(startDate.getTime() + 48 * 60 * 60 * 1000);
-        const startDateObj = new Date(startDate);
-
-        // Check security type for end date calculation
-        let endDateObj = new Date(startDateObj);
-
-        if (existingDeposit?.securityType === "Equity Fund") {
-          // 30 months = 2.5 years
-          endDateObj.setMonth(endDateObj.getMonth() + 30);
-        } else {
-          // Default: 24 months = 2 years
-          endDateObj.setMonth(endDateObj.getMonth() + 24);
-        }
 
         const updatePackage = await PackageBuyInfo.create({
           userId: existingDeposit?.userId,
@@ -296,23 +283,26 @@ const updateDepositStatus = async (req, res) => {
             Date.now().toString(36) + Math.random().toString(36).substring(2),
           isActive: true,
           status: "success",
-          startDate: startDateObj.toDateString(), // Use the formatted start date
-          startDateInt: startDateObj.getTime(), // Use timestamp for startDateInt
-          endDate: endDateObj.toDateString(), // Use the formatted end date
-          endDateInt: endDateObj.getTime(), // Use timestamp for endDateInt
+          startDate: new Date(getDepositStartEnd.start.date).toDateString(), // Use the formatted start date
+          startTime: getDepositStartEnd.start.time, // Use the formatted start time
+          startDateInt: getDepositStartEnd.start.pktTimestamp, // Use timestamp for startDateInt
+          endDate: new Date(getDepositStartEnd.end.date).toDateString(), // Use the formatted end date
+          endTime: getDepositStartEnd.end.time, // Use the formatted end time
+          endDateInt: getDepositStartEnd.end.pktTimestamp, // Use timestamp for endDateInt
           packageType: existingDeposit?.securityType,
-          date: new Date().toDateString(),
+          date: new Date(date).toDateString(),
+          time: time,
         });
         await ProvideExtraEarning(updatePackage?.userId);
         await updatePackageAmount(
           existingDeposit?.userId,
           existingDeposit?.amount,
-          existingDeposit?.securityType
+          existingDeposit?.securityType,
         );
         await levelIncome(
           updatePackage.userId,
           updatePackage.userFullName,
-          updatePackage.packageAmount
+          updatePackage.packageAmount,
         );
         await rewardIncome(updatePackage?.sponsorId);
         message = "Deposit succeeded & Package activated";
@@ -325,7 +315,7 @@ const updateDepositStatus = async (req, res) => {
           "Deposit Request Rejected – Grow-Boo International",
           existingDeposit?.amount,
           `Unfortunately, Your deposit request for $${existingDeposit?.amount} amount has been rejected.`,
-          "deposit"
+          "deposit",
         );
         message = "Deposit Rejected";
       }
@@ -527,7 +517,7 @@ const updateManageDepositAmount = async (req, res) => {
       minusAmount,
       plusAmount,
       today,
-      time
+      time,
     );
     return res.status(200).json({
       message: "Update Success",
@@ -601,9 +591,8 @@ const getAllManageDepositHistory = async (req, res) => {
       },
     ];
 
-    const totalHistories = await ManageDepositHistory.aggregate(
-      totalHistoryPipleine
-    );
+    const totalHistories =
+      await ManageDepositHistory.aggregate(totalHistoryPipleine);
 
     const totalItems = totalHistories.length > 0 ? totalHistories[0].count : 0;
     const totalPages = Math.ceil(totalItems / limit);

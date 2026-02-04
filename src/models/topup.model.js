@@ -37,10 +37,16 @@ const packageBuyInfoSchema = new mongoose.Schema(
     startDate: {
       type: String,
     },
+    startTime: {
+      type: String,
+    },
     startDateInt: {
       type: Number,
     },
     endDate: {
+      type: String,
+    },
+    endTime: {
       type: String,
     },
     endDateInt: {
