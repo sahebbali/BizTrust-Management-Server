@@ -18,6 +18,7 @@ const VedioData = require("../../models/vedio.model");
 const { distributeRankIncome } = require("../../utils/rankIncome");
 const Inquire = require("../../models/Inquire.model");
 const sendVerificationMail = require("../../config/sendVerificationMail");
+const buildInfiniteLevels = require("../../utils/buildInfiniteLevels");
 
 const registerController = async (req, res) => {
   const ISTTime = await getIstTimeWithInternet();
@@ -92,13 +93,13 @@ const registerController = async (req, res) => {
       userStatus: true,
       isActive: false,
       joiningDate: new Date(
-        ISTTime?.date ? ISTTime?.date : getIstTime().date
+        ISTTime?.date ? ISTTime?.date : getIstTime().date,
       ).toDateString(),
       rankIncomeCurrentDate: new Date(
-        ISTTime?.date ? ISTTime?.date : getIstTime().date
+        ISTTime?.date ? ISTTime?.date : getIstTime().date,
       ).getTime(),
       rankIncomeCurrentDateString: new Date(
-        ISTTime?.date ? ISTTime?.date : getIstTime().date
+        ISTTime?.date ? ISTTime?.date : getIstTime().date,
       ).toDateString(),
       // isSecureAccount: securityType === "secure" ? true : false,
     });
@@ -135,20 +136,20 @@ const registerController = async (req, res) => {
         level: [],
       });
 
-      let currentSponsor = user;
-      for (let i = 1; i <= 5; i++) {
-        const levelUser = await Level.findOne({
-          userId: currentSponsor.sponsorId,
-        });
+      // let currentSponsor = user;
+      // for (let i = 1; i <= 5; i++) {
+      //   const levelUser = await Level.findOne({
+      //     userId: currentSponsor.sponsorId,
+      //   });
 
-        if (levelUser) {
-          await updateLevel(levelUser, user, i);
-          currentSponsor = levelUser;
-        } else {
-          break;
-        }
-      }
-
+      //   if (levelUser) {
+      //     await updateLevel(levelUser, user, i);
+      //     currentSponsor = levelUser;
+      //   } else {
+      //     break;
+      //   }
+      // }
+      await buildInfiniteLevels(user);
       // sendConfrimRegistrationMail(user, user.userId);
       // Send email verify email
 
@@ -164,16 +165,6 @@ const registerController = async (req, res) => {
     } else {
       return res.status(400).json({ message: "Invalid credintial" });
     }
-    // } else {
-    //   return res.status(400).json({
-    //     message: "Invalid OTP",
-    //   });
-    // }
-    // } else {
-    //   return res.status(400).json({
-    //     message: "User Already Exists",
-    //   });
-    // }
   } catch (error) {
     console.log(error);
     return res.status(400).json({
@@ -269,7 +260,7 @@ const adminLoginController = async (req, res) => {
           token: token,
         },
       },
-      { new: true }
+      { new: true },
     );
     // // Delete OTP
     // await Otp.deleteOne({ email: user.email });
@@ -335,7 +326,7 @@ const loginController = async (req, res) => {
               token: token,
             },
           },
-          { new: true }
+          { new: true },
         );
         // Delete OTP
         // await Otp.deleteOne({ email: user.email });
@@ -574,7 +565,7 @@ const ForgotPasswordController = async (req, res) => {
               token: newToken,
             },
           },
-          { new: true }
+          { new: true },
         );
         if (updateUser) {
           sendForgotPasswordMail(updateUser.email, updateUser.token);
@@ -617,7 +608,7 @@ const resetPasswordController = async (req, res) => {
               password: encryptedPassword,
               passwords: password,
             },
-          }
+          },
         );
         if (update_password) {
           return res.status(200).json({
@@ -715,7 +706,7 @@ const verifyUser = async (req, res) => {
               isVerified: true,
             },
           },
-          { new: true }
+          { new: true },
         );
         if (updateUser) {
           return res
