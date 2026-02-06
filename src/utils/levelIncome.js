@@ -1,75 +1,80 @@
 const User = require("../models/auth.model");
-
-const Level = require("../models/level.model");
 const ManageLevelIncome = require("../models/manageLevelIncome");
 const { CheckUserEarningLimit } = require("./CheckUserEarningLimit");
 
-const levelIncome = async (userId, fullName, packageAmount) => {
+const levelIncome = async (fromUserId, fromFullName, packageAmount) => {
   console.log("Level Income Calculation Started");
 
   try {
-    // Fetch user levels
-    const userLevels = await Level.find({ "level.userId": userId });
-
-    // Fetch level commission percentages and map them for quick lookup
+    // 1️⃣ Load level commission config
     const levelCommissionMap = (
       await ManageLevelIncome.find({ type: "level-income" })
-    ).reduce((acc, item) => ({ ...acc, [item.level]: item.percentage }), {});
+    ).reduce((acc, item) => {
+      acc[item.level] = item.percentage;
+      return acc;
+    }, {});
 
-    // console.log("User Levels:", userLevels);
+    let currentUser = await User.findOne({ userId: fromUserId });
+    if (!currentUser) return;
 
-    for (const levelData of userLevels) {
-      // Extract distributor's level
-      const distributorLevelData = levelData.level.find(
-        (d) => d.userId === userId
-      );
-      if (!distributorLevelData) continue;
+    let level = 1;
+    const MAX_LEVEL = 5;
+    // console.log({ levelCommissionMap });
 
-      const level = parseInt(distributorLevelData.level, 10);
-      const percentage = levelCommissionMap[level] || 0;
-
-      console.log({ level, percentage });
-
-      // Find the upline user (who is at or above the current level)
+    // 2️⃣ Traverse upline chain
+    while (currentUser.sponsorId && level <= MAX_LEVEL) {
+      // console.log({ level, currentUser });
       const uplineUser = await User.findOne({
-        userId: levelData.userId,
-        openLevel: { $gte: level },
-      }).select("sponsorName sponsorId fullName userId openLevel");
-
-      // console.log("Upline User:", uplineUser);
+        userId: currentUser.sponsorId,
+        openLevel: { $gte: level }, // eligibility check
+      }).select("userId fullName sponsorId sponsorName");
 
       if (!uplineUser) {
-        console.log(`No eligible upline user for level ${level}`);
+        // console.log("----------");
+        currentUser = await User.findOne({
+          userId: currentUser.sponsorId,
+        }).select("userId fullName sponsorId sponsorName");
+        level++;
         continue;
       }
 
-      // Find the upline's active package info
-      // const selfPackageInfo = await PackageBuyInfo.findOne({
-      //   userId: uplineUser.userId,
-      //   isActive: true,
-      // }).sort({ createdAt: -1 });
+      const percentage = levelCommissionMap[level] || 0;
 
-      // if (!selfPackageInfo) {
-      //   console.log(`No active package found for ${uplineUser.userId}`);
-      //   continue;
-      // }
+      // console.log({ percentage });
+      if (percentage <= 0) {
+        console.log("No commission found for level:", level);
+        currentUser = uplineUser;
+        level++;
+        continue;
+      }
 
-      // Calculate commission
-      const commissionAmount = (packageAmount * percentage) / 100;
-      console.log("Commission:", commissionAmount, "User:", uplineUser.userId);
-      Math.abs(Number(commissionAmount.toFixed(2)));
+      const commissionAmount = Number(
+        ((packageAmount * percentage) / 100).toFixed(2),
+      );
 
+      // console.log("---- Level Income Details ----");
+      // console.log({
+      //   level,
+      //   uplineUser: uplineUser.userId,
+      //   percentage,
+      //   commissionAmount,
+      // });
+
+      // 3️⃣ Credit income
       await CheckUserEarningLimit(
-        levelData.userId,
-        levelData.fullName,
-        userId, //income from userid
-        fullName, //income from full name
+        uplineUser.userId,
+        uplineUser.fullName,
+        fromUserId,
+        fromFullName,
         packageAmount,
         commissionAmount,
         level,
         "level-income",
-        percentage
+        percentage,
       );
+
+      currentUser = uplineUser;
+      level++;
     }
   } catch (error) {
     console.error("Error in levelIncome:", error);

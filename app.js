@@ -62,11 +62,11 @@ app.get("/", (req, res) => {
   return res.send("Hello Grow-Boo Production !");
 });
 app.get("/run", (req, res) => {
-  // const datas = levelIncome("709996", "mahin", 100000);
-  // const data = profitSharingIncome("709996", "mahin", 4000);
+  const datas = levelIncome("078899", "Saheb Bali", 100000);
+  // const data = profitSharingIncome("078899", "Saheb Bali", 100000);
   // const data = rewardIncome("582939");
   // const data = handleFristROI();
-  const data = handleROI();
+  // const data = handleROI();
   // const data = ProvideExtraEarning("373056");
   // const data = CheckUserEarningLimit(
   //   "373056",

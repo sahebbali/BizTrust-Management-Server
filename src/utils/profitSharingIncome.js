@@ -1,89 +1,81 @@
 const User = require("../models/auth.model");
-const { PackageBuyInfo } = require("../models/topup.model");
-const Level = require("../models/level.model");
 const ManageLevelIncome = require("../models/manageLevelIncome");
 const { CheckUserEarningLimit } = require("./CheckUserEarningLimit");
 
-const profitSharingIncome = async (
-  userId,
-  fullName,
-  roiPerDayCommissionAmount,
-) => {
+const profitSharingIncome = async (fromUserId, fromFullName, packageAmount) => {
   console.log("Profit Sharing Income Calculation Started");
 
-  // console.log({ roiPerDayCommissionAmount });
-
   try {
-    // Fetch user levels
-    const userLevels = await Level.find({ "level.userId": userId });
-
-    // Fetch level commission percentages and map them for quick lookup
+    // 1️⃣ Load level commission config
     const levelCommissionMap = (
       await ManageLevelIncome.find({ type: "profit-sharing" })
-    ).reduce((acc, item) => ({ ...acc, [item.level]: item.percentage }), {});
+    ).reduce((acc, item) => {
+      acc[item.level] = item.percentage;
+      return acc;
+    }, {});
 
-    // console.log("User Levels:", userLevels);
+    let currentUser = await User.findOne({ userId: fromUserId });
+    if (!currentUser) return;
 
-    for (const levelData of userLevels) {
-      // Extract distributor's level
-      const distributorLevelData = levelData.level.find(
-        (d) => d.userId === userId,
-      );
-      if (!distributorLevelData) continue;
+    let level = 1;
+    const MAX_LEVEL = 5;
+    // console.log({ levelCommissionMap });
 
-      const level = parseInt(distributorLevelData.level, 10);
-      const percentage = levelCommissionMap[level] || 0;
-
-      // console.log({ level, percentage });
-
-      // Find the upline user (who is at or above the current level)
+    // 2️⃣ Traverse upline chain
+    while (currentUser.sponsorId && level <= MAX_LEVEL) {
+      // console.log({ level, currentUser });
       const uplineUser = await User.findOne({
-        userId: levelData.userId,
-        openLevel: { $gte: level },
-      }).select("sponsorName sponsorId fullName userId openLevel");
-      const isPINAccount = await User.findOne({
-        userId: levelData.userId,
-        isPinAccount: true,
-      });
-
-      console.log("Upline User:", uplineUser);
+        userId: currentUser.sponsorId,
+        openLevel: { $gte: level }, // eligibility check
+      }).select("userId fullName sponsorId sponsorName");
 
       if (!uplineUser) {
-        console.log(`No eligible upline user for level ${level}`);
+        // console.log("----------");
+        currentUser = await User.findOne({
+          userId: currentUser.sponsorId,
+        }).select("userId fullName sponsorId sponsorName");
+        level++;
         continue;
       }
-      // if (isPINAccount) {
-      //   console.log(
-      //     `Upline user ${uplineUser.userId} is a PIN account. Skipping.`
-      //   );
-      //   continue;
-      // }
-      // Find the upline's active package info
-      // const selfPackageInfo = await PackageBuyInfo.findOne({
-      //   userId: uplineUser.userId,
-      //   isActive: true,
-      // }).sort({ createdAt: -1 });
 
-      // if (!selfPackageInfo) {
-      //   console.log(`No active package found for ${uplineUser.userId}`);
-      //   continue;
-      // }
+      const percentage = levelCommissionMap[level] || 0;
 
-      // Calculate commission
-      const commissionAmount = (roiPerDayCommissionAmount * percentage) / 100;
-      console.log("Commission:", commissionAmount, "User:", uplineUser.userId);
+      // console.log({ percentage });
+      if (percentage <= 0) {
+        // console.log("No commission found for level:", level);
+        currentUser = uplineUser;
+        level++;
+        continue;
+      }
 
+      const commissionAmount = Number(
+        ((packageAmount * percentage) / 100).toFixed(2),
+      );
+      // console.log({ commissionAmount });
+
+      // console.log("---- Level Income Details ----");
+      // console.log({
+      //   level,
+      //   uplineUser: uplineUser.userId,
+      //   percentage,
+      //   commissionAmount,
+      // });
+
+      // 3️⃣ Credit income
       await CheckUserEarningLimit(
-        levelData.userId,
-        levelData.fullName,
-        userId, //income from userid
-        fullName, //income from full name
-        roiPerDayCommissionAmount,
+        uplineUser.userId,
+        uplineUser.fullName,
+        fromUserId,
+        fromFullName,
+        packageAmount,
         commissionAmount,
         level,
         "profit-sharing",
         percentage,
       );
+
+      currentUser = uplineUser;
+      level++;
     }
   } catch (error) {
     console.error("Error in levelIncome:", error);
