@@ -340,7 +340,7 @@ const CalculateLinePackageAmount = async (userId) => {
 
     const userIds = distributorLvl?.map((d) => d.userId) || [];
     userIds.push(userId);
-    console.log("User Id Array: ", userIds);
+    // console.log("User Id Array: ", userIds);
     const [investmentData] = await Wallet.aggregate([
       {
         $match: {
