@@ -6,35 +6,56 @@ const Wallet = require("../../models/wallet.model");
 // get level team
 const getLevelTeam = async (req, res) => {
   try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const level = req.query.level;
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 10;
+    const levelFilter = req.query.level ? parseInt(req.query.level, 10) : null;
 
-    const matchStage = {
+    const userMatchStage = {
       $match: {
         userId: req.auth.id,
       },
     };
-    const levelStage = {
-      $match: {
-        $and: [level ? { "level.level": level } : {}],
-      },
-    };
 
-    const histories = await Level.aggregate([
-      matchStage,
+    const aggregationPipeline = [
+      userMatchStage,
+
+      // 🔹 Break level array
       { $unwind: "$level" },
-      levelStage,
+
+      // 🔹 Convert level from string → number
       {
-        $set: {
+        $addFields: {
+          levelNumber: { $toInt: "$level.level" },
+        },
+      },
+
+      // 🔹 Enforce MAX LEVEL = 5 + optional filter
+      {
+        $match: {
+          levelNumber: {
+            $lte: 5,
+            ...(levelFilter !== null ? { $eq: levelFilter } : {}),
+          },
+        },
+      },
+
+      // 🔹 Convert joiningDate for sorting
+      {
+        $addFields: {
           "level.dateMilliseconds": {
             $toDate: "$level.joiningDate",
           },
         },
       },
+
+      // 🔹 Sort newest first
       { $sort: { "level.dateMilliseconds": -1 } },
+
+      // 🔹 Pagination
       { $skip: (page - 1) * limit },
       { $limit: limit },
+
+      // 🔹 Join user info
       {
         $lookup: {
           from: "users",
@@ -43,6 +64,8 @@ const getLevelTeam = async (req, res) => {
           as: "userDetails",
         },
       },
+
+      // 🔹 Final response shape
       {
         $project: {
           _id: 0,
@@ -51,16 +74,33 @@ const getLevelTeam = async (req, res) => {
           sponsorId: "$level.sponsorId",
           sponsorName: "$level.sponsorName",
           joiningDate: "$level.joiningDate",
-          level: "$level.level",
-          activationDate: { $arrayElemAt: ["$userDetails.activationDate", 0] },
+          level: "$levelNumber",
+          activationDate: {
+            $arrayElemAt: ["$userDetails.activationDate", 0],
+          },
         },
       },
-    ]);
+    ];
 
-    const totalHistoryPipleine = [
-      matchStage,
+    const histories = await Level.aggregate(aggregationPipeline);
+
+    // 🔹 COUNT PIPELINE (same filters, no pagination)
+    const countPipeline = [
+      userMatchStage,
       { $unwind: "$level" },
-      levelStage,
+      {
+        $addFields: {
+          levelNumber: { $toInt: "$level.level" },
+        },
+      },
+      {
+        $match: {
+          levelNumber: {
+            $lte: 5,
+            ...(levelFilter !== null ? { $eq: levelFilter } : {}),
+          },
+        },
+      },
       {
         $group: {
           _id: null,
@@ -69,40 +109,32 @@ const getLevelTeam = async (req, res) => {
       },
     ];
 
-    const totalHistories = await Level.aggregate(totalHistoryPipleine);
+    const totalResult = await Level.aggregate(countPipeline);
+    const totalDocs = totalResult[0]?.count || 0;
+    const totalPages = Math.ceil(totalDocs / limit);
 
-    const totalItems = totalHistories.length > 0 ? totalHistories[0].count : 0;
-    const totalPages = Math.ceil(totalItems / limit);
-    const hasNextPage = page < totalPages;
-    const nextPage = hasNextPage ? page + 1 : null;
-
-    const response = {
-      totalDocs: totalItems,
-      limit: limit,
-      totalPages: totalPages,
-      page: page,
-      pagingCounter: page,
-      hasPrevPage: page > 1,
-      hasNextPage: hasNextPage,
-      prevPage: page > 1 ? page - 1 : null,
-      nextPage: nextPage,
-      data: histories,
-    };
-
-    if (totalHistories.length > 0) {
-      return res.status(200).json({
-        message: "Retrieved the level history",
-        data: response,
-      });
-    } else {
-      return res.status(400).json({ message: "Level history is empty" });
-    }
+    return res.status(200).json({
+      message: "Level team retrieved successfully (max level 5)",
+      data: {
+        totalDocs,
+        limit,
+        totalPages,
+        page,
+        hasPrevPage: page > 1,
+        hasNextPage: page < totalPages,
+        prevPage: page > 1 ? page - 1 : null,
+        nextPage: page < totalPages ? page + 1 : null,
+        data: histories,
+      },
+    });
   } catch (error) {
+    console.error("getLevelTeam error:", error);
     return res.status(500).json({
       message: "Something went wrong",
     });
   }
 };
+
 // Get Direct Level Team
 const getDirectLevelTeam = async (req, res) => {
   try {
@@ -348,8 +380,8 @@ const getLevelBusiness = async (req, res) => {
 
     let allLine = await Promise.all(
       distributorLvl.map(async (user) =>
-        CalculateLinePackageAmount(user.userId)
-      )
+        CalculateLinePackageAmount(user.userId),
+      ),
     );
 
     allLine.sort((a, b) => b.totalInvestmentAmount - a.totalInvestmentAmount);

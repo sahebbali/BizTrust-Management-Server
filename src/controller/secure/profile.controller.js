@@ -39,7 +39,9 @@ const getAddressHistoryByUser = async (req, res) => {
 const getUserInfo = async (req, res) => {
   try {
     let userId = req.auth.id;
-    const user = await User.findOne({ userId: userId }).select(["-password"]);
+    const user = await User.findOne({ userId: userId }).select([
+      "-password -token -__v -_id -createdAt -updatedAt -team",
+    ]);
     if (user) {
       return res.status(200).json({
         data: user,
@@ -113,7 +115,7 @@ const changePassword = async (req, res) => {
               passwords: new_password,
             },
           },
-          { new: true }
+          { new: true },
         );
         return res.status(200).json({
           message: "Password change successfully",
@@ -158,7 +160,7 @@ const updateEmail = async (req, res) => {
               $set: {
                 email: new_email,
               },
-            }
+            },
           );
 
           await Level.findOneAndUpdate(
@@ -167,7 +169,7 @@ const updateEmail = async (req, res) => {
               $set: {
                 email: new_email,
               },
-            }
+            },
           );
 
           await Level.findOneAndUpdate(
@@ -179,7 +181,7 @@ const updateEmail = async (req, res) => {
             },
             {
               arrayFilters: [{ "t.email": new_email }],
-            }
+            },
           );
 
           const ISTTime = await getIstTimeWithInternet();
@@ -191,7 +193,7 @@ const updateEmail = async (req, res) => {
             currentAddress: new_email,
             updatedBy: user.userId,
             date: new Date(
-              ISTTime?.date ? ISTTime?.date : getIstTime().date
+              ISTTime?.date ? ISTTime?.date : getIstTime().date,
             ).toDateString(),
             time: ISTTime?.time ? ISTTime?.time : getIstTime().time,
           });
@@ -362,7 +364,7 @@ const updateTrxAddress = async (req, res) => {
           walletAddress: trx_address,
           myChain: my_chain,
         },
-      }
+      },
     );
 
     await WalletAddress.create({
@@ -372,7 +374,7 @@ const updateTrxAddress = async (req, res) => {
       currentAddress: trx_address,
       updatedBy: user.userId,
       date: new Date(
-        ISTTime?.date ? ISTTime?.date : getIstTime().date
+        ISTTime?.date ? ISTTime?.date : getIstTime().date,
       ).toDateString(),
       time: ISTTime?.time ? ISTTime?.time : getIstTime().time,
     });
@@ -516,7 +518,7 @@ const updateProfilePic = async (req, res) => {
           avatar: avatar.avatar,
           avatar_public_url: avatar.avatar_public_url,
         },
-      }
+      },
     );
 
     return res.status(200).json({ message: "Image uploaded" });
@@ -566,7 +568,7 @@ const addPin = async (req, res) => {
       const userPin = await Pin.findOneAndUpdate(
         { userId: user_id },
         { $set: pinData },
-        { upsert: true }
+        { upsert: true },
       );
 
       return res.status(200).json({ message: "Pin created successfully" });
@@ -631,7 +633,7 @@ const addUserWalletInfo = async (req, res) => {
     const userPin = await WalletAddress.findOneAndUpdate(
       { userId: user_id },
       { $set: walletData },
-      { upsert: true }
+      { upsert: true },
     );
 
     return res.status(200).json({ message: "Add Wallet successfully" });

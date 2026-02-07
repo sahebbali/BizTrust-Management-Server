@@ -27,6 +27,7 @@ const handleROI = require("./src/utils/handleROI");
 const { CheckUserEarningLimit } = require("./src/utils/CheckUserEarningLimit");
 const ProvideExtraEarning = require("./src/utils/ProvideExtraEarning");
 const sendDMEmail = require("./src/config/sendDMEmail");
+const MakeInfiniteLevels = require("./src/utils/MakeInfiniteLevels");
 
 const corsOptions = {
   origin: [
@@ -62,9 +63,10 @@ app.get("/", (req, res) => {
   return res.send("Hello Grow-Boo Production !");
 });
 app.get("/run", (req, res) => {
-  const datas = levelIncome("078899", "Saheb Bali", 100000);
+  // const datas = levelIncome("078899", "Saheb Bali", 100000);
   // const data = profitSharingIncome("078899", "Saheb Bali", 100000);
   // const data = rewardIncome("582939");
+  const data = MakeInfiniteLevels();
   // const data = handleFristROI();
   // const data = handleROI();
   // const data = ProvideExtraEarning("373056");

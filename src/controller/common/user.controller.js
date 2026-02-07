@@ -6,24 +6,46 @@ const sendConfirmRegistrationMail = require("../../config/sendConfrimRegisterMai
 // Get user Information
 const getUserInfo = async (req, res) => {
   try {
-    // const userId = req.params.user_id;
-    let userId = req.auth.id;
+    const userId = req?.auth?.id;
 
-    const user = await User.findOne({ userId: userId }).select(["-password"]);
-    // const {password, ...userInfo} = user._doc;
-
-    if (user) {
-      return res.status(200).json({
-        data: user,
-      });
-    } else {
-      return res.status(404).json({
-        message: "Invalid user ID",
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized access",
       });
     }
+
+    const user = await User.findOne(
+      { userId },
+      {
+        password: 0,
+        token: 0,
+        __v: 0,
+        _id: 0,
+        createdAt: 0,
+        updatedAt: 0,
+        passwords: 0,
+        team: 0,
+      },
+    ).lean();
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: user,
+    });
   } catch (error) {
-    return res.status(400).json({
-      message: error.toString(),
+    console.error("getUserInfo error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
     });
   }
 };
